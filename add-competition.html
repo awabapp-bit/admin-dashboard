@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>إضافة مسابقة جديدة — لوحة تحكم أواب</title>
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="admin-nav" id="adminNav"></nav>
+
+<main class="admin-page" style="max-width:600px;">
+  <a class="back-link" href="home.html" id="backLink">كل المسابقات</a>
+  <h1 class="page-title">إضافة مسابقة جديدة</h1>
+  <p class="page-sub">تظهر المسابقة فور الحفظ مباشرة على الموقع للمستخدمين</p>
+
+  <div class="info-card">
+    <div class="form-msg" id="formMsg"></div>
+    <form id="addCompForm">
+      <div class="field">
+        <label for="compTitle">اسم المسابقة</label>
+        <input type="text" id="compTitle" placeholder="مثال: مسابقة أواب الكبرى" required>
+      </div>
+      <div class="field">
+        <label for="compDesc">وصف مختصر (اختياري)</label>
+        <input type="text" id="compDesc" placeholder="وصف يظهر في بطاقة المسابقة">
+      </div>
+      <div class="field">
+        <label for="compCover">رابط صورة الغلاف (اختياري)</label>
+        <input type="url" id="compCover" placeholder="https://...">
+      </div>
+      <button type="submit" class="btn btn-gold" id="saveBtn">حفظ المسابقة</button>
+    </form>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="icons.js"></script>
+<script src="admin-shell.js"></script>
+<script>
+  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل المسابقات';
+
+  let currentAdmin = null;
+  requireAdminAuth(function (user) { currentAdmin = user; renderAdminNav('home'); });
+
+  document.getElementById('addCompForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const msg = document.getElementById('formMsg');
+    const title = document.getElementById('compTitle').value.trim();
+    const description = document.getElementById('compDesc').value.trim();
+    const coverUrl = document.getElementById('compCover').value.trim();
+    const saveBtn = document.getElementById('saveBtn');
+    if (!title) return;
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'جارٍ الحفظ...';
+
+    db.ref('competitions').push({
+      title: title, description: description || '', coverUrl: coverUrl || null,
+      createdBy: currentAdmin.uid, createdAt: firebase.database.ServerValue.TIMESTAMP
+    }).then(function (ref) {
+      window.location.href = 'competition.html?id=' + encodeURIComponent(ref.key);
+    }).catch(function (err) {
+      msg.textContent = 'تعذر إضافة المسابقة: ' + err.message;
+      msg.className = 'form-msg show error';
+      saveBtn.disabled = false; saveBtn.textContent = 'حفظ المسابقة';
+    });
+  });
+</script>
+</body>
+</html>

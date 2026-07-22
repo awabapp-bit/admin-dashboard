@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>الحسابات — لوحة تحكم أواب</title>
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="admin-nav" id="adminNav"></nav>
+
+<main class="admin-page">
+  <h1 class="page-title">الحسابات المسجّلة</h1>
+  <p class="page-sub">كل المستخدمين المسجّلين على المنصة</p>
+
+  <div class="stat-grid" id="statGrid"></div>
+
+  <div class="accounts-toolbar">
+    <div class="search-wrap">
+      <input type="text" id="searchBox" placeholder="ابحث بالاسم أو البريد الإلكتروني...">
+      <span class="icon" id="searchIcon"></span>
+    </div>
+    <select class="sort-select" id="sortSelect">
+      <option value="newest">الأحدث تسجيلاً</option>
+      <option value="points">الأعلى نقاطًا</option>
+      <option value="name">الاسم أبجديًا</option>
+      <option value="blocked">المحظورون أولاً</option>
+    </select>
+  </div>
+
+  <div class="accounts-grid" id="accountsGrid">
+    <div class="center-loading" style="grid-column:1/-1;"><div class="loader"></div></div>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="icons.js"></script>
+<script src="admin-shell.js"></script>
+<script>
+  document.getElementById('searchIcon').innerHTML = icon('user', 'icon-sm');
+
+  let allUsers = [];
+
+  requireAdminAuth(function () {
+    renderAdminNav('users');
+    loadUsers();
+  });
+
+  function loadUsers() {
+    db.ref('users').on('value', function (snap) {
+      const data = snap.val() || {};
+      allUsers = Object.keys(data)
+        .map(function (uid) { return Object.assign({ uid: uid }, data[uid]); })
+        .filter(function (u) { return !u.isAdmin; });
+      renderStats();
+      applyFilters();
+    });
+  }
+
+  function renderStats() {
+    const totalPoints = allUsers.reduce(function (sum, u) { return sum + (u.points || 0); }, 0);
+    const blockedCount = allUsers.filter(function (u) { return u.blocked === true; }).length;
+    document.getElementById('statGrid').innerHTML =
+      '<div class="stat-card"><div class="stat-icon">' + icon('users', 'icon-md') + '</div><div><div class="stat-value">' + allUsers.length + '</div><div class="stat-label">حساب مسجّل</div></div></div>' +
+      '<div class="stat-card"><div class="stat-icon">' + icon('star', 'icon-md') + '</div><div><div class="stat-value">' + totalPoints + '</div><div class="stat-label">إجمالي النقاط الموزّعة</div></div></div>' +
+      '<div class="stat-card"><div class="stat-icon">' + icon('lock', 'icon-md') + '</div><div><div class="stat-value">' + blockedCount + '</div><div class="stat-label">حساب محظور</div></div></div>';
+  }
+
+  function applyFilters() {
+    const q = document.getElementById('searchBox').value.trim().toLowerCase();
+    const sort = document.getElementById('sortSelect').value;
+
+    let list = allUsers.slice();
+    if (q) {
+      list = list.filter(function (u) {
+        return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+      });
+    }
+
+    if (sort === 'points') list.sort(function (a, b) { return (b.points || 0) - (a.points || 0); });
+    else if (sort === 'name') list.sort(function (a, b) { return (a.name || '').localeCompare(b.name || '', 'ar'); });
+    else if (sort === 'blocked') list.sort(function (a, b) { return (b.blocked === true ? 1 : 0) - (a.blocked === true ? 1 : 0); });
+    else list.sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+
+    renderGrid(list);
+  }
+
+  function renderGrid(list) {
+    const grid = document.getElementById('accountsGrid');
+    if (list.length === 0) {
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">' + icon('users', 'icon-xl') + '</div><p>لا توجد نتائج</p></div>';
+      return;
+    }
+
+    grid.innerHTML = list.map(function (u) {
+      const blocked = u.blocked === true;
+      const initial = (u.name || '؟').trim().charAt(0);
+      return '<div class="account-card ' + (blocked ? 'is-blocked' : '') + '">' +
+        '<div class="ac-head">' +
+          '<div class="ac-avatar">' + escapeHtml(initial) + '</div>' +
+          '<div style="flex:1; min-width:0;">' +
+            '<div class="ac-name">' + escapeHtml(u.name || '—') + (blocked ? '<span class="status-chip blocked">' + icon('lock', 'icon-sm') + ' محظور</span>' : '') + '</div>' +
+            '<div class="ac-email">' + escapeHtml(u.email || '—') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ac-stats">' +
+          '<span class="ac-points">' + icon('star', 'icon-sm') + ' ' + (u.points || 0) + '</span>' +
+          '<span class="ac-date">' + icon('calendar', 'icon-sm') + ' ' + formatArabicDate(u.createdAt) + '</span>' +
+        '</div>' +
+        '<div class="ac-actions">' +
+          '<a class="btn btn-outline btn-xs" href="user-detail.html?uid=' + u.uid + '">' + icon('eye', 'icon-sm') + ' التفاصيل</a>' +
+          '<button class="btn btn-outline btn-xs reset-btn" data-uid="' + u.uid + '" data-name="' + escapeHtml(u.name || '') + '">' + icon('hourglass', 'icon-sm') + ' تصفير النقاط</button>' +
+          '<button class="btn ' + (blocked ? 'btn-primary' : 'btn-ghost') + ' btn-xs block-btn" data-uid="' + u.uid + '" data-blocked="' + blocked + '" data-name="' + escapeHtml(u.name || '') + '">' +
+            icon('lock', 'icon-sm') + ' ' + (blocked ? 'إلغاء الحظر' : 'حظر') +
+          '</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    grid.querySelectorAll('.reset-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const uid = btn.dataset.uid;
+        if (!confirm('هل تريد إعادة تعيين كل نقاط "' + btn.dataset.name + '" إلى صفر؟ سيتم مسح كل تقدّمه في كل المسابقات ولا يمكن التراجع.')) return;
+        Promise.all([db.ref('users/' + uid + '/points').set(0), db.ref('userProgress/' + uid).remove()])
+          .catch(function (err) { alert('تعذر إعادة التعيين: ' + err.message); });
+      });
+    });
+
+    grid.querySelectorAll('.block-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const uid = btn.dataset.uid;
+        const currentlyBlocked = btn.dataset.blocked === 'true';
+        const msg = currentlyBlocked
+          ? 'إلغاء حظر "' + btn.dataset.name + '"؟ سيتمكن من الدخول للمنصة مرة أخرى.'
+          : 'حظر "' + btn.dataset.name + '"؟ لن يتمكن من الدخول للمنصة حتى تُلغي الحظر.';
+        if (!confirm(msg)) return;
+        db.ref('users/' + uid + '/blocked').set(!currentlyBlocked).catch(function (err) { alert('تعذر تنفيذ الإجراء: ' + err.message); });
+      });
+    });
+  }
+
+  document.getElementById('searchBox').addEventListener('input', applyFilters);
+  document.getElementById('sortSelect').addEventListener('change', applyFilters);
+</script>
+</body>
+</html>

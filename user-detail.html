@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>تفاصيل الحساب — لوحة تحكم أواب</title>
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="admin-nav" id="adminNav"></nav>
+
+<main class="admin-page" style="max-width:620px;">
+  <a class="back-link" href="users.html" id="backLink">كل الحسابات</a>
+  <h1 class="page-title" id="pageTitle">تفاصيل الحساب</h1>
+
+  <div id="content">
+    <div class="center-loading"><div class="loader"></div></div>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="icons.js"></script>
+<script src="admin-shell.js"></script>
+<script>
+  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل الحسابات';
+
+  const params = new URLSearchParams(window.location.search);
+  const targetUid = params.get('uid');
+  if (!targetUid) window.location.href = 'users.html';
+
+  requireAdminAuth(function () {
+    renderAdminNav('users');
+    load();
+  });
+
+  function load() {
+    db.ref('users/' + targetUid).once('value').then(function (snap) {
+      if (!snap.exists()) { window.location.href = 'users.html'; return; }
+      render(snap.val());
+    });
+  }
+
+  function render(u) {
+    document.getElementById('pageTitle').textContent = u.name || 'مستخدم';
+    const blocked = u.blocked === true;
+
+    const content = document.getElementById('content');
+    content.innerHTML =
+      '<div class="detail-card">' +
+        detailRow('user', 'الاسم', escapeHtml(u.name || '—')) +
+        detailRow('envelope', 'البريد الإلكتروني', escapeHtml(u.email || '—')) +
+        detailRow('star', 'النقاط', u.points || 0) +
+        detailRow('calendar', 'تاريخ التسجيل', formatArabicDate(u.createdAt)) +
+        detailRow('clock', 'آخر تسجيل دخول', u.lastLoginAt ? formatArabicDate(u.lastLoginAt) : 'لم يسجّل دخول بعد') +
+        detailRow('lock', 'حالة الحساب', blocked
+          ? '<span class="status-chip blocked" style="margin:0;">' + icon('lock', 'icon-sm') + ' محظور</span>'
+          : '<span class="status-pill live" style="margin:0;">' + icon('check', 'icon-sm') + ' نشط</span>') +
+      '</div>' +
+
+      '<div class="no-password-note">' +
+        icon('key', 'icon-md') +
+        '<span>لأسباب أمنية، Firebase لا يخزّن كلمة المرور الحقيقية في أي مكان (حتى نحن كمطوّرين لا نقدر نصل لها)، فمفيش طريقة تقنية لعرضها. البديل الفعلي: ابعت للمستخدم رابط إعادة تعيين كلمة مرور آمن مباشرة على بريده الإلكتروني.</span>' +
+      '</div>' +
+
+      '<div style="display:flex; gap:10px; flex-wrap:wrap;">' +
+        '<button class="btn btn-gold" id="resetLinkBtn" style="width:auto;">' + icon('envelope') + ' إرسال رابط إعادة تعيين كلمة المرور</button>' +
+        (u.isAdmin ? '' :
+          '<button class="btn btn-outline" id="resetPointsBtn" style="width:auto;">' + icon('hourglass') + ' إعادة تعيين النقاط</button>' +
+          '<button class="btn ' + (blocked ? 'btn-primary' : 'btn-ghost') + '" id="blockBtn" style="width:auto;">' + icon('lock') + ' ' + (blocked ? 'إلغاء الحظر' : 'حظر الحساب') + '</button>'
+        ) +
+      '</div>' +
+      '<div class="form-msg" id="actionMsg" style="margin-top:16px;"></div>';
+
+    document.getElementById('resetLinkBtn').addEventListener('click', function () {
+      const msg = document.getElementById('actionMsg');
+      auth.sendPasswordResetEmail(u.email)
+        .then(function () {
+          msg.textContent = 'تم إرسال رابط إعادة تعيين كلمة المرور إلى ' + u.email;
+          msg.className = 'form-msg show success';
+        })
+        .catch(function (err) {
+          msg.textContent = 'تعذر إرسال الرابط: ' + (err.message || err.code);
+          msg.className = 'form-msg show error';
+        });
+    });
+
+    const resetBtn = document.getElementById('resetPointsBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        if (!confirm('هل تريد إعادة تعيين كل نقاط هذا المستخدم إلى صفر؟ سيتم مسح كل تقدّمه في كل المسابقات.')) return;
+        Promise.all([db.ref('users/' + targetUid + '/points').set(0), db.ref('userProgress/' + targetUid).remove()])
+          .then(function () { load(); })
+          .catch(function (err) { alert('تعذر إعادة التعيين: ' + err.message); });
+      });
+    }
+
+    const blockBtn = document.getElementById('blockBtn');
+    if (blockBtn) {
+      blockBtn.addEventListener('click', function () {
+        const msgText = blocked ? 'إلغاء حظر هذا الحساب؟' : 'حظر هذا الحساب؟ لن يتمكن من الدخول للمنصة.';
+        if (!confirm(msgText)) return;
+        db.ref('users/' + targetUid + '/blocked').set(!blocked)
+          .then(function () { load(); })
+          .catch(function (err) { alert('تعذر تنفيذ الإجراء: ' + err.message); });
+      });
+    }
+  }
+
+  function detailRow(iconName, label, value) {
+    return '<div class="detail-row"><span class="d-label">' + icon(iconName, 'icon-sm') + ' ' + label + '</span><span class="d-value">' + value + '</span></div>';
+  }
+</script>
+</body>
+</html>

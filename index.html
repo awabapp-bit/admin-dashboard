@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>دخول المسؤول — منصة أواب الإلكترونية</title>
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="pattern-strip"></div>
+    <div class="admin-login-badge" id="shieldBadge">مساحة المسؤول</div>
+    <div class="auth-brand">
+      <img src="logo.png" alt="شعار منصة أواب" onerror="this.style.display='none'">
+      <h1>لوحة تحكم أواب</h1>
+      <p>تسجيل دخول المسؤول فقط</p>
+    </div>
+
+    <div class="form-msg" id="formMsg"></div>
+
+    <form id="adminLoginForm" novalidate>
+      <div class="field">
+        <label for="adminUser">اسم المستخدم</label>
+        <input type="text" id="adminUser" autocomplete="username" placeholder="admin" required>
+      </div>
+      <div class="field">
+        <label for="adminPass">كلمة المرور</label>
+        <div class="password-toggle-wrap">
+          <input type="password" id="adminPass" autocomplete="current-password" placeholder="••••••••" required>
+          <button type="button" class="password-toggle" id="togglePass" aria-label="إظهار كلمة المرور"></button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" id="loginBtn">دخول لوحة التحكم</button>
+    </form>
+
+    <div class="auth-switch"><a href="https://awabapp-bit.github.io/awab-user-site/">← العودة لموقع المنصة</a></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="icons.js"></script>
+<script>
+  document.getElementById('shieldBadge').innerHTML = icon('shield', 'icon-sm') + ' مساحة المسؤول';
+  document.getElementById('togglePass').innerHTML = icon('eye');
+
+  /* بيانات دخول لوحة التحكم كما طُلب: admin / 123
+     خلف الكواليس تُستخدم هذه البيانات لتسجيل الدخول لحساب المسؤول الحقيقي
+     admin@awab.su.com، وهو نفس الحساب الذي يستطيع المسؤول تسجيل الدخول به
+     مباشرة في موقع المستخدم (index.html هناك) للرد على تعليقات الناس. */
+  const ADMIN_USERNAME = 'admin';
+  const ADMIN_PASSWORD = '123';
+  const ADMIN_REAL_EMAIL = 'admin@awab.su.com';
+  const ADMIN_REAL_PASSWORD = '500500';
+
+  auth.onAuthStateChanged(function (user) {
+    if (!user) return;
+    db.ref('users/' + user.uid).once('value').then(function (snap) {
+      const data = snap.val();
+      if (data && data.isAdmin === true) window.location.href = 'home.html';
+    });
+  });
+
+  const form = document.getElementById('adminLoginForm');
+  const formMsg = document.getElementById('formMsg');
+  const loginBtn = document.getElementById('loginBtn');
+  const togglePass = document.getElementById('togglePass');
+  const passInput = document.getElementById('adminPass');
+
+  togglePass.addEventListener('click', function () {
+    const isPass = passInput.type === 'password';
+    passInput.type = isPass ? 'text' : 'password';
+    togglePass.innerHTML = icon(isPass ? 'eyeSlash' : 'eye');
+  });
+
+  function showMsg(text, type) { formMsg.textContent = text; formMsg.className = 'form-msg show ' + type; }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    formMsg.classList.remove('show');
+    const u = document.getElementById('adminUser').value.trim();
+    const p = passInput.value;
+
+    if (u !== ADMIN_USERNAME || p !== ADMIN_PASSWORD) {
+      showMsg('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
+      return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'جارٍ الدخول...';
+
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .then(function () { return auth.signInWithEmailAndPassword(ADMIN_REAL_EMAIL, ADMIN_REAL_PASSWORD); })
+      .then(function () { window.location.href = 'home.html'; })
+      .catch(function (err) {
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+          auth.createUserWithEmailAndPassword(ADMIN_REAL_EMAIL, ADMIN_REAL_PASSWORD)
+            .then(function (cred) {
+              return cred.user.updateProfile({ displayName: 'المسؤول' }).then(function () {
+                return db.ref('users/' + cred.user.uid).set({
+                  name: 'المسؤول', email: ADMIN_REAL_EMAIL, points: 0, isAdmin: true,
+                  createdAt: firebase.database.ServerValue.TIMESTAMP
+                });
+              });
+            })
+            .then(function () { window.location.href = 'home.html'; })
+            .catch(function (err2) {
+              showMsg('تعذر تجهيز حساب المسؤول: ' + (err2.code || err2.message), 'error');
+              loginBtn.disabled = false; loginBtn.textContent = 'دخول لوحة التحكم';
+            });
+        } else {
+          showMsg('حدث خطأ أثناء الدخول (' + (err.code || 'غير معروف') + ')', 'error');
+          loginBtn.disabled = false; loginBtn.textContent = 'دخول لوحة التحكم';
+        }
+      });
+  });
+</script>
+</body>
+</html>
