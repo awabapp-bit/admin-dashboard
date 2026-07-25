@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>إدارة المسابقة — لوحة تحكم أواب</title>
+<title>إدارة المحتوى — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -12,7 +12,7 @@
 <nav class="admin-nav" id="adminNav"></nav>
 
 <main class="admin-page">
-  <a class="back-link" href="home.html" id="backLink">كل المسابقات</a>
+  <a class="back-link" href="home.html" id="backLink">كل المحتوى</a>
 
   <div class="admin-page-head">
     <div>
@@ -37,7 +37,7 @@
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
 <script>
-  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل المسابقات';
+  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل المحتوى';
   document.getElementById('participantsLink').innerHTML = icon('medal', 'icon-sm') + ' المشتركون والنقاط';
   document.getElementById('addLessonLink').innerHTML = icon('plus') + ' إضافة محاضرة جديدة';
 
@@ -56,7 +56,7 @@
     db.ref('competitions/' + compId).on('value', function (snap) {
       if (!snap.exists()) { window.location.href = 'home.html'; return; }
       const comp = snap.val();
-      document.getElementById('compTitle').textContent = comp.title || 'مسابقة';
+      document.getElementById('compTitle').textContent = comp.title || 'بدون عنوان';
       document.getElementById('compDesc').textContent = comp.description || '';
       renderLessons(comp.lessons || {});
     });
@@ -77,6 +77,7 @@
       const lesson = lessons[lessonId];
       const videoCount = lesson.videos ? Object.keys(lesson.videos).length : 0;
       const examCount = lesson.exams ? Object.keys(lesson.exams).length : 0;
+      const materialCount = lesson.materials ? Object.keys(lesson.materials).length : 0;
       const isLive = !lesson.releaseAt || lesson.releaseAt <= now;
 
       html +=
@@ -88,6 +89,7 @@
               '<div class="meta-row">' +
                 '<span>' + icon('video', 'icon-sm') + ' ' + videoCount + ' فيديو</span>' +
                 '<span>' + icon('listCheck', 'icon-sm') + ' ' + examCount + ' اختبار</span>' +
+                (materialCount > 0 ? '<span>' + icon('filePdf', 'icon-sm') + ' ' + materialCount + ' مرفق</span>' : '') +
                 '<span class="status-pill ' + (isLive ? 'live' : 'scheduled') + '">' +
                   icon(isLive ? 'check' : 'clock', 'icon-sm') + ' ' + (isLive ? 'منشورة الآن' : 'تُنشر في ' + formatArabicDate(lesson.releaseAt)) +
                 '</span>' +

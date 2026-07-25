@@ -78,7 +78,7 @@
 
     document.getElementById('resetLinkBtn').addEventListener('click', function () {
       const msg = document.getElementById('actionMsg');
-      auth.sendPasswordResetEmail(u.email)
+      auth.sendPasswordResetEmail(u.email, { url: RESET_SITE_URL })
         .then(function () {
           msg.textContent = 'تم إرسال رابط إعادة تعيين كلمة المرور إلى ' + u.email;
           msg.className = 'form-msg show success';
@@ -92,7 +92,7 @@
     const resetBtn = document.getElementById('resetPointsBtn');
     if (resetBtn) {
       resetBtn.addEventListener('click', function () {
-        if (!confirm('هل تريد إعادة تعيين كل نقاط هذا المستخدم إلى صفر؟ سيتم مسح كل تقدّمه في كل المسابقات.')) return;
+        if (!confirm('هل تريد إعادة تعيين كل نقاط هذا المستخدم إلى صفر؟ سيتم مسح كل تقدّمه في كل الكورسات والمسابقات.')) return;
         Promise.all([db.ref('users/' + targetUid + '/points').set(0), db.ref('userProgress/' + targetUid).remove()])
           .then(function () { load(); })
           .catch(function (err) { alert('تعذر إعادة التعيين: ' + err.message); });

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>إضافة مسابقة جديدة — لوحة تحكم أواب</title>
+<title>إضافة محتوى جديد — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -12,26 +12,41 @@
 <nav class="admin-nav" id="adminNav"></nav>
 
 <main class="admin-page" style="max-width:600px;">
-  <a class="back-link" href="home.html" id="backLink">كل المسابقات</a>
-  <h1 class="page-title">إضافة مسابقة جديدة</h1>
-  <p class="page-sub">تظهر المسابقة فور الحفظ مباشرة على الموقع للمستخدمين</p>
+  <a class="back-link" href="home.html" id="backLink">كل المحتوى</a>
+  <h1 class="page-title">إضافة محتوى جديد</h1>
+  <p class="page-sub">يظهر فور الحفظ مباشرة على الموقع للمستخدمين</p>
 
   <div class="info-card">
     <div class="form-msg" id="formMsg"></div>
     <form id="addCompForm">
       <div class="field">
-        <label for="compTitle">اسم المسابقة</label>
-        <input type="text" id="compTitle" placeholder="مثال: مسابقة أواب الكبرى" required>
+        <label>نوع المحتوى</label>
+        <div style="display:flex; gap:10px;">
+          <label style="flex:1; display:flex; align-items:center; gap:8px; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); cursor:pointer;" id="courseTypeLabel">
+            <input type="radio" name="contentType" value="course" checked style="accent-color:var(--primary);">
+            <span id="courseTypeIcon"></span> كورس
+          </label>
+          <label style="flex:1; display:flex; align-items:center; gap:8px; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); cursor:pointer;" id="compTypeLabel">
+            <input type="radio" name="contentType" value="competition" style="accent-color:var(--gold);">
+            <span id="compTypeIcon"></span> مسابقة
+          </label>
+        </div>
+        <div class="field-hint">هيظهر للمستخدم زر "اشتراك في الكورس" لو كورس، أو "انضمام للمسابقة" لو مسابقة</div>
+      </div>
+
+      <div class="field">
+        <label for="compTitle">الاسم</label>
+        <input type="text" id="compTitle" placeholder="مثال: كورس التجويد الأساسي" required>
       </div>
       <div class="field">
-        <label for="compDesc">وصف مختصر (اختياري)</label>
-        <input type="text" id="compDesc" placeholder="وصف يظهر في بطاقة المسابقة">
+        <label for="compDesc">الوصف (اختياري)</label>
+        <textarea id="compDesc" rows="4" placeholder="وصف كامل يظهر في صفحة المحتوى" style="width:100%; padding:13px 15px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; font-size:15px; resize:vertical;"></textarea>
       </div>
       <div class="field">
         <label for="compCover">رابط صورة الغلاف (اختياري)</label>
         <input type="url" id="compCover" placeholder="https://...">
       </div>
-      <button type="submit" class="btn btn-gold" id="saveBtn">حفظ المسابقة</button>
+      <button type="submit" class="btn btn-gold" id="saveBtn">حفظ</button>
     </form>
   </div>
 </main>
@@ -43,7 +58,9 @@
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
 <script>
-  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل المسابقات';
+  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل المحتوى';
+  document.getElementById('courseTypeIcon').innerHTML = icon('bookOpen', 'icon-sm');
+  document.getElementById('compTypeIcon').innerHTML = icon('trophy', 'icon-sm');
 
   let currentAdmin = null;
   requireAdminAuth(function (user) { currentAdmin = user; renderAdminNav('home'); });
@@ -54,6 +71,7 @@
     const title = document.getElementById('compTitle').value.trim();
     const description = document.getElementById('compDesc').value.trim();
     const coverUrl = document.getElementById('compCover').value.trim();
+    const type = document.querySelector('input[name="contentType"]:checked').value;
     const saveBtn = document.getElementById('saveBtn');
     if (!title) return;
 
@@ -61,14 +79,14 @@
     saveBtn.textContent = 'جارٍ الحفظ...';
 
     db.ref('competitions').push({
-      title: title, description: description || '', coverUrl: coverUrl || null,
+      title: title, description: description || '', coverUrl: coverUrl || null, type: type,
       createdBy: currentAdmin.uid, createdAt: firebase.database.ServerValue.TIMESTAMP
     }).then(function (ref) {
       window.location.href = 'competition.html?id=' + encodeURIComponent(ref.key);
     }).catch(function (err) {
-      msg.textContent = 'تعذر إضافة المسابقة: ' + err.message;
+      msg.textContent = 'تعذر الحفظ: ' + err.message;
       msg.className = 'form-msg show error';
-      saveBtn.disabled = false; saveBtn.textContent = 'حفظ المسابقة';
+      saveBtn.disabled = false; saveBtn.textContent = 'حفظ';
     });
   });
 </script>

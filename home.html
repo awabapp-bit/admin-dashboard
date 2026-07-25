@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>لوحة تحكم أواب — المسابقات</title>
+<title>لوحة تحكم أواب — المحتوى التعليمي</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -14,10 +14,10 @@
 <main class="admin-page">
   <div class="admin-page-head">
     <div>
-      <h1 class="page-title">المسابقات</h1>
-      <p class="page-sub">إدارة المسابقات والمحاضرات (فيديوهات و/أو اختبارات)</p>
+      <h1 class="page-title">المحتوى التعليمي</h1>
+      <p class="page-sub">إدارة الكورسات والمسابقات ومحاضراتها (فيديوهات و/أو اختبارات و/أو مرفقات)</p>
     </div>
-    <a href="add-competition.html" class="btn btn-gold" style="width:auto;" id="addBtn">إضافة مسابقة جديدة</a>
+    <a href="add-competition.html" class="btn btn-gold" style="width:auto;" id="addBtn">إضافة محتوى جديد</a>
   </div>
 
   <div class="stat-grid" id="statGrid"></div>
@@ -34,7 +34,7 @@
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
 <script>
-  document.getElementById('addBtn').innerHTML = icon('plus') + ' إضافة مسابقة جديدة';
+  document.getElementById('addBtn').innerHTML = icon('plus') + ' إضافة محتوى جديد';
 
   requireAdminAuth(function () {
     renderAdminNav('home');
@@ -51,7 +51,7 @@
         lessonCount += comps[cid].lessons ? Object.keys(comps[cid].lessons).length : 0;
       });
       document.getElementById('statGrid').innerHTML =
-        statCard('trophy', Object.keys(comps).length, 'مسابقة') +
+        statCard('trophy', Object.keys(comps).length, 'كورس/مسابقة') +
         statCard('listCheck', lessonCount, 'محاضرة') +
         statCard('users', Math.max(Object.keys(users).length - 1, 0), 'حساب مستخدم');
     });
@@ -69,7 +69,7 @@
       const ids = Object.keys(data);
 
       if (ids.length === 0) {
-        wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon('trophy', 'icon-xl') + '</div><p>لا توجد مسابقات بعد. ابدأ بإضافة أول مسابقة.</p></div>';
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon('trophy', 'icon-xl') + '</div><p>لا يوجد محتوى بعد. ابدأ بإضافة أول كورس أو مسابقة.</p></div>';
         return;
       }
 
@@ -84,12 +84,14 @@
           examCount += lessons[lid].exams ? Object.keys(lessons[lid].exams).length : 0;
         });
 
+        const isCourse = c.type !== 'competition';
         html +=
           '<div class="admin-comp-card">' +
             '<div class="info">' +
-              '<h3>' + escapeHtml(c.title || 'مسابقة') + '</h3>' +
+              '<h3>' + escapeHtml(c.title || 'بدون عنوان') + '</h3>' +
               (c.description ? '<p>' + escapeHtml(c.description) + '</p>' : '') +
               '<div class="tags">' +
+                '<span class="tag ' + (isCourse ? '' : 'mix-tag') + '">' + icon(isCourse ? 'bookOpen' : 'trophy', 'icon-sm') + ' ' + (isCourse ? 'كورس' : 'مسابقة') + '</span>' +
                 '<span class="tag">' + icon('listCheck', 'icon-sm') + ' ' + lessonIds.length + ' محاضرة</span>' +
                 '<span class="tag mix-tag video-tag">' + icon('video', 'icon-sm') + ' ' + videoCount + ' فيديو</span>' +
                 '<span class="tag mix-tag">' + icon('pen', 'icon-sm') + ' ' + examCount + ' اختبار</span>' +
@@ -106,7 +108,7 @@
 
       wrap.querySelectorAll('.delete-comp-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
-          if (!confirm('هل أنت متأكد من حذف هذه المسابقة نهائيًا؟ سيتم حذف كل محاضراتها وأسئلتها.')) return;
+          if (!confirm('هل أنت متأكد من حذف هذا المحتوى نهائيًا؟ سيتم حذف كل محاضراتها وأسئلتها.')) return;
           db.ref('competitions/' + btn.dataset.id).remove();
         });
       });

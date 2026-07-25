@@ -1355,3 +1355,18 @@ a.lesson-row.locked { cursor: not-allowed; }
   .accounts-toolbar { flex-direction: column; align-items: stretch; }
   .accounts-toolbar .search-wrap { max-width: none; }
 }
+
+/* ================= رفع مرفقات (PDF/صور) في محرر المحاضرة ================= */
+.material-upload-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  padding: 10px 12px; background: var(--bg); border-radius: var(--radius-sm);
+}
+.material-upload-row .mu-icon { color: var(--primary); flex-shrink: 0; }
+.material-upload-row .mu-name { flex: 1; font-size: 13px; color: var(--text); word-break: break-all; }
+.material-upload-row .mu-remove { background: none; border: none; color: var(--danger); flex-shrink: 0; }
+.upload-progress-bar {
+  height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; margin-top: 8px;
+}
+.upload-progress-fill { height: 100%; background: var(--primary); border-radius: 999px; transition: width .2s ease; }
+
+.mix-tag.material-tag { background: rgba(179,67,43,0.1); color: var(--danger); }

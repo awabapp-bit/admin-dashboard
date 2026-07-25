@@ -2,6 +2,7 @@
    هذا موقع مستقل تمامًا عن موقع المستخدم؛ عدّل الرابط أدناه ليشير لموقع
    المستخدم الفعلي بعد نشره (رابط منفصل بالكامل، مش نفس المستودع). */
 const USER_SITE_URL = 'https://awabapp-bit.github.io/awab-user-site/';
+const RESET_SITE_URL = 'https://awabapp-bit.github.io/awab-reset-site/';
 
 /**
  * يتحقق أن المستخدم الحالي مسجل دخول عبر حساب Firebase وأن isAdmin = true.
