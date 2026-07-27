@@ -294,6 +294,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 }
 .btn-ghost:hover { background: rgba(179,67,43,0.08); }
 
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger) 0%, #8a3120 100%);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(179,67,43,0.25);
+}
+.btn-danger:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(179,67,43,0.32); }
+.btn-danger:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
 .btn-sm { width: auto; padding: 9px 16px; font-size: 13.5px; }
 
 .auth-switch {

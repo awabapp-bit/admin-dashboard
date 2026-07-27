@@ -67,11 +67,18 @@
         '<span>لأسباب أمنية، Firebase لا يخزّن كلمة المرور الحقيقية في أي مكان (حتى نحن كمطوّرين لا نقدر نصل لها)، فمفيش طريقة تقنية لعرضها. البديل الفعلي: ابعت للمستخدم رابط إعادة تعيين كلمة مرور آمن مباشرة على بريده الإلكتروني.</span>' +
       '</div>' +
 
+      (u.isAdmin ? '' :
+      '<div class="no-password-note">' +
+        icon('trash', 'icon-md') +
+        '<span>حذف الحساب هيمسح كل بياناته من الموقع نهائيًا (نقاطه، اشتراكاته، إشعاراته، محادثاته) وهيتعامل معاه الموقع كأنه مش موجود. سجل الدخول (Firebase Authentication) بتاعه هيفضل موجود تقنيًا لحد ما تحذفه يدويًا من Firebase Console لو حبيت تمنعه من عمل حساب جديد بنفس البريد.</span>' +
+      '</div>') +
+
       '<div style="display:flex; gap:10px; flex-wrap:wrap;">' +
         '<button class="btn btn-gold" id="resetLinkBtn" style="width:auto;">' + icon('envelope') + ' إرسال رابط إعادة تعيين كلمة المرور</button>' +
         (u.isAdmin ? '' :
           '<button class="btn btn-outline" id="resetPointsBtn" style="width:auto;">' + icon('hourglass') + ' إعادة تعيين النقاط</button>' +
-          '<button class="btn ' + (blocked ? 'btn-primary' : 'btn-ghost') + '" id="blockBtn" style="width:auto;">' + icon('lock') + ' ' + (blocked ? 'إلغاء الحظر' : 'حظر الحساب') + '</button>'
+          '<button class="btn ' + (blocked ? 'btn-primary' : 'btn-ghost') + '" id="blockBtn" style="width:auto;">' + icon('lock') + ' ' + (blocked ? 'إلغاء الحظر' : 'حظر الحساب') + '</button>' +
+          '<button class="btn btn-danger" id="deleteBtn" style="width:auto;">' + icon('trash') + ' حذف الحساب نهائيًا</button>'
         ) +
       '</div>' +
       '<div class="form-msg" id="actionMsg" style="margin-top:16px;"></div>';
@@ -107,6 +114,24 @@
         db.ref('users/' + targetUid + '/blocked').set(!blocked)
           .then(function () { load(); })
           .catch(function (err) { alert('تعذر تنفيذ الإجراء: ' + err.message); });
+      });
+    }
+
+    const deleteBtn = document.getElementById('deleteBtn');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', function () {
+        const name = u.name || u.email || 'هذا المستخدم';
+        if (!confirm('هل أنت متأكد من حذف حساب "' + name + '" نهائيًا؟ سيُحذف نهائيًا كل شيء: نقاطه، تقدّمه، اشتراكاته في كل المسابقات، إشعاراته، ومحادثات الدعم الفني معه. لا يمكن التراجع عن هذا الإجراء.')) return;
+        if (prompt('للتأكيد، اكتب "حذف" في المربع التالي:') !== 'حذف') { alert('تم إلغاء الحذف.'); return; }
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'جارٍ الحذف...';
+        deleteUserAccountData(targetUid)
+          .then(function () { window.location.href = 'users.html'; })
+          .catch(function (err) {
+            alert('تعذر حذف الحساب: ' + err.message);
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = icon('trash') + ' حذف الحساب نهائيًا';
+          });
       });
     }
   }

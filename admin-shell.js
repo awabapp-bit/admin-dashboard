@@ -131,3 +131,33 @@ function formatArabicDate(ts) {
   const d = new Date(ts);
   return d.toLocaleString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
+
+/**
+ * يحذف كل بيانات حساب مستخدم من قاعدة البيانات (نقاطه، تقدّمه، اشتراكاته في كل
+ * المسابقات، إشعاراته، محادثات الدعم الفني، إلخ) في عملية واحدة (multi-path update).
+ * ملحوظة مهمة: هذا يحذف بيانات الحساب فقط من Realtime Database. حساب الدخول
+ * نفسه (Firebase Authentication) هيفضل موجود تقنيًا لأن حذفه لمستخدم تاني غير
+ * ممكن من كود الموقع مباشرة (محتاج صلاحيات Admin SDK من سيرفر)، لكن بما إن كل
+ * بياناته اتمسحت هيتعامل معاه الموقع كأنه حساب جديد تمامًا لو دخل تاني.
+ * بيرجّع Promise.
+ */
+function deleteUserAccountData(uid) {
+  const updates = {};
+  updates['users/' + uid] = null;
+  updates['userProgress/' + uid] = null;
+  updates['userEnrollments/' + uid] = null;
+  updates['notifications/' + uid] = null;
+  updates['notifiedLessons/' + uid] = null;
+  updates['conversations/' + uid] = null;
+  updates['messages/' + uid] = null;
+
+  return db.ref('enrollments').once('value').then(function (snap) {
+    const all = snap.val() || {};
+    Object.keys(all).forEach(function (compId) {
+      if (all[compId] && Object.prototype.hasOwnProperty.call(all[compId], uid)) {
+        updates['enrollments/' + compId + '/' + uid] = null;
+      }
+    });
+    return db.ref().update(updates);
+  });
+}

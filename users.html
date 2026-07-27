@@ -120,7 +120,8 @@
             '<button class="btn btn-outline btn-xs reset-btn" data-uid="' + u.uid + '" data-name="' + escapeHtml(u.name || '') + '">' + icon('hourglass', 'icon-sm') + ' تصفير النقاط</button>' +
             '<button class="btn ' + (blocked ? 'btn-primary' : 'btn-ghost') + ' btn-xs block-btn" data-uid="' + u.uid + '" data-blocked="' + blocked + '" data-name="' + escapeHtml(u.name || '') + '">' +
               icon('lock', 'icon-sm') + ' ' + (blocked ? 'إلغاء الحظر' : 'حظر') +
-            '</button>'
+            '</button>' +
+            '<button class="btn btn-danger btn-xs delete-btn" data-uid="' + u.uid + '" data-name="' + escapeHtml(u.name || '') + '" data-email="' + escapeHtml(u.email || '') + '">' + icon('trash', 'icon-sm') + ' حذف الحساب</button>'
           ) +
         '</div>' +
       '</div>';
@@ -144,6 +145,22 @@
           : 'حظر "' + btn.dataset.name + '"؟ لن يتمكن من الدخول للمنصة حتى تُلغي الحظر.';
         if (!confirm(msg)) return;
         db.ref('users/' + uid + '/blocked').set(!currentlyBlocked).catch(function (err) { alert('تعذر تنفيذ الإجراء: ' + err.message); });
+      });
+    });
+
+    grid.querySelectorAll('.delete-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const uid = btn.dataset.uid;
+        const name = btn.dataset.name || btn.dataset.email || 'هذا المستخدم';
+        if (!confirm('هل أنت متأكد من حذف حساب "' + name + '" نهائيًا؟ سيُحذف نهائيًا كل شيء: نقاطه، تقدّمه، اشتراكاته في كل المسابقات، إشعاراته، ومحادثات الدعم الفني معه. لا يمكن التراجع عن هذا الإجراء.')) return;
+        if (prompt('للتأكيد، اكتب "حذف" في المربع التالي:') !== 'حذف') { alert('تم إلغاء الحذف.'); return; }
+        btn.disabled = true;
+        btn.textContent = 'جارٍ الحذف...';
+        deleteUserAccountData(uid).catch(function (err) {
+          alert('تعذر حذف الحساب: ' + err.message);
+          btn.disabled = false;
+          btn.innerHTML = icon('trash', 'icon-sm') + ' حذف الحساب';
+        });
       });
     });
   }
