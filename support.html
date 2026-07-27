@@ -50,7 +50,7 @@
     .offline-dot:nth-child(3){animation-delay:0.4s}
     @keyframes supJump{0%{transform:translateY(0)}100%{transform:translateY(-8px)}}
 
-    .dashboard-container{display:none;width:100%;flex:1;min-height:0;overflow:hidden}
+    .dashboard-container{display:none;width:100%;flex:1;min-height:0;overflow:hidden;position:relative}
     .dashboard-container.active{display:flex}
 
     .sidebar{width:380px;border-left:1px solid var(--sup-card-border);background:var(--sup-sidebar-bg);backdrop-filter:blur(20px);display:flex;flex-direction:column;height:100%}
@@ -164,9 +164,17 @@
     @keyframes supSpin{to{transform:rotate(360deg)}}
 
     @media(max-width:768px){
-      .sidebar{width:100%;position:absolute;top:0;right:0;bottom:0;z-index:10;height:auto}
-      .sidebar.hidden{display:none}
-      .chat-pane{width:100%}
+      .sidebar,.chat-pane{width:100%;height:100%}
+
+      /* الوضع الافتراضي: صفحة القائمة بس هي الموجودة، عناصر الدردشة (هيدر/رسائل/شريط الإرسال) مش موجودة في الصفحة خالص */
+      .dashboard-container .chat-pane{display:none}
+      .dashboard-container .sidebar{display:flex}
+
+      /* عند فتح محادثة: تختفي القائمة تماماً وتظهر صفحة الدردشة بس */
+      .dashboard-container.chat-open .sidebar{display:none}
+      .dashboard-container.chat-open .chat-pane{display:flex}
+
+      .chat-placeholder{display:none !important}
       .back-btn{display:flex}
 
       .chat-header{padding:12px 15px}
@@ -404,10 +412,11 @@
   $('attach-trigger-btn').addEventListener('click', e => { e.stopPropagation(); attachmentPopupMenu.classList.toggle('active'); });
   document.addEventListener('click', () => attachmentPopupMenu.classList.remove('active'));
   $('back-to-list-btn').addEventListener('click', () => {
-    dashboardSidebar.classList.remove('hidden');
+    dashboardDiv.classList.remove('chat-open');
     chatPlaceholderEl.style.display = 'flex';
     selectedUserId = null;
-    if (chatMsgsUnsub) chatMsgsUnsub();
+    if (usersStatusUnsub) { usersStatusUnsub(); usersStatusUnsub = null; }
+    if (chatMsgsUnsub) { chatMsgsUnsub(); chatMsgsUnsub = null; }
   });
   $('close-lightbox').addEventListener('click', () => imageLightbox.classList.remove('active'));
   function openLightbox(src) { lightboxImgEl.src = src; imageLightbox.classList.add('active'); }
@@ -482,7 +491,7 @@
     selectedUserId   = userId;
     selectedUserName = userName;
     chatPlaceholderEl.style.display = 'none';
-    if (window.innerWidth <= 768) dashboardSidebar.classList.add('hidden');
+    dashboardDiv.classList.add('chat-open');
     chatHeaderName.textContent   = userName;
     chatHeaderAvatar.textContent = userName.trim().charAt(0) || 'U';
     chatHeaderStatus.className   = 'header-user-status';
