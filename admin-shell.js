@@ -1,7 +1,6 @@
 /* قشرة لوحة تحكم المسؤول: تحقق من صلاحية المسؤول + رسم شريط التنقل العلوي
    هذا موقع مستقل تمامًا عن موقع المستخدم؛ عدّل الرابط أدناه ليشير لموقع
    المستخدم الفعلي بعد نشره (رابط منفصل بالكامل، مش نفس المستودع). */
-const USER_SITE_URL = 'https://awabapp-bit.github.io/awab-user-site/';
 const RESET_SITE_URL = 'https://awabapp-bit.github.io/awab-reset-site/';
 
 /**
@@ -48,16 +47,63 @@ function renderAdminNav(activePage) {
           '<span>AWWAB ADMIN PANEL</span>' +
         '</div>' +
       '</div>' +
-      '<div class="admin-links">' +
+      '<button class="admin-menu-toggle" id="adminMenuToggle" type="button" aria-label="فتح القائمة" aria-expanded="false" aria-controls="adminLinks">' +
+        '<span class="hamburger-lines"><span></span><span></span><span></span></span>' +
+      '</button>' +
+      '<div class="admin-links" id="adminLinks">' +
         '<a href="home.html" class="' + (activePage === 'home' ? 'active' : '') + '">' + icon('gear', 'icon-sm') + ' المسابقات</a>' +
         '<a href="users.html" class="' + (activePage === 'users' ? 'active' : '') + '">' + icon('users', 'icon-sm') + ' الحسابات</a>' +
-        '<a href="' + USER_SITE_URL + '" target="_blank" rel="noopener">' + icon('rightToBracket', 'icon-sm') + ' عرض الموقع</a>' +
+        '<a href="support.html" class="' + (activePage === 'support' ? 'active' : '') + '">' + icon('headset', 'icon-sm') + ' الدعم الفني</a>' +
         '<button class="danger-link" id="adminLogoutBtn">' + icon('logout', 'icon-sm') + ' تسجيل الخروج</button>' +
       '</div>' +
-    '</div>';
+    '</div>' +
+    '<div class="admin-sidebar-overlay" id="adminSidebarOverlay"></div>';
 
   document.getElementById('adminLogoutBtn').addEventListener('click', function () {
     auth.signOut().then(function () { window.location.href = 'index.html'; });
+  });
+
+  setupAdminMobileNav();
+}
+
+/**
+ * يفعّل زر الهمبرغر ليفتح/يقفل القائمة الجانبية على الشاشات الصغيرة
+ * (هواتف وتابلت)، مع إغلاقها بالنقر على الستارة، أو زر Escape،
+ * أو اختيار أي رابط، أو تكبير الشاشة لحجم سطح المكتب.
+ */
+function setupAdminMobileNav() {
+  const toggle = document.getElementById('adminMenuToggle');
+  const links = document.getElementById('adminLinks');
+  const overlay = document.getElementById('adminSidebarOverlay');
+  if (!toggle || !links || !overlay) return;
+
+  function openMenu() {
+    links.classList.add('open');
+    overlay.classList.add('open');
+    toggle.classList.add('open');
+    toggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMenu() {
+    links.classList.remove('open');
+    overlay.classList.remove('open');
+    toggle.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  toggle.addEventListener('click', function () {
+    if (links.classList.contains('open')) closeMenu(); else openMenu();
+  });
+  overlay.addEventListener('click', closeMenu);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeMenu();
+  });
+  links.querySelectorAll('a, button').forEach(function (el) {
+    el.addEventListener('click', closeMenu);
+  });
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 860) closeMenu();
   });
 }
 

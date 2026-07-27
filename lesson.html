@@ -14,7 +14,7 @@
 <main class="admin-page" style="max-width:760px;">
   <a class="back-link" id="backLink" href="home.html">رجوع للمحتوى</a>
   <h1 class="page-title" id="pageTitle">إضافة محاضرة جديدة</h1>
-  <p class="page-sub">أضف عنوان المحاضرة ومعاد نشرها، ثم فيديوهات و/أو اختبارات حسب ما تريد</p>
+  <p class="page-sub">أضف عنوان المحاضرة ومعاد نشرها، ثم فيديوهات و/أو اختبارات حسب ما تريد. أسئلة كل اختبار تُدار في صفحة خاصة به.</p>
 
   <div class="form-msg" id="formMsg"></div>
 
@@ -84,7 +84,7 @@
 <script>
   document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' رجوع للمحتوى';
   document.getElementById('addVideoBtn').innerHTML = icon('plus') + ' إضافة فيديو';
-  document.getElementById('addExamBtn').innerHTML = icon('plus') + ' إضافة اختبار';
+  document.getElementById('addExamBtn').innerHTML = icon('circlePlus') + ' إضافة اختبار جديد';
   document.getElementById('saveBtn').innerHTML = icon('floppyDisk') + ' حفظ المحاضرة';
 
   const params = new URLSearchParams(window.location.search);
@@ -93,40 +93,97 @@
   if (!compId) window.location.href = 'home.html';
 
   let videoCounter = 0;
-  let examCounter = 0;
   let materials = {}; // { materialId: { name, url, type, size } }
+  let examsData = []; // [{ localId, key, title, questions:[{key,text,options,correct,points}] }]
   const videosWrap = document.getElementById('videosWrap');
   const examsWrap = document.getElementById('examsWrap');
+  const draftKey = 'awab_lesson_draft::' + compId + '::' + (lessonId || 'new');
 
   requireAdminAuth(function () {
     renderAdminNav('home');
-    document.getElementById('backLink').href = 'competition.html?id=' + encodeURIComponent(compId);
+    const backLink = document.getElementById('backLink');
+    backLink.href = 'competition.html?id=' + encodeURIComponent(compId);
+    backLink.addEventListener('click', function () { sessionStorage.removeItem(draftKey); });
 
-    if (lessonId) {
-      document.getElementById('pageTitle').textContent = 'تعديل المحاضرة';
-      loadExistingLesson();
-    }
+    if (lessonId) document.getElementById('pageTitle').textContent = 'تعديل المحاضرة';
+
+    fetchOriginalLesson().then(function () {
+      const draftRaw = sessionStorage.getItem(draftKey);
+      if (draftRaw) {
+        try {
+          const draft = JSON.parse(draftRaw);
+          document.getElementById('lessonTitle').value = draft.title || '';
+          document.getElementById('lessonRelease').value = draft.releaseAt || '';
+          (draft.videos || []).forEach(function (v) { addVideoBlock({ title: v.title, url: v.url }, v.key); });
+          materials = draft.materials || {};
+          renderMaterialsList();
+          examsData = draft.exams || [];
+          renderExamsList();
+          return;
+        } catch (e) { /* مسودة تالفة: نتابع بالتحميل العادي */ }
+      }
+      if (lessonId && originalLesson) {
+        populateFormFromLesson(originalLesson);
+      } else {
+        renderExamsList();
+      }
+      saveDraftToStorage();
+    });
   });
 
   let originalLesson = null;
 
-  function loadExistingLesson() {
-    db.ref('competitions/' + compId + '/lessons/' + lessonId).once('value').then(function (snap) {
-      if (!snap.exists()) return;
-      const lesson = snap.val();
-      originalLesson = lesson;
-      document.getElementById('lessonTitle').value = lesson.title || '';
-      if (lesson.releaseAt) document.getElementById('lessonRelease').value = toDatetimeLocalValue(lesson.releaseAt);
-
-      const videos = lesson.videos || {};
-      Object.keys(videos).forEach(function (vid) { addVideoBlock(videos[vid], vid); });
-
-      const exams = lesson.exams || {};
-      Object.keys(exams).forEach(function (eid) { addExamBlock(exams[eid], eid); });
-
-      materials = lesson.materials || {};
-      renderMaterialsList();
+  function fetchOriginalLesson() {
+    if (!lessonId) return Promise.resolve(null);
+    return db.ref('competitions/' + compId + '/lessons/' + lessonId).once('value').then(function (snap) {
+      originalLesson = snap.exists() ? snap.val() : null;
+      return originalLesson;
     });
+  }
+
+  function populateFormFromLesson(lesson) {
+    document.getElementById('lessonTitle').value = lesson.title || '';
+    if (lesson.releaseAt) document.getElementById('lessonRelease').value = toDatetimeLocalValue(lesson.releaseAt);
+
+    const videos = lesson.videos || {};
+    Object.keys(videos).forEach(function (vid) { addVideoBlock(videos[vid], vid); });
+
+    materials = lesson.materials || {};
+    renderMaterialsList();
+
+    const exams = lesson.exams || {};
+    examsData = Object.keys(exams).map(function (eid) {
+      const e = exams[eid];
+      const questions = Object.keys(e.questions || {}).map(function (qid) {
+        const q = e.questions[qid];
+        return { key: qid, text: q.text, options: q.options, correct: q.correct, points: q.points };
+      });
+      return { localId: eid, key: eid, title: e.title, questions: questions };
+    });
+    renderExamsList();
+  }
+
+  /* ---------------- المسودة المؤقتة (لحفظ حالة النموذج أثناء التنقل لصفحة أسئلة الاختبار) ---------------- */
+  function buildDraftObject() {
+    return {
+      title: document.getElementById('lessonTitle').value,
+      releaseAt: document.getElementById('lessonRelease').value,
+      videos: Array.from(videosWrap.children).map(function (block) {
+        return { key: block.dataset.key || '', title: block.querySelector('.v-title').value, url: block.querySelector('.v-url').value };
+      }),
+      materials: materials,
+      exams: examsData
+    };
+  }
+
+  function saveDraftToStorage() {
+    try { sessionStorage.setItem(draftKey, JSON.stringify(buildDraftObject())); }
+    catch (e) { console.warn('تعذر حفظ المسودة المؤقتة', e); }
+  }
+
+  function saveDraftAndGoToExam(localId) {
+    saveDraftToStorage();
+    window.location.href = 'exam.html?comp=' + encodeURIComponent(compId) + '&lesson=' + encodeURIComponent(lessonId || 'new') + '&exam=' + encodeURIComponent(localId);
   }
 
   function toDatetimeLocalValue(ts) {
@@ -152,75 +209,48 @@
   }
   document.getElementById('addVideoBtn').addEventListener('click', function () { addVideoBlock(); });
 
-  /* ---------------- الاختبارات ---------------- */
-  function addExamBlock(existing, existingKey) {
-    examCounter++;
-    const eNum = examCounter;
-    const block = document.createElement('div');
-    block.className = 'question-builder';
-    block.style.borderColor = 'var(--primary-light)';
-    block.style.background = 'rgba(27,77,53,0.03)';
-    block.dataset.enum = eNum;
-    block.dataset.key = existingKey || '';
-
-    block.innerHTML =
-      '<div class="q-header"><h4>اختبار #<span class="e-index">' + eNum + '</span></h4>' +
-        '<button type="button" class="q-remove-btn e-remove">' + icon('trash', 'icon-sm') + ' حذف الاختبار</button></div>' +
-      '<div class="field"><label>عنوان الاختبار</label><input type="text" class="e-title" value="' + escapeHtml(existing ? existing.title : '') + '" placeholder="مثال: اختبار الدرس الأول" required></div>' +
-      '<div class="exam-questions-wrap"></div>' +
-      '<button type="button" class="btn btn-outline btn-xs add-question-btn">' + icon('plus', 'icon-sm') + ' إضافة سؤال</button>';
-
-    examsWrap.appendChild(block);
-
-    const qWrap = block.querySelector('.exam-questions-wrap');
-    let qCounter = 0;
-
-    function addQuestion(existingQ, existingQKey) {
-      qCounter++;
-      const qNum = qCounter;
-      const uid = 'e' + eNum + 'q' + qNum;
-      const qBlock = document.createElement('div');
-      qBlock.style.cssText = 'border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; margin:12px 0; background:#fff;';
-      qBlock.dataset.key = existingQKey || '';
-
-      const opts = (existingQ && existingQ.options) || ['', '', '', ''];
-      const correct = existingQ ? existingQ.correct : 0;
-      const points = existingQ ? existingQ.points : 10;
-      const text = existingQ ? existingQ.text : '';
-
-      qBlock.innerHTML =
-        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">' +
-          '<strong style="font-size:13px; color:var(--primary-dark);">سؤال #<span class="qi-index">' + qNum + '</span></strong>' +
-          '<button type="button" class="q-remove-btn qq-remove" style="font-size:11.5px;">' + icon('trash', 'icon-sm') + ' حذف</button>' +
+  /* ---------------- الاختبارات (بطاقات ملخص فقط؛ الأسئلة تُدار في exam.html) ---------------- */
+  function renderExamsList() {
+    examsWrap.innerHTML = '';
+    if (examsData.length === 0) {
+      examsWrap.innerHTML = '<p class="muted" style="font-size:13px;margin:2px 0 4px;">لا توجد اختبارات مضافة بعد.</p>';
+      return;
+    }
+    examsData.forEach(function (exam, idx) {
+      const qCount = (exam.questions || []).length;
+      const totalPoints = (exam.questions || []).reduce(function (sum, q) { return sum + (parseInt(q.points, 10) || 0); }, 0);
+      const card = document.createElement('div');
+      card.className = 'question-builder';
+      card.style.borderColor = 'var(--primary-light)';
+      card.style.background = 'rgba(27,77,53,0.03)';
+      card.innerHTML =
+        '<div class="q-header"><h4>اختبار #' + (idx + 1) + (exam.title ? (' — ' + escapeHtml(exam.title)) : ' (بلا عنوان بعد)') + '</h4>' +
+          '<button type="button" class="q-remove-btn exam-del-btn" data-local="' + exam.localId + '">' + icon('trash', 'icon-sm') + ' حذف الاختبار</button></div>' +
+        '<div style="display:flex; gap:22px; margin:6px 0 14px; font-size:13px; color:var(--text-muted);">' +
+          '<span>' + icon('listCheck', 'icon-sm') + ' عدد الأسئلة: <strong style="color:var(--primary-dark)">' + qCount + '</strong></span>' +
+          '<span>' + icon('medal', 'icon-sm') + ' إجمالي النقاط: <strong style="color:var(--primary-dark)">' + totalPoints + '</strong></span>' +
         '</div>' +
-        '<div class="field"><label>نص السؤال</label><input type="text" class="qq-text" value="' + escapeHtml(text) + '" required></div>' +
-        [0, 1, 2, 3].map(function (i) {
-          return '<div class="option-row">' +
-            '<input type="radio" name="correct-' + uid + '" class="qq-correct" value="' + i + '" ' + (correct === i ? 'checked' : '') + '>' +
-            '<span class="option-label">' + (i + 1) + '</span>' +
-            '<input type="text" class="qq-option" placeholder="نص الإجابة ' + (i + 1) + '" value="' + escapeHtml(opts[i] || '') + '" required>' +
-          '</div>';
-        }).join('') +
-        '<div class="field" style="margin:10px 0 0;"><label>نقاط الإجابة الصحيحة</label><input type="number" class="qq-points" min="1" value="' + (points || 10) + '" required style="max-width:120px;"></div>';
-
-      qWrap.appendChild(qBlock);
-      qBlock.querySelector('.qq-remove').addEventListener('click', function () {
-        qBlock.remove();
-        Array.from(qWrap.children).forEach(function (el, i) { el.querySelector('.qi-index').textContent = i + 1; });
+        '<button type="button" class="btn btn-outline btn-sm exam-edit-btn" data-local="' + exam.localId + '" style="width:auto;">' + icon('pen', 'icon-sm') + ' ' + (qCount ? 'تعديل الأسئلة' : 'إضافة الأسئلة') + '</button>';
+      examsWrap.appendChild(card);
+    });
+    examsWrap.querySelectorAll('.exam-edit-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () { saveDraftAndGoToExam(btn.dataset.local); });
+    });
+    examsWrap.querySelectorAll('.exam-del-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (!confirm('هل تريد حذف هذا الاختبار بالكامل؟')) return;
+        examsData = examsData.filter(function (e) { return e.localId !== btn.dataset.local; });
+        renderExamsList();
+        saveDraftToStorage();
       });
-    }
-
-    const existingQuestions = (existing && existing.questions) ? existing.questions : null;
-    if (existingQuestions) {
-      Object.keys(existingQuestions).forEach(function (qid) { addQuestion(existingQuestions[qid], qid); });
-    } else {
-      addQuestion();
-    }
-
-    block.querySelector('.add-question-btn').addEventListener('click', function () { addQuestion(); });
-    block.querySelector('.e-remove').addEventListener('click', function () { block.remove(); renumber(examsWrap, '.e-index'); });
+    });
   }
-  document.getElementById('addExamBtn').addEventListener('click', function () { addExamBlock(); });
+
+  document.getElementById('addExamBtn').addEventListener('click', function () {
+    const localId = 'newexam_' + Date.now();
+    examsData.push({ localId: localId, key: '', title: '', questions: [] });
+    saveDraftAndGoToExam(localId);
+  });
 
   function renumber(container, selector) {
     Array.from(container.children).forEach(function (el, i) { el.querySelector(selector).textContent = i + 1; });
@@ -295,34 +325,33 @@
     });
     if (videoError) { msg.textContent = videoError; msg.className = 'form-msg show error'; return; }
 
-    // جمع الاختبارات (نفس الأمر: نحافظ على معرف الاختبار والأسئلة القديمة)
+    // جمع الاختبارات من examsData (تُدار أسئلتها في صفحة exam.html المستقلة)
     const exams = {};
     let newExamsCount = 0;
     let newQuestionsCount = 0;
     let examError = null;
-    Array.from(examsWrap.children).forEach(function (block, ei) {
-      const eTitle = block.querySelector('.e-title').value.trim();
-      const qBlocks = Array.from(block.querySelectorAll('.exam-questions-wrap > div'));
-      if (qBlocks.length === 0) { examError = 'أضف سؤالاً واحدًا على الأقل في الاختبار #' + (ei + 1); return; }
+    examsData.forEach(function (exam, ei) {
+      if (examError) return;
+      const eTitle = (exam.title || '').trim();
+      if (!eTitle) { examError = 'أضف عنوانًا للاختبار #' + (ei + 1); return; }
+      const qList = exam.questions || [];
+      if (qList.length === 0) { examError = 'أضف سؤالاً واحدًا على الأقل في اختبار "' + eTitle + '"'; return; }
 
-      const examExistingKey = block.dataset.key;
+      const examExistingKey = exam.key || '';
       if (!examExistingKey) newExamsCount++;
 
       const questions = {};
-      for (let qi = 0; qi < qBlocks.length; qi++) {
-        const qb = qBlocks[qi];
-        const qText = qb.querySelector('.qq-text').value.trim();
-        const options = Array.from(qb.querySelectorAll('.qq-option')).map(function (i2) { return i2.value.trim(); });
-        const correctRadio = qb.querySelector('.qq-correct:checked');
-        const points = parseInt(qb.querySelector('.qq-points').value, 10) || 10;
-        if (!qText || options.some(function (o) { return !o; }) || !correctRadio) {
-          examError = 'تأكد من إكمال كل حقول السؤال #' + (qi + 1) + ' في الاختبار #' + (ei + 1);
-          return;
+      for (let qi = 0; qi < qList.length; qi++) {
+        const q = qList[qi];
+        const options = q.options || [];
+        if (!q.text || !q.text.trim() || options.length < 4 || options.some(function (o) { return !o || !String(o).trim(); }) || q.correct === null || q.correct === undefined) {
+          examError = 'تأكد من إكمال كل حقول السؤال #' + (qi + 1) + ' في اختبار "' + eTitle + '"';
+          break;
         }
-        const qExistingKey = qb.dataset.key;
+        const qExistingKey = q.key || '';
         const qKey = qExistingKey || ('q' + qi + '_' + Date.now());
         if (!qExistingKey && examExistingKey) newQuestionsCount++; // سؤال جديد أُضيف لاختبار موجود بالفعل
-        questions[qKey] = { text: qText, options: options, correct: parseInt(correctRadio.value, 10), points: points };
+        questions[qKey] = { text: q.text.trim(), options: options, correct: parseInt(q.correct, 10), points: parseInt(q.points, 10) || 10 };
       }
       if (examError) return;
 
@@ -376,6 +405,7 @@
     }
 
     writePromise.then(function () {
+      sessionStorage.removeItem(draftKey);
       window.location.href = 'competition.html?id=' + encodeURIComponent(compId);
     }).catch(function (err) {
       msg.textContent = 'تعذر حفظ المحاضرة: ' + err.message;
