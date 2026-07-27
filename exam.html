@@ -33,6 +33,11 @@
       <label for="examTitle">عنوان الاختبار</label>
       <input type="text" id="examTitle" placeholder="مثال: اختبار الدرس الأول" required>
     </div>
+    <div class="field">
+      <label for="examRelease">معاد نزول الاختبار</label>
+      <input type="datetime-local" id="examRelease" required>
+      <div class="field-hint">لن يظهر هذا الاختبار للطلاب ولن يقدروا يفتحوه قبل هذا الموعد.</div>
+    </div>
   </div>
 
   <div class="exam-summary-bar">
@@ -70,6 +75,13 @@
   const draftKey = 'awab_lesson_draft::' + compId + '::' + lessonId;
   const questionsWrap = document.getElementById('questionsWrap');
   const examTitleInput = document.getElementById('examTitle');
+  const examReleaseInput = document.getElementById('examRelease');
+
+  function toDatetimeLocalValue(ts) {
+    const d = new Date(ts);
+    const pad = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
 
   document.getElementById('backLink').href = 'lesson.html?comp=' + encodeURIComponent(compId) + (lessonId !== 'new' ? '&lesson=' + encodeURIComponent(lessonId) : '');
 
@@ -92,6 +104,7 @@
     }
 
     examTitleInput.value = examEntry.title || '';
+    examReleaseInput.value = examEntry.releaseAt || draft.releaseAt || '';
     (examEntry.questions || []).forEach(function (q) { addQuestionBlock(q, q.key); });
     updateSummary();
   });
@@ -152,6 +165,9 @@
     const title = examTitleInput.value.trim();
     if (!title) { msg.textContent = 'من فضلك اكتب عنوان الاختبار'; msg.className = 'form-msg show error'; return; }
 
+    const releaseVal = examReleaseInput.value;
+    if (!releaseVal) { msg.textContent = 'من فضلك حدد معاد نزول الاختبار'; msg.className = 'form-msg show error'; return; }
+
     const qBlocks = Array.from(questionsWrap.children);
     if (qBlocks.length === 0) { msg.textContent = 'أضف سؤالاً واحدًا على الأقل'; msg.className = 'form-msg show error'; return; }
 
@@ -171,6 +187,7 @@
     }
 
     examEntry.title = title;
+    examEntry.releaseAt = releaseVal;
     examEntry.questions = questions;
 
     const idx = draft.exams.findIndex(function (e) { return e.localId === examLocalId; });

@@ -158,7 +158,7 @@
         const q = e.questions[qid];
         return { key: qid, text: q.text, options: q.options, correct: q.correct, points: q.points };
       });
-      return { localId: eid, key: eid, title: e.title, questions: questions };
+      return { localId: eid, key: eid, title: e.title, releaseAt: e.releaseAt ? toDatetimeLocalValue(e.releaseAt) : '', questions: questions };
     });
     renderExamsList();
   }
@@ -226,9 +226,10 @@
       card.innerHTML =
         '<div class="q-header"><h4>اختبار #' + (idx + 1) + (exam.title ? (' — ' + escapeHtml(exam.title)) : ' (بلا عنوان بعد)') + '</h4>' +
           '<button type="button" class="q-remove-btn exam-del-btn" data-local="' + exam.localId + '">' + icon('trash', 'icon-sm') + ' حذف الاختبار</button></div>' +
-        '<div style="display:flex; gap:22px; margin:6px 0 14px; font-size:13px; color:var(--text-muted);">' +
+        '<div style="display:flex; gap:22px; flex-wrap:wrap; margin:6px 0 14px; font-size:13px; color:var(--text-muted);">' +
           '<span>' + icon('listCheck', 'icon-sm') + ' عدد الأسئلة: <strong style="color:var(--primary-dark)">' + qCount + '</strong></span>' +
           '<span>' + icon('medal', 'icon-sm') + ' إجمالي النقاط: <strong style="color:var(--primary-dark)">' + totalPoints + '</strong></span>' +
+          '<span>' + icon('clock', 'icon-sm') + ' ينزل: <strong style="color:var(--primary-dark)">' + (exam.releaseAt ? formatArabicDate(new Date(exam.releaseAt).getTime()) : 'لم يُحدد بعد') + '</strong></span>' +
         '</div>' +
         '<button type="button" class="btn btn-outline btn-sm exam-edit-btn" data-local="' + exam.localId + '" style="width:auto;">' + icon('pen', 'icon-sm') + ' ' + (qCount ? 'تعديل الأسئلة' : 'إضافة الأسئلة') + '</button>';
       examsWrap.appendChild(card);
@@ -248,7 +249,7 @@
 
   document.getElementById('addExamBtn').addEventListener('click', function () {
     const localId = 'newexam_' + Date.now();
-    examsData.push({ localId: localId, key: '', title: '', questions: [] });
+    examsData.push({ localId: localId, key: '', title: '', releaseAt: '', questions: [] });
     saveDraftAndGoToExam(localId);
   });
 
@@ -334,6 +335,8 @@
       if (examError) return;
       const eTitle = (exam.title || '').trim();
       if (!eTitle) { examError = 'أضف عنوانًا للاختبار #' + (ei + 1); return; }
+      if (!exam.releaseAt) { examError = 'حدد معاد نزول اختبار "' + eTitle + '"'; return; }
+      const examReleaseAt = new Date(exam.releaseAt).getTime();
       const qList = exam.questions || [];
       if (qList.length === 0) { examError = 'أضف سؤالاً واحدًا على الأقل في اختبار "' + eTitle + '"'; return; }
 
@@ -357,7 +360,7 @@
 
       const examKey = examExistingKey || ('ex' + ei + '_' + Date.now());
       const oldExam = examExistingKey && originalLesson && originalLesson.exams ? originalLesson.exams[examExistingKey] : null;
-      exams[examKey] = { title: eTitle, questions: questions, createdAt: (oldExam && oldExam.createdAt) || firebase.database.ServerValue.TIMESTAMP };
+      exams[examKey] = { title: eTitle, releaseAt: examReleaseAt, questions: questions, createdAt: (oldExam && oldExam.createdAt) || firebase.database.ServerValue.TIMESTAMP };
     });
     if (examError) { msg.textContent = examError; msg.className = 'form-msg show error'; return; }
 
