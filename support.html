@@ -34,7 +34,7 @@
     #support-root{font-family:'Cairo',sans-serif}
     body.chat-active{overflow:hidden}
 
-    .support-shell{display:flex;flex-direction:column;height:100vh}
+    .support-shell{display:flex;flex-direction:column;height:100vh;height:100dvh;min-height:0}
 
     .offline-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(246,244,238,0.9);backdrop-filter:blur(25px);z-index:99999;display:flex;justify-content:center;align-items:center;opacity:0;pointer-events:none;transform:scale(1.08);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1)}
     .offline-screen.active{opacity:1;pointer-events:all;transform:scale(1)}
@@ -50,7 +50,7 @@
     .offline-dot:nth-child(3){animation-delay:0.4s}
     @keyframes supJump{0%{transform:translateY(0)}100%{transform:translateY(-8px)}}
 
-    .dashboard-container{display:none;width:100%;flex:1;min-height:0}
+    .dashboard-container{display:none;width:100%;flex:1;min-height:0;overflow:hidden;position:relative}
     .dashboard-container.active{display:flex}
 
     .sidebar{width:380px;border-left:1px solid var(--sup-card-border);background:var(--sup-sidebar-bg);backdrop-filter:blur(20px);display:flex;flex-direction:column;height:100%}
@@ -75,11 +75,11 @@
     .unread-badge{background:var(--sup-danger);color:#fff;font-size:10px;font-weight:bold;min-width:18px;height:18px;border-radius:50%;display:flex;justify-content:center;align-items:center;padding:0 4px}
     .no-conv-msg{text-align:center;color:var(--sup-text-muted);padding:40px 20px;font-size:14px}
 
-    .chat-pane{flex:1;display:flex;flex-direction:column;height:100%;background:rgba(255,255,255,0.1);position:relative}
+    .chat-pane{flex:1;display:flex;flex-direction:column;height:100%;min-height:0;background:rgba(255,255,255,0.1);position:relative}
     .chat-placeholder{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:15px;color:var(--sup-text-muted);z-index:5;background:rgba(246,244,238,0.95)}
     .chat-placeholder i{font-size:60px;background:linear-gradient(135deg,var(--sup-primary),var(--sup-accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0.8}
 
-    .chat-header{padding:15px 25px;background:rgba(255,255,255,0.45);border-bottom:1px solid var(--sup-card-border);display:flex;align-items:center;gap:15px}
+    .chat-header{padding:15px 25px;background:rgba(255,255,255,0.45);border-bottom:1px solid var(--sup-card-border);display:flex;align-items:center;gap:15px;flex-shrink:0;position:relative;z-index:15}
     .back-btn{display:none;background:none;border:none;color:var(--sup-text);font-size:20px;cursor:pointer;width:36px;height:36px;border-radius:50%;justify-content:center;align-items:center}
     .back-btn:hover{background:var(--sup-hover-bg)}
     .header-user-info{display:flex;align-items:center;gap:12px}
@@ -89,7 +89,7 @@
     .header-user-status{font-size:11px;color:var(--sup-text-muted)}
     .header-user-status.online{color:var(--sup-success)}
 
-    .chat-messages{flex:1;padding:25px;overflow-y:auto;display:flex;flex-direction:column;gap:15px;background:var(--sup-chat-messages-bg)}
+    .chat-messages{flex:1;min-height:0;padding:25px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;display:flex;flex-direction:column;gap:15px;background:var(--sup-chat-messages-bg)}
     .chat-messages::-webkit-scrollbar{width:6px}
     .chat-messages::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:3px}
 
@@ -119,7 +119,7 @@
     .msg-file-download:hover{opacity:0.85}
     .file-name-txt{max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    .chat-input-bar{padding:20px 25px;background:rgba(255,255,255,0.45);border-top:1px solid var(--sup-card-border);display:flex;align-items:center;gap:12px;position:relative}
+    .chat-input-bar{padding:14px 25px calc(14px + env(safe-area-inset-bottom));background:rgba(255,255,255,0.9);backdrop-filter:blur(15px);border-top:1px solid var(--sup-card-border);display:flex;align-items:center;gap:12px;position:sticky;bottom:0;left:0;right:0;z-index:20;flex-shrink:0}
     .chat-input-wrapper{flex:1;display:flex;align-items:center;background:var(--sup-input-bg);border:1px solid var(--sup-input-border);border-radius:16px;padding:5px 15px}
     .chat-input-wrapper:focus-within{border-color:var(--sup-primary);box-shadow:0 0 15px var(--sup-primary-glow)}
     .chat-input-wrapper textarea{width:100%;background:none;border:none;outline:none;color:var(--sup-text);font-size:14px;resize:none;padding:8px 0;height:38px;max-height:100px;line-height:22px;font-family:'Cairo',sans-serif}
@@ -164,10 +164,28 @@
     @keyframes supSpin{to{transform:rotate(360deg)}}
 
     @media(max-width:768px){
-      .sidebar{width:100%;position:absolute;top:0;right:0;z-index:10}
-      .sidebar.hidden{display:none}
-      .chat-pane{width:100%}
+      .sidebar,.chat-pane{width:100%;height:100%}
+
+      /* الوضع الافتراضي: صفحة القائمة بس هي الموجودة، عناصر الدردشة (هيدر/رسائل/شريط الإرسال) مش موجودة في الصفحة خالص */
+      .dashboard-container .chat-pane{display:none}
+      .dashboard-container .sidebar{display:flex}
+
+      /* عند فتح محادثة: تختفي القائمة تماماً وتظهر صفحة الدردشة بس */
+      .dashboard-container.chat-open .sidebar{display:none}
+      .dashboard-container.chat-open .chat-pane{display:flex}
+
+      .chat-placeholder{display:none !important}
       .back-btn{display:flex}
+
+      .chat-header{padding:12px 15px}
+      .chat-messages{padding:15px}
+      .chat-input-bar{padding:10px 12px calc(10px + env(safe-area-inset-bottom));gap:8px}
+      .chat-input-wrapper{padding:4px 12px}
+      .chat-input-wrapper textarea{font-size:16px;height:34px}
+      .input-attachment-btn{width:40px;height:40px;font-size:19px}
+      .send-msg-btn{width:44px;height:44px;font-size:17px}
+      .attachment-menu{right:12px;bottom:75px;max-width:calc(100% - 24px)}
+      .recording-overlay{padding:0 12px}
     }
   </style>
 </head>
@@ -349,6 +367,29 @@
   let usersStatusUnsub = null;
   let chatMsgsUnsub    = null;
 
+  // ----- ثبات الشريط السفلي على الهواتف عند فتح لوحة المفاتيح -----
+  // iOS Safari لا يقلّص وحدة dvh عند ظهور الكيبورد، فبنتابع
+  // window.visualViewport يدويًا ونطبّق ارتفاعها الحقيقي على الحاوية،
+  // وبكده الشريط السفلي فوق الكيبورد دايمًا مهما كان طول المحادثة.
+  const supportShellEl = $('support-shell');
+  function syncViewportHeight() {
+    const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    supportShellEl.style.height = h + 'px';
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', syncViewportHeight);
+    window.visualViewport.addEventListener('scroll', syncViewportHeight);
+  }
+  window.addEventListener('resize', syncViewportHeight);
+  syncViewportHeight();
+
+  chatTextInput.addEventListener('focus', () => {
+    setTimeout(() => {
+      syncViewportHeight();
+      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }, 300);
+  });
+
   // ----- Offline -----
   function checkOnline() {
     navigator.onLine ? offlineScreen.classList.remove('active') : offlineScreen.classList.add('active');
@@ -371,15 +412,24 @@
   $('attach-trigger-btn').addEventListener('click', e => { e.stopPropagation(); attachmentPopupMenu.classList.toggle('active'); });
   document.addEventListener('click', () => attachmentPopupMenu.classList.remove('active'));
   $('back-to-list-btn').addEventListener('click', () => {
-    dashboardSidebar.classList.remove('hidden');
+    dashboardDiv.classList.remove('chat-open');
     chatPlaceholderEl.style.display = 'flex';
     selectedUserId = null;
-    if (chatMsgsUnsub) chatMsgsUnsub();
+    if (usersStatusUnsub) { usersStatusUnsub(); usersStatusUnsub = null; }
+    if (chatMsgsUnsub) { chatMsgsUnsub(); chatMsgsUnsub = null; }
   });
   $('close-lightbox').addEventListener('click', () => imageLightbox.classList.remove('active'));
   function openLightbox(src) { lightboxImgEl.src = src; imageLightbox.classList.add('active'); }
 
   // ----- Conversations -----
+  // ملاحظة: كل عنصر تحت 'conversations' يمثّل شخصًا مختلفًا أرسل رسالة
+  // (المفتاح = uid صاحب المحادثة)، فالقائمة بطبيعتها بتعرض كل الناس.
+  // المشكلة كانت إن سجل واحد فيه بيانات ناقصة (مثلاً بدون userId/userName
+  // أو lastMessageTimestamp) كان يسبب استثناء JavaScript أثناء renderConvItem،
+  // و forEach بيتوقف فورًا عند أول استثناء — فكانت باقي المحادثات (اللي
+  // جاية بعد السجل التالف بالترتيب) تختفي من القائمة وكأن فيه شخص واحد بس.
+  // الحل: قيم افتراضية آمنة لكل حقل + تغليف كل عنصر بـ try/catch عشان سجل
+  // واحد تالف ميكسّرش عرض باقي الناس.
   function listenConversations() {
     db.ref('conversations').on('value', snap => {
       conversationsListContainer.innerHTML = '';
@@ -388,40 +438,62 @@
         return;
       }
       const list = [];
-      snap.forEach(c => list.push(c.val()));
-      list.sort((a,b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
-      list.forEach(renderConvItem);
+      snap.forEach(c => {
+        const val = c.val() || {};
+        // لو السجل مفيهوش userId محفوظ (بيانات قديمة/ناقصة)، استخدم مفتاح
+        // العنصر نفسه كـ uid بدل ما نتجاهل الشخص ده بالكامل من القائمة.
+        if (!val.userId) val.userId = c.key;
+        list.push(val);
+      });
+      list.sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
+      list.forEach(conv => {
+        try {
+          renderConvItem(conv);
+        } catch (err) {
+          console.error('تعذر عرض إحدى المحادثات:', err, conv);
+        }
+      });
+      if (!conversationsListContainer.children.length) {
+        conversationsListContainer.innerHTML = `<div class="no-conv-msg"><i class="fa-solid fa-inbox" style="font-size:30px;margin-bottom:10px;display:block;opacity:0.5"></i>لا توجد رسائل واردة حالياً.</div>`;
+      }
     });
   }
 
   function renderConvItem(conv) {
+    const userName = conv.userName || 'مستخدم';
+    const lastMessage = conv.lastMessage != null ? conv.lastMessage : '';
+    const unread = parseInt(conv.unreadCountByAdmin, 10) || 0;
+
     const item = document.createElement('div');
     item.className = `conv-item ${selectedUserId === conv.userId ? 'active' : ''}`;
-    const initial = (conv.userName || '').trim()[0] || 'U';
-    const badge   = conv.unreadCountByAdmin > 0 ? `<span class="unread-badge">${conv.unreadCountByAdmin}</span>` : '';
-    const time    = new Date(conv.lastMessageTimestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    const initial = userName.trim().charAt(0) || 'U';
+    const badge   = unread > 0 ? `<span class="unread-badge">${unread}</span>` : '';
+    const time    = conv.lastMessageTimestamp
+      ? new Date(conv.lastMessageTimestamp).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+      : '';
     item.innerHTML = `
-      <div class="user-avatar">${initial}</div>
+      <div class="user-avatar">${escapeHtml(initial)}</div>
       <div class="conv-details">
-        <div class="conv-row"><span class="conv-name">${conv.userName}</span><span class="conv-time">${time}</span></div>
-        <div class="conv-row"><span class="conv-last-msg">${conv.lastMessage}</span>${badge}</div>
+        <div class="conv-row"><span class="conv-name">${escapeHtml(userName)}</span><span class="conv-time">${escapeHtml(time)}</span></div>
+        <div class="conv-row"><span class="conv-last-msg">${escapeHtml(lastMessage)}</span>${badge}</div>
       </div>`;
     item.addEventListener('click', () => {
       document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
       item.classList.add('active');
-      openChat(conv.userId, conv.userName);
+      openChat(conv.userId, userName);
     });
     conversationsListContainer.appendChild(item);
   }
 
   // ----- Open Chat -----
   function openChat(userId, userName) {
+    userName = userName || 'مستخدم';
     selectedUserId   = userId;
     selectedUserName = userName;
     chatPlaceholderEl.style.display = 'none';
-    if (window.innerWidth <= 768) dashboardSidebar.classList.add('hidden');
+    dashboardDiv.classList.add('chat-open');
     chatHeaderName.textContent   = userName;
-    chatHeaderAvatar.textContent = userName.trim()[0];
+    chatHeaderAvatar.textContent = userName.trim().charAt(0) || 'U';
     chatHeaderStatus.className   = 'header-user-status';
     chatHeaderStatus.textContent = 'غير متصل';
 
@@ -564,7 +636,10 @@
     const msgsCb = snap => {
       chatMessagesContainer.innerHTML = '';
       if (snap.exists()) {
-        snap.forEach(c => renderMsg(c.val()));
+        snap.forEach(c => {
+          try { renderMsg(c.val() || {}); }
+          catch (err) { console.error('تعذر عرض رسالة:', err, c.val()); }
+        });
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
       }
     };
@@ -593,7 +668,7 @@
       a.href = msg.fileUrl; a.download = msg.fileName||'file'; a.target = '_blank';
       a.className = 'msg-file-download';
       a.innerHTML = `<i class="fa-solid fa-file-arrow-down"></i>
-        <div><div class="file-name-txt">${msg.fileName||'ملف مرفق'}</div>
+        <div><div class="file-name-txt">${escapeHtml(msg.fileName || 'ملف مرفق')}</div>
         <span style="font-size:10px;opacity:0.6">اضغط للتحميل</span></div>`;
       msgDiv.appendChild(a);
     }
