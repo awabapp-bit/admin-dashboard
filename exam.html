@@ -24,7 +24,7 @@
 <main class="admin-page" style="max-width:760px;">
   <a class="back-link" id="backLink" href="lesson.html">إلغاء والرجوع لبيانات المحاضرة</a>
   <h1 class="page-title">أسئلة الاختبار</h1>
-  <p class="page-sub">أضف عنوان الاختبار ثم أسئلته؛ يظهر عدد الأسئلة ومجموع النقاط تلقائيًا أدناه</p>
+  <p class="page-sub">أضف عنوان الاختبار، مدته، ثم أسئلته</p>
 
   <div class="form-msg" id="formMsg"></div>
 
@@ -34,15 +34,20 @@
       <input type="text" id="examTitle" placeholder="مثال: اختبار الدرس الأول" required>
     </div>
     <div class="field">
+      <label for="examDuration">مدة الاختبار (بالدقائق)</label>
+      <input type="number" id="examDuration" placeholder="مثال: 10" min="1" value="10" required>
+    </div>
+    <div class="field">
       <label for="examRelease">معاد نزول الاختبار</label>
       <input type="datetime-local" id="examRelease" required>
-      <div class="field-hint">لن يظهر هذا الاختبار للطلاب ولن يقدروا يفتحوه قبل هذا الموعد.</div>
+      <div class="field-hint">لن يظهر هذا الاختبار للطلاب قبل هذا الموعد.</div>
     </div>
   </div>
 
   <div class="exam-summary-bar">
     <div class="exam-summary-item" id="qCountItem">عدد الأسئلة: <span class="num" id="qCountNum">0</span></div>
     <div class="exam-summary-item" id="pointsItem">إجمالي النقاط: <span class="num" id="pointsNum">0</span></div>
+    <div class="exam-summary-item" id="durationItem">المدة: <span class="num" id="durationDisplay">0</span> دقيقة</div>
   </div>
 
   <div id="questionsWrap"></div>
@@ -64,6 +69,7 @@
   document.getElementById('saveExamBtn').innerHTML = icon('floppyDisk') + ' حفظ والعودة لبيانات المحاضرة';
   document.getElementById('qCountItem').innerHTML = icon('listCheck', 'icon-sm') + ' عدد الأسئلة: <span class="num" id="qCountNum">0</span>';
   document.getElementById('pointsItem').innerHTML = icon('medal', 'icon-sm') + ' إجمالي النقاط: <span class="num" id="pointsNum">0</span>';
+  document.getElementById('durationItem').innerHTML = icon('clock', 'icon-sm') + ' المدة: <span class="num" id="durationDisplay">0</span> دقيقة';
 
   const params   = new URLSearchParams(window.location.search);
   const compId   = params.get('comp');
@@ -76,6 +82,7 @@
   const questionsWrap = document.getElementById('questionsWrap');
   const examTitleInput = document.getElementById('examTitle');
   const examReleaseInput = document.getElementById('examRelease');
+  const examDurationInput = document.getElementById('examDuration');
 
   function toDatetimeLocalValue(ts) {
     const d = new Date(ts);
@@ -99,11 +106,12 @@
     draft.exams = draft.exams || [];
     examEntry = draft.exams.find(function (e) { return e.localId === examLocalId; });
     if (!examEntry) {
-      examEntry = { localId: examLocalId, key: '', title: '', questions: [] };
+      examEntry = { localId: examLocalId, key: '', title: '', duration: 10, questions: [] };
       draft.exams.push(examEntry);
     }
 
     examTitleInput.value = examEntry.title || '';
+    examDurationInput.value = examEntry.duration || 10;
     examReleaseInput.value = examEntry.releaseAt || draft.releaseAt || '';
     (examEntry.questions || []).forEach(function (q) { addQuestionBlock(q, q.key); });
     updateSummary();
@@ -156,7 +164,9 @@
       return sum + (parseInt(b.querySelector('.qq-points').value, 10) || 0);
     }, 0);
     document.getElementById('pointsNum').textContent = total;
+    document.getElementById('durationDisplay').textContent = examDurationInput.value || 0;
   }
+  examDurationInput.addEventListener('input', updateSummary);
 
   document.getElementById('saveExamBtn').addEventListener('click', function () {
     const msg = document.getElementById('formMsg');
@@ -165,11 +175,14 @@
     const title = examTitleInput.value.trim();
     if (!title) { msg.textContent = 'من فضلك اكتب عنوان الاختبار'; msg.className = 'form-msg show error'; return; }
 
+    const duration = parseInt(examDurationInput.value, 10);
+    if (!duration || duration < 1) { msg.textContent = 'من فضلك حدد مدة صحيحة (أكبر من 0)'; msg.className = 'form-msg show error'; return; }
+
     const releaseVal = examReleaseInput.value;
     if (!releaseVal) { msg.textContent = 'من فضلك حدد معاد نزول الاختبار'; msg.className = 'form-msg show error'; return; }
 
     const qBlocks = Array.from(questionsWrap.children);
-    if (qBlocks.length === 0) { msg.textContent = 'أضف سؤالاً واحدًا على الأقل'; msg.className = 'form-msg show error'; return; }
+    if (qBlocks.length === 0) { msg.textContent = 'أضف سؤالاً واحداً على الأقل'; msg.className = 'form-msg show error'; return; }
 
     const questions = [];
     for (let i = 0; i < qBlocks.length; i++) {
@@ -187,6 +200,7 @@
     }
 
     examEntry.title = title;
+    examEntry.duration = duration;
     examEntry.releaseAt = releaseVal;
     examEntry.questions = questions;
 

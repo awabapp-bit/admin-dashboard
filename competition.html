@@ -19,7 +19,8 @@
       <h1 class="page-title" id="compTitle">جارٍ التحميل...</h1>
       <p class="page-sub" id="compDesc"></p>
     </div>
-    <div style="display:flex; gap:8px;">
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn btn-outline" id="editContentBtn" style="width:auto;">تعديل المحتوى</button>
       <a class="btn btn-outline" id="participantsLink" href="#" style="width:auto;">المشتركون والنقاط</a>
       <a class="btn btn-gold" id="addLessonLink" href="#" style="width:auto;">إضافة محاضرة جديدة</a>
     </div>
@@ -29,6 +30,30 @@
     <div class="center-loading"><div class="loader"></div></div>
   </div>
 </main>
+
+<!-- نافذة تعديل المحتوى -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <button class="modal-close" id="closeEditModal"></button>
+    <h3>تعديل المحتوى</h3>
+    <form id="editForm">
+      <div class="field">
+        <label>الاسم</label>
+        <input type="text" id="editTitle" required>
+      </div>
+      <div class="field">
+        <label>الوصف</label>
+        <textarea id="editDesc" rows="4"></textarea>
+      </div>
+      <div class="field">
+        <label>رابط صورة الغلاف</label>
+        <input type="url" id="editCover">
+      </div>
+      <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+    </form>
+    <div class="form-msg" id="editMsg"></div>
+  </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -40,6 +65,7 @@
   document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل المحتوى';
   document.getElementById('participantsLink').innerHTML = icon('medal', 'icon-sm') + ' المشتركون والنقاط';
   document.getElementById('addLessonLink').innerHTML = icon('plus') + ' إضافة محاضرة جديدة';
+  document.getElementById('editContentBtn').innerHTML = icon('pen') + ' تعديل المحتوى';
 
   const params = new URLSearchParams(window.location.search);
   const compId = params.get('id');
@@ -53,7 +79,8 @@
   });
 
   function loadCompetition() {
-    db.ref('competitions/' + compId).on('value', function (snap) {
+    const compRef = db.ref('competitions/' + compId);
+    compRef.on('value', function (snap) {
       if (!snap.exists()) { window.location.href = 'home.html'; return; }
       const comp = snap.val();
       document.getElementById('compTitle').textContent = comp.title || 'بدون عنوان';
@@ -62,15 +89,52 @@
     });
   }
 
+  // ===== نافذة تعديل المحتوى =====
+  const editModal = document.getElementById('editModal');
+  const closeEditBtn = document.getElementById('closeEditModal');
+  closeEditBtn.innerHTML = icon('xmark');
+  closeEditBtn.addEventListener('click', function () { editModal.classList.remove('open'); });
+  editModal.addEventListener('click', function (e) { if (e.target === editModal) editModal.classList.remove('open'); });
+
+  document.getElementById('editContentBtn').addEventListener('click', function () {
+    const compRef = db.ref('competitions/' + compId);
+    compRef.once('value').then(function (snap) {
+      const c = snap.val();
+      document.getElementById('editTitle').value = c.title || '';
+      document.getElementById('editDesc').value = c.description || '';
+      document.getElementById('editCover').value = c.coverUrl || '';
+      editModal.classList.add('open');
+    });
+  });
+
+  document.getElementById('editForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const msg = document.getElementById('editMsg');
+    msg.classList.remove('show');
+    const title = document.getElementById('editTitle').value.trim();
+    const description = document.getElementById('editDesc').value.trim();
+    const coverUrl = document.getElementById('editCover').value.trim();
+    if (!title) { msg.textContent = 'الاسم مطلوب'; msg.className = 'form-msg show error'; return; }
+    db.ref('competitions/' + compId).update({
+      title: title, description: description, coverUrl: coverUrl || null
+    }).then(function () {
+      msg.textContent = 'تم التعديل بنجاح';
+      msg.className = 'form-msg show success';
+      setTimeout(function () { editModal.classList.remove('open'); }, 1000);
+    }).catch(function (err) {
+      msg.textContent = 'تعذر التعديل: ' + err.message;
+      msg.className = 'form-msg show error';
+    });
+  });
+
+  // ===== عرض المحاضرات =====
   function renderLessons(lessons) {
     const wrap = document.getElementById('lessonsWrap');
     const ids = Object.keys(lessons);
-
     if (ids.length === 0) {
       wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon('video', 'icon-xl') + '</div><p>لا توجد محاضرات بعد. أضِف المحاضرة الأولى.</p></div>';
       return;
     }
-
     const now = Date.now();
     let html = '';
     ids.forEach(function (lessonId, index) {
