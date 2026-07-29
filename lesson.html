@@ -93,8 +93,8 @@
   if (!compId) window.location.href = 'home.html';
 
   let videoCounter = 0;
-  let materials = {};
-  let examsData = [];
+  let materials = {}; // { materialId: { name, url, type, size } }
+  let examsData = []; // [{ localId, key, title, questions:[{key,text,options,correct,points}] }]
   const videosWrap = document.getElementById('videosWrap');
   const examsWrap = document.getElementById('examsWrap');
   const draftKey = 'awab_lesson_draft::' + compId + '::' + (lessonId || 'new');
@@ -120,7 +120,7 @@
           examsData = draft.exams || [];
           renderExamsList();
           return;
-        } catch (e) { /* مسودة تالفة */ }
+        } catch (e) { /* مسودة تالفة: نتابع بالتحميل العادي */ }
       }
       if (lessonId && originalLesson) {
         populateFormFromLesson(originalLesson);
@@ -158,11 +158,12 @@
         const q = e.questions[qid];
         return { key: qid, text: q.text, options: q.options, correct: q.correct, points: q.points };
       });
-      return { localId: eid, key: eid, title: e.title, releaseAt: e.releaseAt ? toDatetimeLocalValue(e.releaseAt) : '', duration: e.duration || 10, questions: questions };
+      return { localId: eid, key: eid, title: e.title, releaseAt: e.releaseAt ? toDatetimeLocalValue(e.releaseAt) : '', questions: questions };
     });
     renderExamsList();
   }
 
+  /* ---------------- المسودة المؤقتة (لحفظ حالة النموذج أثناء التنقل لصفحة أسئلة الاختبار) ---------------- */
   function buildDraftObject() {
     return {
       title: document.getElementById('lessonTitle').value,
@@ -191,7 +192,7 @@
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
-  /* الفيديوهات */
+  /* ---------------- الفيديوهات ---------------- */
   function addVideoBlock(existing, existingKey) {
     videoCounter++;
     const num = videoCounter;
@@ -208,7 +209,7 @@
   }
   document.getElementById('addVideoBtn').addEventListener('click', function () { addVideoBlock(); });
 
-  /* الاختبارات */
+  /* ---------------- الاختبارات (بطاقات ملخص فقط؛ الأسئلة تُدار في exam.html) ---------------- */
   function renderExamsList() {
     examsWrap.innerHTML = '';
     if (examsData.length === 0) {
@@ -228,7 +229,6 @@
         '<div style="display:flex; gap:22px; flex-wrap:wrap; margin:6px 0 14px; font-size:13px; color:var(--text-muted);">' +
           '<span>' + icon('listCheck', 'icon-sm') + ' عدد الأسئلة: <strong style="color:var(--primary-dark)">' + qCount + '</strong></span>' +
           '<span>' + icon('medal', 'icon-sm') + ' إجمالي النقاط: <strong style="color:var(--primary-dark)">' + totalPoints + '</strong></span>' +
-          '<span>' + icon('clock', 'icon-sm') + ' المدة: <strong style="color:var(--primary-dark)">' + (exam.duration || 10) + ' دقيقة</strong></span>' +
           '<span>' + icon('clock', 'icon-sm') + ' ينزل: <strong style="color:var(--primary-dark)">' + (exam.releaseAt ? formatArabicDate(new Date(exam.releaseAt).getTime()) : 'لم يُحدد بعد') + '</strong></span>' +
         '</div>' +
         '<button type="button" class="btn btn-outline btn-sm exam-edit-btn" data-local="' + exam.localId + '" style="width:auto;">' + icon('pen', 'icon-sm') + ' ' + (qCount ? 'تعديل الأسئلة' : 'إضافة الأسئلة') + '</button>';
@@ -249,7 +249,7 @@
 
   document.getElementById('addExamBtn').addEventListener('click', function () {
     const localId = 'newexam_' + Date.now();
-    examsData.push({ localId: localId, key: '', title: '', releaseAt: '', duration: 10, questions: [] });
+    examsData.push({ localId: localId, key: '', title: '', releaseAt: '', questions: [] });
     saveDraftAndGoToExam(localId);
   });
 
@@ -257,7 +257,7 @@
     Array.from(container.children).forEach(function (el, i) { el.querySelector(selector).textContent = i + 1; });
   }
 
-  /* المرفقات */
+  /* ---------------- المرفقات (روابط PDF / صور) ---------------- */
   document.getElementById('addMaterialBtn').addEventListener('click', function () {
     const nameInput = document.getElementById('materialName');
     const urlInput = document.getElementById('materialUrl');
@@ -299,7 +299,7 @@
     });
   }
 
-  /* حفظ المحاضرة */
+  /* ---------------- الحفظ ---------------- */
   document.getElementById('lessonForm').addEventListener('submit', function (e) {
     e.preventDefault();
     const msg = document.getElementById('formMsg');
@@ -310,7 +310,9 @@
     if (!releaseInput) { msg.textContent = 'من فضلك حدد معاد نشر المحاضرة'; msg.className = 'form-msg show error'; return; }
     const releaseAt = new Date(releaseInput).getTime();
 
+    // جمع الفيديوهات (نحافظ على نفس المعرف القديم عند التعديل حتى لا تنكسر روابط الإشعارات وتقدّم الطلاب)
     const videos = {};
+    let newVideosCount = 0;
     let videoError = null;
     Array.from(videosWrap.children).forEach(function (block, i) {
       const vTitle = block.querySelector('.v-title').value.trim();
@@ -318,12 +320,16 @@
       if (!extractYouTubeId(vUrl)) { videoError = 'رابط اليوتيوب غير صحيح في الفيديو #' + (i + 1); return; }
       const existingKey = block.dataset.key;
       const key = existingKey || ('v' + i + '_' + Date.now());
+      if (!existingKey) newVideosCount++;
       const oldVideo = existingKey && originalLesson && originalLesson.videos ? originalLesson.videos[existingKey] : null;
       videos[key] = { title: vTitle, url: vUrl, createdAt: (oldVideo && oldVideo.createdAt) || firebase.database.ServerValue.TIMESTAMP };
     });
     if (videoError) { msg.textContent = videoError; msg.className = 'form-msg show error'; return; }
 
+    // جمع الاختبارات من examsData (تُدار أسئلتها في صفحة exam.html المستقلة)
     const exams = {};
+    let newExamsCount = 0;
+    let newQuestionsCount = 0;
     let examError = null;
     examsData.forEach(function (exam, ei) {
       if (examError) return;
@@ -332,9 +338,11 @@
       if (!exam.releaseAt) { examError = 'حدد معاد نزول اختبار "' + eTitle + '"'; return; }
       const examReleaseAt = new Date(exam.releaseAt).getTime();
       const qList = exam.questions || [];
-      if (qList.length === 0) { examError = 'أضف سؤالاً واحداً على الأقل في اختبار "' + eTitle + '"'; return; }
+      if (qList.length === 0) { examError = 'أضف سؤالاً واحدًا على الأقل في اختبار "' + eTitle + '"'; return; }
 
       const examExistingKey = exam.key || '';
+      if (!examExistingKey) newExamsCount++;
+
       const questions = {};
       for (let qi = 0; qi < qList.length; qi++) {
         const q = qList[qi];
@@ -345,25 +353,19 @@
         }
         const qExistingKey = q.key || '';
         const qKey = qExistingKey || ('q' + qi + '_' + Date.now());
+        if (!qExistingKey && examExistingKey) newQuestionsCount++; // سؤال جديد أُضيف لاختبار موجود بالفعل
         questions[qKey] = { text: q.text.trim(), options: options, correct: parseInt(q.correct, 10), points: parseInt(q.points, 10) || 10 };
       }
       if (examError) return;
 
       const examKey = examExistingKey || ('ex' + ei + '_' + Date.now());
       const oldExam = examExistingKey && originalLesson && originalLesson.exams ? originalLesson.exams[examExistingKey] : null;
-      // ✅ إضافة duration هنا
-      exams[examKey] = {
-        title: eTitle,
-        releaseAt: examReleaseAt,
-        duration: exam.duration || 10,
-        questions: questions,
-        createdAt: (oldExam && oldExam.createdAt) || firebase.database.ServerValue.TIMESTAMP
-      };
+      exams[examKey] = { title: eTitle, releaseAt: examReleaseAt, questions: questions, createdAt: (oldExam && oldExam.createdAt) || firebase.database.ServerValue.TIMESTAMP };
     });
     if (examError) { msg.textContent = examError; msg.className = 'form-msg show error'; return; }
 
-    if (Object.keys(videos).length === 0 && Object.keys(exams).length === 0) {
-      msg.textContent = 'أضف فيديو واحدًا على الأقل أو اختبارًا واحدًا على الأقل';
+    if (Object.keys(videos).length === 0 && Object.keys(exams).length === 0 && Object.keys(materials).length === 0) {
+      msg.textContent = 'أضف فيديو واحدًا على الأقل أو اختبارًا واحدًا على الأقل أو مرفقًا واحدًا على الأقل';
       msg.className = 'form-msg show error';
       return;
     }
@@ -372,21 +374,37 @@
     saveBtn.disabled = true;
     saveBtn.textContent = 'جارٍ الحفظ...';
 
-    const lessonData = {
-      title: title,
-      releaseAt: releaseAt,
-      videos: videos,
-      exams: exams,
-      materials: materials,
-      updatedAt: firebase.database.ServerValue.TIMESTAMP
-    };
+    const lessonData = { title: title, releaseAt: releaseAt, videos: videos, exams: exams, materials: materials, updatedAt: firebase.database.ServerValue.TIMESTAMP };
 
     let writePromise;
     if (lessonId) {
-      writePromise = db.ref('competitions/' + compId + '/lessons/' + lessonId).update(lessonData);
+      writePromise = db.ref('competitions/' + compId + '/lessons/' + lessonId).update(lessonData).then(function () {
+        // لو المحاضرة كانت منشورة بالفعل وأُضيف لها فيديو أو سؤال جديد، نبلّغ المشتركين
+        const alreadyPublished = originalLesson && originalLesson.releaseAt && originalLesson.releaseAt <= Date.now();
+        if (alreadyPublished && newVideosCount > 0) {
+          notifyEnrolledUsers('lesson', 'تمت إضافة فيديو جديد', 'محاضرة "' + title + '" فيها فيديو جديد');
+        }
+        if (alreadyPublished && (newExamsCount > 0 || newQuestionsCount > 0)) {
+          notifyEnrolledUsers('exam', 'تمت إضافة سؤال جديد', 'محاضرة "' + title + '" فيها سؤال جديد');
+        }
+      });
     } else {
       lessonData.createdAt = firebase.database.ServerValue.TIMESTAMP;
-      writePromise = db.ref('competitions/' + compId + '/lessons').push(lessonData);
+      writePromise = db.ref('competitions/' + compId + '/lessons').push(lessonData).then(function (ref) {
+        // لو المحاضرة متاحة دلوقتي (معادها وصل أو فات)، نبلّغ المشتركين فورًا ونسجّل إنهم اتبعتلهم
+        // إشعار عشان النظام اللي في موقع المستخدم (checkAndNotifyReleasedLessons) محايبعتش لهم تاني.
+        // لو معادها لسه في المستقبل، مش هنبعت دلوقتي؛ هيتبعت تلقائيًا لما الطالب يفتح الموقع بعد المعاد.
+        if (releaseAt <= Date.now()) {
+          notifyEnrolledUsers('lesson', 'تمت إضافة محاضرة جديدة', lessonData.title || 'محاضرة جديدة');
+          db.ref('enrollments/' + compId).once('value').then(function (snap) {
+            const enrolled = snap.val() || {};
+            Object.keys(enrolled).forEach(function (uid) {
+              db.ref('notifiedLessons/' + uid + '/' + compId + '_' + ref.key).set(true);
+            });
+          });
+        }
+        return ref;
+      });
     }
 
     writePromise.then(function () {
@@ -399,6 +417,40 @@
       saveBtn.innerHTML = icon('floppyDisk') + ' حفظ المحاضرة';
     });
   });
+
+  /* يرسل إشعارًا لكل المشتركين الفعليين في هذا الكورس/المسابقة */
+  function notifyEnrolledUsers(type, title, body) {
+    db.ref('enrollments/' + compId).once('value').then(function (snap) {
+      const enrolled = snap.val() || {};
+      const uids = Object.keys(enrolled);
+      if (uids.length === 0) {
+        console.warn('لا يوجد مشتركون في هذا الكورس (enrollments/' + compId + ' فاضية) — لن يصل إشعار لأي أحد.');
+        return;
+      }
+      let failCount = 0;
+      const promises = uids.map(function (uid) {
+        return db.ref('notifications/' + uid).push({
+          type: type,
+          title: title,
+          body: body,
+          link: 'competition.html?id=' + compId,
+          read: false,
+          createdAt: firebase.database.ServerValue.TIMESTAMP
+        }).catch(function (err) {
+          failCount++;
+          console.error('تعذر إرسال إشعار للمستخدم ' + uid + ':', err);
+        });
+      });
+      Promise.all(promises).then(function () {
+        if (failCount > 0) {
+          alert('تنبيه: تعذر إرسال الإشعار لـ ' + failCount + ' من ' + uids.length + ' مشترك. الأرجح إن قواعد Firebase (Realtime Database Rules) القديمة لسه شغالة ولازم تنسخ محتوى ملف firebase-rules.json وتلزقه في Firebase Console > Realtime Database > Rules ثم Publish.');
+        }
+      });
+    }).catch(function (err) {
+      console.error('تعذر قراءة قائمة المشتركين:', err);
+      alert('تعذر قراءة قائمة المشتركين في هذا الكورس (enrollments/' + compId + '): ' + err.message);
+    });
+  }
 </script>
 </body>
 </html>
