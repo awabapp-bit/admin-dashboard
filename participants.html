@@ -34,7 +34,7 @@
   <div class="modal modal-wide">
     <button type="button" class="modal-close" id="retakeModalClose"><span class="icon"></span></button>
     <h3 id="retakeModalTitle">إدارة محاولات الاختبار</h3>
-    <p class="page-sub" style="margin-top:-10px;">فتح أي اختبار لإعادة المحاولة متاح لأي مشترك، سواء نجح، فشل، أو جمع نقاطًا بالفعل. عند إعادة المحاولة، تُحتسب أعلى نتيجة بين المحاولتين تلقائيًا ولا تُفقد نتيجة المستخدم الأفضل.</p>
+    <p class="page-sub" style="margin-top:-10px;">فتح أي اختبار لإعادة المحاولة متاح دايمًا لأي مشترك مهما كانت حالته (لم يبدأ، جارٍ، تم تسليمه، مقفول، عليه مخالفات أو لأ). عند إعادة المحاولة، تُحتسب أعلى نتيجة بين المحاولتين تلقائيًا ولا تُفقد نتيجة المستخدم الأفضل.</p>
     <div id="retakeModalBody"><div class="center-loading" style="min-height:100px;"><div class="loader"></div></div></div>
   </div>
 </div>
@@ -192,17 +192,21 @@
           '</div>' +
         '</div>' +
         '<div class="actions">' +
-          '<button type="button" class="btn btn-gold btn-sm reopen-exam-btn" data-lesson="' + row.lessonId + '" data-exam="' + row.examId + '" ' + (row.attempt ? '' : 'disabled style="opacity:.45;"') + '>' + icon('rotateLeft', 'icon-sm') + ' فتح لإعادة المحاولة</button>' +
+          '<button type="button" class="btn btn-gold btn-sm reopen-exam-btn" data-lesson="' + row.lessonId + '" data-exam="' + row.examId + '">' + icon('rotateLeft', 'icon-sm') + ' فتح لإعادة المحاولة</button>' +
         '</div>' +
       '</div>';
     }).join('');
 
     retakeBody.querySelectorAll('.reopen-exam-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        if (!confirm('فتح هذا الاختبار لإعادة المحاولة؟ سيقدر المستخدم يبدأ محاولة جديدة، وهتُحتسب أعلى نتيجة بين المحاولتين تلقائيًا.')) return;
+        if (!confirm('فتح هذا الاختبار لإعادة المحاولة؟ سيقدر المستخدم يبدأ محاولة جديدة بغض النظر عن أي حالة سابقة (لم يبدأ / مقفول / عليه مخالفات أو لأ)، وهتُحتسب أعلى نتيجة بين المحاولتين تلقائيًا.')) return;
         const lid = btn.dataset.lesson, eid = btn.dataset.exam;
+        const examRef = compId + '_' + lid + '_' + eid;
         btn.disabled = true;
-        resetExamAttempt(compId, lid, eid, currentModalUid).then(function () {
+        Promise.all([
+          resetExamAttempt(compId, lid, eid, currentModalUid),
+          clearExamViolations(currentModalUid, examRef)
+        ]).then(function () {
           loadRetakeData(currentModalUid);
         }).catch(function (err) {
           alert('تعذر فتح الاختبار: ' + err.message);

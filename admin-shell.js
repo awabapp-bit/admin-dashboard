@@ -227,6 +227,25 @@ function resetExamAttempt(compId, lessonId, examId, uid) {
 window.resetExamAttempt = resetExamAttempt;
 
 /**
+ * حذف مخالفات مستخدم معين الخاصة باختبار معيّن فقط (examRef بصيغة
+ * compId_lessonId_examId)، من غير ما تمسح باقي مخالفاته في اختبارات
+ * تانية. مستخدمة عند "فتح اختبار لإعادة المحاولة" عشان محدش يتمنع من
+ * محاولة جديدة بسبب مخالفات مسجلة على نفس الاختبار.
+ */
+function clearExamViolations(uid, examRef) {
+  return db.ref('violations/' + uid).once('value').then(function (snap) {
+    const all = snap.val() || {};
+    const updates = {};
+    Object.keys(all).forEach(function (vid) {
+      if (all[vid] && all[vid].examRef === examRef) updates[vid] = null;
+    });
+    if (Object.keys(updates).length === 0) return Promise.resolve();
+    return db.ref('violations/' + uid).update(updates);
+  });
+}
+window.clearExamViolations = clearExamViolations;
+
+/**
  * حذف جميع مخالفات مستخدم معين.
  */
 function clearUserViolations(uid) {
