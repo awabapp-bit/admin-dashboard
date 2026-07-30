@@ -39,23 +39,28 @@ function renderAdminNav(activePage) {
 
   nav.innerHTML =
     '<div class="admin-nav-inner">' +
-      '<div class="admin-brand">' +
-        '<img src="logo.png" alt="" onerror="this.style.display=\'none\'">' +
-        icon('gear', 'icon-md') +
-        '<div class="admin-brand-text">' +
-          '<h2>لوحة تحكم أواب</h2>' +
-          '<span>AWWAB ADMIN PANEL</span>' +
+      '<div class="admin-brand-row">' +
+        '<div class="admin-brand">' +
+          '<img src="logo.png" alt="" onerror="this.style.display=\'none\'">' +
+          icon('gear', 'icon-md') +
+          '<div class="admin-brand-text">' +
+            '<h2>لوحة تحكم أواب</h2>' +
+            '<span>AWWAB ADMIN PANEL</span>' +
+          '</div>' +
         '</div>' +
+        '<button class="admin-collapse-toggle" id="adminCollapseToggle" type="button" aria-label="طي القائمة الجانبية" aria-expanded="true" title="طي/فتح القائمة">' +
+          icon('chevronLeft', 'icon-sm') +
+        '</button>' +
       '</div>' +
       '<button class="admin-menu-toggle" id="adminMenuToggle" type="button" aria-label="فتح القائمة" aria-expanded="false" aria-controls="adminLinks">' +
         '<span class="hamburger-lines"><span></span><span></span><span></span></span>' +
       '</button>' +
       '<div class="admin-links" id="adminLinks">' +
-        '<a href="home.html" class="' + (activePage === 'home' ? 'active' : '') + '">' + icon('gear', 'icon-sm') + ' المسابقات</a>' +
-        '<a href="users.html" class="' + (activePage === 'users' ? 'active' : '') + '">' + icon('users', 'icon-sm') + ' الحسابات</a>' +
-        '<a href="violations.html" class="' + (activePage === 'violations' ? 'active' : '') + '">' + icon('exclamation-triangle', 'icon-sm') + ' المخالفات</a>' +
-        '<a href="support.html" class="' + (activePage === 'support' ? 'active' : '') + '">' + icon('headset', 'icon-sm') + ' الدعم الفني</a>' +
-        '<button class="danger-link" id="adminLogoutBtn">' + icon('logout', 'icon-sm') + ' تسجيل الخروج</button>' +
+        '<a href="home.html" title="المسابقات" class="' + (activePage === 'home' ? 'active' : '') + '">' + icon('gear', 'icon-sm') + '<span class="link-label">المسابقات</span></a>' +
+        '<a href="users.html" title="الحسابات" class="' + (activePage === 'users' ? 'active' : '') + '">' + icon('users', 'icon-sm') + '<span class="link-label">الحسابات</span></a>' +
+        '<a href="violations.html" title="المخالفات" class="' + (activePage === 'violations' ? 'active' : '') + '">' + icon('bell', 'icon-sm') + '<span class="link-label">المخالفات</span></a>' +
+        '<a href="support.html" title="الدعم الفني" class="' + (activePage === 'support' ? 'active' : '') + '">' + icon('headset', 'icon-sm') + '<span class="link-label">الدعم الفني</span></a>' +
+        '<button class="danger-link" id="adminLogoutBtn" title="تسجيل الخروج">' + icon('logout', 'icon-sm') + '<span class="link-label">تسجيل الخروج</span></button>' +
       '</div>' +
     '</div>' +
     '<div class="admin-sidebar-overlay" id="adminSidebarOverlay"></div>';
@@ -65,6 +70,31 @@ function renderAdminNav(activePage) {
   });
 
   setupAdminMobileNav();
+  setupAdminSidebarCollapse();
+}
+
+/**
+ * يفعّل زر السهم أعلى القائمة الجانبية ليطويها لعرض الأيقونات فقط
+ * (على شاشات سطح المكتب)، ويحفظ حالة الطي في localStorage عشان تفضل
+ * زي ما هي بين الصفحات وبعد تحديث المتصفح.
+ */
+function setupAdminSidebarCollapse() {
+  const toggle = document.getElementById('adminCollapseToggle');
+  if (!toggle) return;
+
+  function applyState(collapsed) {
+    document.body.classList.toggle('sidebar-collapsed', collapsed);
+    toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+  }
+
+  const saved = localStorage.getItem('adminSidebarCollapsed') === '1';
+  applyState(saved);
+
+  toggle.addEventListener('click', function () {
+    const collapsed = !document.body.classList.contains('sidebar-collapsed');
+    applyState(collapsed);
+    localStorage.setItem('adminSidebarCollapsed', collapsed ? '1' : '0');
+  });
 }
 
 /**

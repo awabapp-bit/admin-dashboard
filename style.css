@@ -2,27 +2,48 @@
    منصة أواب الإلكترونية — نظام التصميم المشترك
    =================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --primary: #1B4D35;
-  --primary-dark: #123424;
-  --primary-light: #256B49;
-  --gold: #A8782A;
-  --gold-light: #C99A4A;
-  --gold-pale: #F3E7CF;
-  --bg: #F6F4EE;
+  /* ---- الهوية الأساسية ---- */
+  --primary: #1D4ED8;
+  --primary-dark: #0B1E4D;
+  --primary-darker: #071230;
+  --primary-light: #4C7EF3;
+  --primary-rgb: 29, 78, 216;
+
+  --gold: #B8790A;
+  --gold-light: #DDA23D;
+  --gold-pale: #FBF2DF;
+  --gold-rgb: 184, 121, 10;
+
+  /* ---- المحايدات (Slate) ---- */
+  --bg: #F3F5F9;
+  --bg-soft: #EEF1F6;
   --card-bg: #FFFFFF;
-  --text: #1F2A24;
-  --text-muted: #6B7A72;
-  --border: #E4DFD2;
-  --danger: #B3432B;
-  --success: #2E7D4F;
-  --radius-sm: 10px;
-  --radius: 18px;
-  --radius-lg: 26px;
-  --shadow: 0 10px 30px rgba(18, 52, 36, 0.08);
-  --shadow-lift: 0 16px 40px rgba(18, 52, 36, 0.14);
+  --text: #0F172A;
+  --text-muted: #64748B;
+  --text-faint: #94A3B8;
+  --border: #E2E6EE;
+  --border-soft: #EDF0F5;
+
+  --danger: #D92D20;
+  --danger-rgb: 217, 45, 32;
+  --success: #0F8B5F;
+  --success-rgb: 15, 139, 95;
+
+  /* ---- القياسات ---- */
+  --radius-sm: 9px;
+  --radius: 13px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow: 0 1px 2px rgba(15,23,42,.04), 0 6px 18px rgba(15, 23, 42, 0.06);
+  --shadow-lift: 0 4px 10px rgba(15,23,42,.05), 0 20px 40px rgba(15, 23, 42, 0.12);
+
+  --sidebar-w: 264px;
+  --sidebar-w-collapsed: 78px;
 }
 
 * {
@@ -49,8 +70,8 @@ a, button, input, select, textarea, label, [role="button"] {
 
 body {
   background-image:
-    radial-gradient(circle at 8% 8%, rgba(168,120,42,0.06) 0, transparent 45%),
-    radial-gradient(circle at 92% 90%, rgba(27,77,53,0.07) 0, transparent 45%);
+    radial-gradient(circle at 8% 8%, rgba(29,78,216,0.05) 0, transparent 45%),
+    radial-gradient(circle at 92% 90%, rgba(29,78,216,0.05) 0, transparent 45%);
   background-attachment: fixed;
 }
 
@@ -75,6 +96,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   align-items: center;
   justify-content: center;
   padding: 24px;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(29,78,216,0.10) 0, transparent 42%),
+    radial-gradient(circle at 85% 82%, rgba(184,121,10,0.08) 0, transparent 42%),
+    var(--bg);
 }
 
 .auth-card {
@@ -111,7 +136,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .auth-brand h1 {
-  font-family: 'Amiri', serif;
+  font-family: 'Cairo', sans-serif; font-weight: 800;
   font-size: 24px;
   font-weight: 700;
   color: var(--primary-dark);
@@ -145,14 +170,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   border-radius: var(--radius-sm);
   font-size: 15px;
   font-family: inherit;
-  background: #FCFBF8;
+  background: #F9FAFB;
   color: var(--text);
   transition: border-color .15s ease, box-shadow .15s ease;
 }
 
 .field input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(27,77,53,0.10);
+  box-shadow: 0 0 0 3px rgba(29,78,216,0.10);
   outline: none;
 }
 
@@ -188,7 +213,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   justify-content: center;
   border-radius: 8px;
 }
-.password-toggle:hover { color: var(--primary); background: rgba(27,77,53,0.06); }
+.password-toggle:hover { color: var(--primary); background: rgba(29,78,216,0.06); }
 .password-toggle .icon { width: 18px; height: 18px; vertical-align: middle; }
 
 .checkbox-row {
@@ -207,7 +232,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   list-style: none;
   margin: 4px 0 18px;
   padding: 12px 14px;
-  background: #FAF8F2;
+  background: #F2F4F7;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   display: grid;
@@ -253,54 +278,58 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 13px 18px;
-  border: none;
+  padding: 12.5px 18px;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   font-family: inherit;
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 700;
-  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  letter-spacing: .1px;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease, opacity .12s ease;
 }
+.btn:active { transform: translateY(1px); }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: var(--primary);
   color: #fff;
-  box-shadow: 0 8px 20px rgba(27,77,53,0.25);
+  box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 6px 14px rgba(29,78,216,0.22);
 }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(27,77,53,0.3); }
-.btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.btn-primary:hover { background: #1B45C4; box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 8px 18px rgba(29,78,216,0.28); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .btn-gold {
-  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+  background: var(--gold);
   color: #fff;
-  box-shadow: 0 8px 20px rgba(168,120,42,0.25);
+  box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 6px 14px rgba(200,136,10,0.22);
 }
-.btn-gold:hover { transform: translateY(-1px); }
+.btn-gold:hover { background: #A26E09; }
 
 .btn-outline {
-  background: transparent;
+  background: var(--card-bg);
   color: var(--primary);
-  border: 1.5px solid var(--primary);
+  border: 1px solid var(--border);
 }
-.btn-outline:hover { background: rgba(27,77,53,0.06); }
+.btn-outline:hover { background: var(--bg-soft); border-color: var(--primary-light); }
 
 .btn-ghost {
   background: transparent;
   color: var(--danger);
-  border: 1.5px solid transparent;
+  border: 1px solid transparent;
   width: auto;
   padding: 8px 14px;
   font-size: 13.5px;
+  box-shadow: none;
 }
-.btn-ghost:hover { background: rgba(179,67,43,0.08); }
+.btn-ghost:hover { background: rgba(217,45,32,0.07); }
 
 .btn-danger {
-  background: linear-gradient(135deg, var(--danger) 0%, #8a3120 100%);
+  background: var(--danger);
   color: #fff;
-  box-shadow: 0 8px 20px rgba(179,67,43,0.25);
+  box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 6px 14px rgba(217,45,32,0.22);
 }
-.btn-danger:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(179,67,43,0.32); }
-.btn-danger:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.btn-danger:hover { background: #B8261B; }
+.btn-danger:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .btn-sm { width: auto; padding: 9px 16px; font-size: 13.5px; }
 
@@ -321,15 +350,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   display: none;
 }
 .form-msg.show { display: block; }
-.form-msg.error { background: #FBEAE6; color: var(--danger); }
-.form-msg.success { background: #E6F2EA; color: var(--success); }
+.form-msg.error { background: #FCE8E6; color: var(--danger); }
+.form-msg.success { background: #E7F6F0; color: var(--success); }
 
 /* ---------- App header ---------- */
 .app-header {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(246,244,238,0.9);
+  background: rgba(245,247,250,0.9);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
 }
@@ -358,7 +387,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .brand-block .brand-text h2 {
-  font-family: 'Amiri', serif;
+  font-family: 'Cairo', sans-serif; font-weight: 800;
   font-size: 17px;
   margin: 0;
   color: var(--primary-dark);
@@ -386,7 +415,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   border-radius: 999px;
   font-weight: 800;
   font-size: 14px;
-  border: 1px solid rgba(168,120,42,0.25);
+  border: 1px solid rgba(200,136,10,0.25);
 }
 .points-badge svg { width: 16px; height: 16px; }
 
@@ -453,14 +482,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .page-title {
-  font-family: 'Amiri', serif;
-  font-size: 26px;
-  color: var(--primary-dark);
-  margin: 0 0 4px;
+  font-family: 'Cairo', sans-serif; font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -.2px;
+  color: var(--text);
+  margin: 0 0 5px;
 }
 .page-sub {
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 13.5px;
   margin: 0 0 26px;
 }
 
@@ -468,11 +498,13 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13.5px;
-  color: var(--primary);
+  font-size: 13px;
+  color: var(--text-muted);
   font-weight: 700;
   margin-bottom: 18px;
+  transition: color .15s ease;
 }
+.back-link:hover { color: var(--primary); }
 
 /* ---------- Cards / grid ---------- */
 .grid {
@@ -504,7 +536,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .comp-card .cover::after {
   content: "";
   position: absolute; inset: 0;
-  background: radial-gradient(circle at 30% 20%, rgba(201,154,74,0.35), transparent 60%);
+  background: radial-gradient(circle at 30% 20%, rgba(200,136,10,0.35), transparent 60%);
 }
 .comp-card .cover img { width: 100%; height: 100%; object-fit: cover; }
 .comp-card .cover .cover-icon { font-size: 30px; color: var(--gold-pale); position: relative; z-index: 1; }
@@ -533,16 +565,16 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   min-height: 220px;
   color: var(--gold);
   font-weight: 700;
-  background: rgba(168,120,42,0.04);
+  background: rgba(200,136,10,0.04);
   transition: background .15s ease;
 }
-.add-card:hover { background: rgba(168,120,42,0.09); }
+.add-card:hover { background: rgba(200,136,10,0.09); }
 .add-card .plus { font-size: 30px; }
 
 /* ---------- Modal ---------- */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(18,52,36,0.55);
+  background: rgba(11,30,77,0.55);
   display: none;
   align-items: center;
   justify-content: center;
@@ -581,7 +613,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .modal-close .icon { width: 13px; height: 13px; }
 
 .modal h3 {
-  font-family: 'Amiri', serif;
+  font-family: 'Cairo', sans-serif; font-weight: 800;
   font-size: 20px;
   color: var(--primary-dark);
   margin: 0 0 18px;
@@ -629,7 +661,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   font-size: 11.5px;
   font-weight: 700;
   color: var(--success);
-  background: #E6F2EA;
+  background: #E7F6F0;
   padding: 5px 10px;
   border-radius: 999px;
   display: inline-flex;
@@ -654,9 +686,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 }
 .quiz-option:hover { border-color: var(--primary-light); }
 .quiz-option input { accent-color: var(--primary); }
-.quiz-option.selected { border-color: var(--primary); background: rgba(27,77,53,0.05); }
-.quiz-option.correct { border-color: var(--success); background: #E6F2EA; }
-.quiz-option.wrong { border-color: var(--danger); background: #FBEAE6; }
+.quiz-option.selected { border-color: var(--primary); background: rgba(29,78,216,0.05); }
+.quiz-option.correct { border-color: var(--success); background: #E7F6F0; }
+.quiz-option.wrong { border-color: var(--danger); background: #FCE8E6; }
 .quiz-option.correct .icon { color: var(--success); margin-inline-start: auto; }
 .quiz-option.wrong .icon { color: var(--danger); margin-inline-start: auto; }
 
@@ -668,7 +700,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   font-size: 40px;
   font-weight: 800;
   color: var(--gold);
-  font-family: 'Amiri', serif;
+  font-family: 'Cairo', sans-serif; font-weight: 800;
 }
 .quiz-result p { color: var(--text-muted); font-size: 14px; }
 
@@ -729,7 +761,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 /* ---------- Islamic touch: basmala + geometric pattern ---------- */
 .basmala {
-  font-family: 'Amiri', serif;
+  font-family: 'Cairo', sans-serif; font-weight: 800;
   font-size: 14.5px;
   color: var(--gold);
   text-align: center;
@@ -738,25 +770,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   opacity: .92;
 }
 
-.brand-crescent {
-  color: var(--gold);
-  flex-shrink: 0;
-  margin-inline-end: 3px;
-  vertical-align: -1px;
-}
-
 .pattern-strip {
-  height: 10px;
+  height: 5px;
   width: 100%;
-  background-image:
-    linear-gradient(135deg, var(--gold) 25%, transparent 25%),
-    linear-gradient(225deg, var(--gold) 25%, transparent 25%),
-    linear-gradient(315deg, var(--gold) 25%, transparent 25%),
-    linear-gradient(45deg, var(--gold) 25%, transparent 25%);
-  background-position: -5px 0, -5px 0, 0 0, 0 0;
-  background-size: 10px 10px;
-  background-repeat: repeat-x;
-  opacity: .4;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 55%, var(--gold) 100%);
+  opacity: .9;
 }
 
 .auth-card .pattern-strip {
@@ -766,34 +784,64 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   left: 0;
 }
 
-/* ================= لوحة تحكم المسؤول ================= */
+/* ================= لوحة تحكم المسؤول: قائمة جانبية ثابتة ================= */
 
 .admin-nav {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  background: linear-gradient(180deg, var(--primary-darker) 0%, var(--primary-dark) 100%);
   color: #fff;
+  box-shadow: var(--shadow);
+  transition: width .25s ease;
 }
 .admin-nav-inner {
-  max-width: 1120px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 14px 20px;
+  padding: 14px 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
 }
+.admin-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
 .admin-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
+  min-width: 0;
 }
-.admin-brand img { width: 34px; height: 34px; border-radius: 9px; object-fit: contain; }
-.admin-brand .icon { color: var(--gold-light); }
-.admin-brand-text h2 { font-family: 'Amiri', serif; font-size: 16px; margin: 0; line-height: 1.2; }
-.admin-brand-text span { font-size: 10.5px; color: var(--gold-light); font-weight: 700; letter-spacing: .5px; }
+.admin-brand img { width: 34px; height: 34px; border-radius: 9px; object-fit: contain; flex-shrink: 0; }
+.admin-brand .icon { color: var(--gold-light); flex-shrink: 0; }
+.admin-brand-text { min-width: 0; overflow: hidden; }
+.admin-brand-text h2 { font-family: 'Cairo', sans-serif; font-weight: 800; font-size: 16px; margin: 0; line-height: 1.2; white-space: nowrap; }
+.admin-brand-text span { font-size: 10px; color: var(--gold-light); font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+
+/* زر طي/فتح القائمة الجانبية — يظهر فقط على شاشات سطح المكتب */
+.admin-collapse-toggle {
+  display: none;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.08);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.admin-collapse-toggle:hover { background: rgba(255,255,255,0.18); }
+.admin-collapse-toggle svg { transition: transform .25s ease; }
 
 .admin-links {
   display: flex;
@@ -804,21 +852,85 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .admin-links a, .admin-links button {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 10px;
   background: none;
   border: none;
-  color: rgba(255,255,255,0.78);
+  color: rgba(255,255,255,0.68);
   font-family: inherit;
   font-size: 13.5px;
   font-weight: 600;
-  padding: 9px 14px;
+  padding: 10px 14px;
   border-radius: 10px;
-  transition: all .15s ease;
+  transition: background .15s ease, color .15s ease, padding .2s ease, justify-content .2s ease;
+  position: relative;
 }
-.admin-links a:hover, .admin-links button:hover { background: rgba(255,255,255,0.1); color: #fff; }
-.admin-links a.active { background: rgba(255,255,255,0.16); color: #fff; }
-.admin-links button.danger-link { color: #F3C9BE; }
-.admin-links button.danger-link:hover { background: rgba(179,67,43,0.25); color: #fff; }
+.admin-links .link-label { white-space: nowrap; overflow: hidden; }
+.admin-links a:hover, .admin-links button:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.admin-links a.active { background: rgba(255,255,255,0.12); color: #fff; }
+.admin-links a.active::before {
+  content: "";
+  position: absolute;
+  top: 50%; right: -2px; transform: translateY(-50%);
+  width: 3px; height: 18px; border-radius: 4px;
+  background: var(--gold-light);
+}
+.admin-links button.danger-link { color: #F0AFA6; }
+.admin-links button.danger-link:hover { background: rgba(217,45,32,0.22); color: #fff; }
+
+/* ---- تحويل الشريط إلى قائمة جانبية ثابتة على الشاشات المتوسطة والكبيرة ---- */
+@media (min-width: 861px) {
+  .admin-nav {
+    position: fixed;
+    top: 0; bottom: 0; right: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: none;
+    border-inline-start: 1px solid rgba(255,255,255,0.06);
+  }
+  .admin-nav-inner {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    height: 100%;
+    padding: 22px 16px 20px;
+    gap: 0;
+  }
+  .admin-brand-row {
+    padding: 4px 8px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 18px;
+  }
+  .admin-collapse-toggle { display: flex; }
+  .admin-links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 3px;
+    flex: 1;
+  }
+  .admin-links a, .admin-links button {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 14px;
+  }
+  .admin-links button.danger-link { margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); border-radius: 0; }
+  .admin-menu-toggle { display: none !important; }
+
+  /* ---- حالة الطي: القائمة تضغر لتُظهر الأيقونات فقط ---- */
+  body.sidebar-collapsed .admin-nav { width: var(--sidebar-w-collapsed); }
+  body.sidebar-collapsed .admin-brand-row { flex-direction: column; gap: 12px; padding: 4px 0 18px; }
+  body.sidebar-collapsed .admin-brand { justify-content: center; width: 100%; }
+  body.sidebar-collapsed .admin-brand-text { display: none; }
+  body.sidebar-collapsed .link-label { display: none; }
+  body.sidebar-collapsed .admin-links a,
+  body.sidebar-collapsed .admin-links button {
+    justify-content: center;
+    padding: 12px 0;
+  }
+  body.sidebar-collapsed .admin-links a.active::before { display: none; }
+  body.sidebar-collapsed .admin-collapse-toggle svg { transform: rotate(180deg); }
+}
 
 /* زرّ القائمة (همبرغر) — يظهر فقط على الشاشات الصغيرة */
 .admin-menu-toggle {
@@ -861,7 +973,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .admin-sidebar-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(18,52,36,0.5);
+  background: rgba(7,12,30,0.55);
+  backdrop-filter: blur(2px);
   z-index: 45;
   opacity: 0;
   pointer-events: none;
@@ -875,13 +988,26 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   padding: 30px 20px 70px;
 }
 
+@media (min-width: 861px) {
+  .admin-page {
+    margin: 0;
+    margin-right: var(--sidebar-w);
+    max-width: none;
+    padding: 34px 40px 80px;
+    transition: margin-right .25s ease;
+  }
+  body.sidebar-collapsed .admin-page { margin-right: var(--sidebar-w-collapsed); }
+}
+
 .admin-page-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
+  margin-bottom: 26px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-soft);
 }
 
 /* بطاقات إحصائية */
@@ -896,43 +1022,59 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px 20px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-xs);
   display: flex;
   align-items: center;
   gap: 14px;
+  transition: box-shadow .15s ease, border-color .15s ease;
 }
+.stat-card:hover { box-shadow: var(--shadow); border-color: var(--border); }
 .stat-card .stat-icon {
-  width: 44px; height: 44px;
-  border-radius: 12px;
-  background: var(--gold-pale);
-  color: var(--gold);
+  width: 42px; height: 42px;
+  border-radius: 11px;
+  background: var(--bg-soft);
+  color: var(--primary);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.stat-card .stat-icon .icon { width: 20px; height: 20px; }
-.stat-card .stat-value { font-size: 22px; font-weight: 800; color: var(--primary-dark); font-family: 'Amiri', serif; line-height: 1.1; }
-.stat-card .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.stat-card .stat-icon .icon { width: 19px; height: 19px; }
+.stat-card .stat-value { font-size: 22px; font-weight: 800; color: var(--text); font-family: 'Cairo', sans-serif; line-height: 1.1; }
+.stat-card .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
 
 /* بطاقة مسابقة في لوحة التحكم */
 .admin-comp-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--primary-light);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-xs);
   padding: 18px 20px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+  transition: box-shadow .15s ease;
 }
-.admin-comp-card .info h3 { margin: 0 0 4px; font-size: 16.5px; color: var(--primary-dark); }
+.admin-comp-card:hover { box-shadow: var(--shadow); }
+.comp-card-thumb {
+  width: 84px;
+  height: 84px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+@media (max-width: 480px) {
+  .comp-card-thumb { width: 100%; height: 140px; }
+}
+.admin-comp-card .info h3 { margin: 0 0 4px; font-size: 16px; font-weight: 700; color: var(--text); }
 .admin-comp-card .info p { margin: 0 0 8px; font-size: 13px; color: var(--text-muted); max-width: 480px; }
 .admin-comp-card .info .tags { display: flex; gap: 8px; flex-wrap: wrap; }
 .admin-comp-card .tag {
   font-size: 11px; font-weight: 700; color: var(--primary);
-  background: rgba(27,77,53,0.08); padding: 4px 10px; border-radius: 999px;
+  background: rgba(29,78,216,0.08); padding: 4px 10px; border-radius: 999px;
   display: inline-flex; align-items: center; gap: 4px;
 }
 .admin-comp-card .actions { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -946,12 +1088,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px 18px;
-  margin-bottom: 12px;
+  padding: 15px 18px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
+  transition: box-shadow .15s ease, border-color .15s ease;
 }
+.admin-lesson-row:hover { border-color: var(--primary-light); box-shadow: var(--shadow-xs); }
 .admin-lesson-row .info { display: flex; align-items: center; gap: 14px; }
-.admin-lesson-row .info h4 { margin: 0 0 5px; font-size: 15px; color: var(--text); }
+.admin-lesson-row .info h4 { margin: 0 0 5px; font-size: 15px; font-weight: 700; color: var(--text); }
 .admin-lesson-row .info .meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .admin-lesson-row .info .meta-row span { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
 .admin-lesson-row .actions { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -960,7 +1104,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
   display: inline-flex; align-items: center; gap: 5px;
 }
-.status-pill.live { background: #E6F2EA; color: var(--success); }
+.status-pill.live { background: #E7F6F0; color: var(--success); }
 .status-pill.scheduled { background: var(--gold-pale); color: var(--gold); }
 
 /* منشئ الأسئلة */
@@ -969,7 +1113,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   border-radius: var(--radius);
   padding: 18px;
   margin-bottom: 16px;
-  background: rgba(168,120,42,0.03);
+  background: rgba(200,136,10,0.03);
   position: relative;
 }
 .question-builder .q-header {
@@ -1001,24 +1145,24 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 table.data-table { width: 100%; border-collapse: collapse; }
 table.data-table th {
   text-align: right; font-size: 12px; color: var(--text-muted); font-weight: 700;
-  padding: 12px 16px; background: #FAF8F2; border-bottom: 1px solid var(--border);
+  padding: 12px 16px; background: #F2F4F7; border-bottom: 1px solid var(--border);
 }
 table.data-table td {
   padding: 13px 16px; font-size: 13.5px; border-bottom: 1px solid var(--border); color: var(--text);
 }
 table.data-table tr:last-child td { border-bottom: none; }
-table.data-table tr:hover td { background: #FBFAF6; }
+table.data-table tr:hover td { background: #F9FAFB; }
 .rank-badge {
   width: 26px; height: 26px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 800; background: var(--bg); color: var(--text-muted);
 }
-.rank-badge.top1 { background: #F3E0B3; color: #8A6416; }
-.rank-badge.top2 { background: #E3E3E3; color: #666; }
-.rank-badge.top3 { background: #EAC8AE; color: #8A4B25; }
+.rank-badge.top1 { background: #F6E3B4; color: #7A5A12; }
+.rank-badge.top2 { background: #E3E5E8; color: #5B6673; }
+.rank-badge.top3 { background: #EDD0B8; color: #7A4520; }
 .admin-badge-pill {
   font-size: 10.5px; font-weight: 800; color: var(--primary);
-  background: rgba(27,77,53,0.08); padding: 3px 9px; border-radius: 999px;
+  background: rgba(29,78,216,0.08); padding: 3px 9px; border-radius: 999px;
   margin-inline-start: 6px;
 }
 
@@ -1041,8 +1185,8 @@ table.data-table tr:hover td { background: #FBFAF6; }
 
 /* حساب محظور - شريط تنبيه */
 .blocked-banner {
-  background: #FBEAE6;
-  border: 1px solid rgba(179,67,43,0.3);
+  background: #FCE8E6;
+  border: 1px solid rgba(217,45,32,0.3);
   color: var(--danger);
   border-radius: var(--radius-sm);
   padding: 12px 16px;
@@ -1076,7 +1220,7 @@ a.lesson-row.locked { cursor: not-allowed; }
   display: flex; align-items: center; gap: 10px;
   margin: 0 0 16px;
 }
-.lesson-view-quiz-head h3 { font-family: 'Amiri', serif; font-size: 19px; color: var(--primary-dark); margin: 0; }
+.lesson-view-quiz-head h3 { font-family: 'Cairo', sans-serif; font-weight: 800; font-size: 19px; color: var(--primary-dark); margin: 0; }
 
 .already-done-card {
   background: var(--card-bg);
@@ -1096,11 +1240,11 @@ a.lesson-row.locked { cursor: not-allowed; }
   font-size: 10.5px; font-weight: 800; padding: 3px 9px; border-radius: 999px;
   display: inline-flex; align-items: center; gap: 4px; margin-inline-start: 6px;
 }
-.status-chip.blocked { background: #FBEAE6; color: var(--danger); }
+.status-chip.blocked { background: #FCE8E6; color: var(--danger); }
 
 /* ================= استجابة الشاشات الصغيرة للوحة المسؤول: قائمة جانبية ================= */
 @media (max-width: 860px) {
-  .admin-nav-inner { padding: 12px 16px; flex-wrap: nowrap; }
+  .admin-nav-inner { padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); flex-wrap: nowrap; }
   .admin-menu-toggle { display: flex; }
 
   .admin-links {
@@ -1108,31 +1252,35 @@ a.lesson-row.locked { cursor: not-allowed; }
     top: 0;
     bottom: 0;
     right: 0;
-    width: min(80vw, 300px);
+    width: min(82vw, 300px);
     height: 100%;
     margin: 0;
     z-index: 50;
-    background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%);
-    box-shadow: -14px 0 40px rgba(18,52,36,0.35);
+    background: linear-gradient(180deg, var(--primary-darker) 0%, var(--primary-dark) 100%);
+    box-shadow: -14px 0 40px rgba(10,14,26,0.35);
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
     flex-wrap: nowrap;
     gap: 6px;
     padding: 78px 14px 24px;
+    padding-top: max(78px, calc(env(safe-area-inset-top) + 66px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
     transform: translateX(100%);
-    transition: transform .28s ease;
+    transition: transform .28s cubic-bezier(.32,.72,0,1);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .admin-links.open { transform: translateX(0); }
   .admin-links a, .admin-links button {
     width: 100%;
     justify-content: flex-start;
-    padding: 13px 14px;
+    padding: 14px 15px;
     font-size: 14.5px;
+    min-height: 46px;
   }
 
-  .admin-page { padding: 20px 14px 50px; }
+  .admin-page { padding: 18px 16px 50px; }
   .admin-page-head { flex-direction: column; align-items: stretch; }
   .admin-page-head > div:last-child { display: flex; flex-direction: column; gap: 8px; }
   .admin-page-head a.btn, .admin-page-head button.btn { width: 100% !important; }
@@ -1143,7 +1291,7 @@ a.lesson-row.locked { cursor: not-allowed; }
   .admin-comp-card .actions, .admin-lesson-row .actions { width: 100%; }
   .admin-comp-card .actions .btn, .admin-lesson-row .actions .btn { flex: 1; }
 
-  .table-wrap { overflow-x: auto; }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   table.data-table { min-width: 560px; }
 
   .option-row input[type="text"] { min-width: 0; }
@@ -1164,7 +1312,7 @@ a.lesson-row.locked { cursor: not-allowed; }
 }
 .site-footer .footer-inner { max-width: 720px; margin: 0 auto; }
 .site-footer .footer-tagline {
-  font-family: 'Amiri', serif;
+  font-family: 'Cairo', sans-serif; font-weight: 800;
   color: var(--gold);
   font-size: 14px;
   margin: 0 0 4px;
@@ -1187,12 +1335,12 @@ a.lesson-row.locked { cursor: not-allowed; }
   font-size: 12.5px;
   font-weight: 700;
   color: var(--primary);
-  background: rgba(27,77,53,0.06);
+  background: rgba(29,78,216,0.06);
   padding: 7px 14px;
   border-radius: 999px;
   transition: background .15s ease;
 }
-.site-footer .footer-links a:hover { background: rgba(27,77,53,0.12); }
+.site-footer .footer-links a:hover { background: rgba(29,78,216,0.12); }
 
 /* ================= بطاقة الكورس (محسّنة: صورة + اسم تحتها) ================= */
 .comp-card {
@@ -1216,14 +1364,14 @@ a.lesson-row.locked { cursor: not-allowed; }
 .comp-card .cover::after {
   content: "";
   position: absolute; inset: 0;
-  background: radial-gradient(circle at 25% 15%, rgba(201,154,74,0.4), transparent 60%);
+  background: radial-gradient(circle at 25% 15%, rgba(200,136,10,0.4), transparent 60%);
 }
 .comp-card .cover img { width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 1; }
 .comp-card .cover .cover-icon { color: var(--gold-pale); position: relative; z-index: 1; }
 .comp-card .body { padding: 16px 18px 20px; text-align: center; }
 .comp-card .body h3 {
   margin: 0 0 6px; font-size: 17px; color: var(--primary-dark);
-  font-family: 'Amiri', serif;
+  font-family: 'Cairo', sans-serif; font-weight: 800;
 }
 .comp-card .body p { margin: 0 0 10px; font-size: 13px; color: var(--text-muted); line-height: 1.6; }
 .comp-card .body .meta { justify-content: center; }
@@ -1245,7 +1393,7 @@ a.lesson-row.locked { cursor: not-allowed; }
   position: absolute; inset: 0 0 auto 0; height: 4px;
   background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%);
 }
-.course-hero h1 { font-family: 'Amiri', serif; font-size: 24px; margin: 0 0 6px; }
+.course-hero h1 { font-family: 'Cairo', sans-serif; font-weight: 800; font-size: 24px; margin: 0 0 6px; }
 .course-hero p { margin: 0; opacity: .85; font-size: 13.5px; }
 
 /* ================= أكورديون المحاضرات ================= */
@@ -1287,7 +1435,7 @@ a.lesson-row.locked { cursor: not-allowed; }
   background: var(--gold-pale); color: var(--gold);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.content-item.exam-item .ci-icon { background: rgba(27,77,53,0.1); color: var(--primary); }
+.content-item.exam-item .ci-icon { background: rgba(29,78,216,0.1); color: var(--primary); }
 .content-item .ci-right { font-size: 11.5px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
 
 /* ================= صفحة الفيديو + تعليقات + مشاركة ================= */
@@ -1309,13 +1457,13 @@ a.lesson-row.locked { cursor: not-allowed; }
 }
 
 .comments-section h3 {
-  font-family: 'Amiri', serif; font-size: 18px; color: var(--primary-dark);
+  font-family: 'Cairo', sans-serif; font-weight: 800; font-size: 18px; color: var(--primary-dark);
   display: flex; align-items: center; gap: 8px; margin: 0 0 14px;
 }
 .comment-form { display: flex; gap: 8px; margin-bottom: 18px; }
 .comment-form input {
   flex: 1; padding: 11px 15px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-  font-family: inherit; font-size: 14px; background: #FCFBF8;
+  font-family: inherit; font-size: 14px; background: #F9FAFB;
 }
 .comment-form input:focus { border-color: var(--primary); outline: none; }
 .comment-list { display: flex; flex-direction: column; gap: 12px; }
@@ -1350,7 +1498,7 @@ a.lesson-row.locked { cursor: not-allowed; }
   border-radius: var(--radius-lg); padding: 36px 28px; box-shadow: var(--shadow-lift);
 }
 .blocked-card .big-icon { color: var(--danger); margin-bottom: 14px; }
-.blocked-card h2 { font-family: 'Amiri', serif; color: var(--primary-dark); margin: 0 0 10px; }
+.blocked-card h2 { font-family: 'Cairo', sans-serif; font-weight: 800; color: var(--primary-dark); margin: 0 0 10px; }
 .blocked-card p { color: var(--text-muted); font-size: 14px; line-height: 1.7; margin: 0 0 20px; }
 
 /* ================= صفحة تفاصيل الحساب (المسؤول) ================= */
@@ -1367,14 +1515,14 @@ a.lesson-row.locked { cursor: not-allowed; }
 .detail-row .d-value { font-size: 14.5px; font-weight: 700; color: var(--text); }
 
 .no-password-note {
-  background: #FAF8F2; border: 1px dashed var(--gold-light); border-radius: var(--radius-sm);
+  background: #F2F4F7; border: 1px dashed var(--gold-light); border-radius: var(--radius-sm);
   padding: 14px 16px; font-size: 12.5px; color: var(--text-muted); line-height: 1.7;
   display: flex; gap: 10px; align-items: flex-start; margin-bottom: 16px;
 }
 .no-password-note .icon { color: var(--gold); flex-shrink: 0; margin-top: 2px; }
 
 /* ================= بادج نوع محتوى المحاضرة (فيديو/اختبار) في لوحة الأدمن ================= */
-.mix-tag { background: rgba(27,77,53,0.08); color: var(--primary); }
+.mix-tag { background: rgba(29,78,216,0.08); color: var(--primary); }
 .mix-tag.video-tag { background: var(--gold-pale); color: var(--gold); }
 
 @media (max-width: 480px) {
@@ -1400,7 +1548,7 @@ a.lesson-row.locked { cursor: not-allowed; }
 .accounts-toolbar .search-wrap input { padding-right: 40px; }
 .accounts-toolbar .sort-select {
   padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-  font-family: inherit; font-size: 13.5px; background: #FCFBF8; color: var(--text); cursor: pointer;
+  font-family: inherit; font-size: 13.5px; background: #F9FAFB; color: var(--text); cursor: pointer;
 }
 
 .accounts-grid {
@@ -1421,7 +1569,7 @@ a.lesson-row.locked { cursor: not-allowed; }
   gap: 14px;
 }
 .account-card:hover { box-shadow: var(--shadow-lift); transform: translateY(-2px); }
-.account-card.is-blocked { border-color: rgba(179,67,43,0.35); background: linear-gradient(180deg, #FDF4F2 0%, var(--card-bg) 60px); }
+.account-card.is-blocked { border-color: rgba(217,45,32,0.35); background: linear-gradient(180deg, #FCEEEE 0%, var(--card-bg) 60px); }
 
 .account-card .ac-head { display: flex; align-items: center; gap: 12px; }
 .account-card .ac-avatar {
@@ -1430,7 +1578,7 @@ a.lesson-row.locked { cursor: not-allowed; }
   color: #fff; display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 17px;
 }
-.account-card.is-blocked .ac-avatar { background: linear-gradient(135deg, #C0553A, var(--danger)); }
+.account-card.is-blocked .ac-avatar { background: linear-gradient(135deg, #C4453A, var(--danger)); }
 .account-card .ac-name { font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
 .account-card .ac-email { font-size: 12px; color: var(--text-muted); word-break: break-all; }
 
@@ -1463,4 +1611,4 @@ a.lesson-row.locked { cursor: not-allowed; }
 }
 .upload-progress-fill { height: 100%; background: var(--primary); border-radius: 999px; transition: width .2s ease; }
 
-.mix-tag.material-tag { background: rgba(179,67,43,0.1); color: var(--danger); }
+.mix-tag.material-tag { background: rgba(217,45,32,0.1); color: var(--danger); }

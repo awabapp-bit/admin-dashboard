@@ -87,6 +87,7 @@
         const isCourse = c.type !== 'competition';
         html +=
           '<div class="admin-comp-card">' +
+            (c.coverUrl ? '<img src="' + escapeHtml(c.coverUrl) + '" alt="" class="comp-card-thumb" onerror="this.style.display=\'none\'">' : '') +
             '<div class="info">' +
               '<h3>' + escapeHtml(c.title || 'بدون عنوان') + '</h3>' +
               (c.description ? '<p>' + escapeHtml(c.description) + '</p>' : '') +

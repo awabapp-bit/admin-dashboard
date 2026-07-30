@@ -21,14 +21,23 @@
   <div class="table-wrap">
     <table class="data-table">
       <thead>
-        <tr><th>#</th><th>الاسم</th><th>البريد الإلكتروني</th><th>محاضرات مكتملة</th><th>النقاط بهذا المحتوى</th></tr>
+        <tr><th>#</th><th>الاسم</th><th>البريد الإلكتروني</th><th>محاضرات مكتملة</th><th>النقاط بهذا المحتوى</th><th>إجراءات</th></tr>
       </thead>
       <tbody id="tableBody">
-        <tr><td colspan="5"><div class="center-loading" style="min-height:120px;"><div class="loader"></div></div></td></tr>
+        <tr><td colspan="6"><div class="center-loading" style="min-height:120px;"><div class="loader"></div></div></td></tr>
       </tbody>
     </table>
   </div>
 </main>
+
+<div class="modal-overlay" id="retakeModalOverlay">
+  <div class="modal modal-wide">
+    <button type="button" class="modal-close" id="retakeModalClose"><span class="icon"></span></button>
+    <h3 id="retakeModalTitle">إدارة محاولات الاختبار</h3>
+    <p class="page-sub" style="margin-top:-10px;">فتح أي اختبار لإعادة المحاولة متاح لأي مشترك، سواء نجح، فشل، أو جمع نقاطًا بالفعل. عند إعادة المحاولة، تُحتسب أعلى نتيجة بين المحاولتين تلقائيًا ولا تُفقد نتيجة المستخدم الأفضل.</p>
+    <div id="retakeModalBody"><div class="center-loading" style="min-height:100px;"><div class="loader"></div></div></div>
+  </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -94,7 +103,7 @@
   function renderTable(rows) {
     const body = document.getElementById('tableBody');
     if (rows.length === 0) {
-      body.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:30px;">لا يوجد مشتركون بعد في هذا المحتوى</td></tr>';
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:30px;">لا يوجد مشتركون بعد في هذا المحتوى</td></tr>';
       return;
     }
     body.innerHTML = rows.map(function (r, i) {
@@ -105,9 +114,104 @@
         '<td>' + escapeHtml(r.email) + '</td>' +
         '<td>' + r.completedCount + '</td>' +
         '<td><strong>' + r.points + '</strong></td>' +
+        '<td><button type="button" class="btn btn-outline btn-xs manage-retake-btn" data-uid="' + r.uid + '" data-name="' + escapeHtml(r.name) + '" style="width:auto;">' + icon('rotateLeft', 'icon-sm') + ' الاختبارات</button></td>' +
       '</tr>';
     }).join('');
+
+    body.querySelectorAll('.manage-retake-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () { openRetakeModal(btn.dataset.uid, btn.dataset.name); });
+    });
   }
+
+  /* ---------------- نافذة إدارة محاولات الاختبار لأي مشترك ---------------- */
+  const retakeOverlay = document.getElementById('retakeModalOverlay');
+  const retakeBody = document.getElementById('retakeModalBody');
+
+  document.getElementById('retakeModalClose').querySelector('.icon').outerHTML = icon('xmark', 'icon-sm');
+  document.getElementById('retakeModalClose').addEventListener('click', closeRetakeModal);
+  retakeOverlay.addEventListener('click', function (e) { if (e.target === retakeOverlay) closeRetakeModal(); });
+  function closeRetakeModal() { retakeOverlay.classList.remove('open'); }
+
+  let currentModalUid = null;
+  function openRetakeModal(uid, name) {
+    currentModalUid = uid;
+    document.getElementById('retakeModalTitle').textContent = 'محاولات الاختبار — ' + name;
+    retakeBody.innerHTML = '<div class="center-loading" style="min-height:100px;"><div class="loader"></div></div>';
+    retakeOverlay.classList.add('open');
+    loadRetakeData(uid);
+  }
+
+  function loadRetakeData(uid) {
+    Promise.all([
+      db.ref('competitions/' + compId + '/lessons').once('value'),
+      db.ref('examAttempts').once('value'),
+      db.ref('userProgress/' + uid + '/' + compId).once('value')
+    ]).then(function (results) {
+      const lessons = results[0].val() || {};
+      const allAttempts = results[1].val() || {};
+      const progress = results[2].val() || {};
+      renderRetakeList(uid, lessons, allAttempts, progress);
+    });
+  }
+
+  function renderRetakeList(uid, lessons, allAttempts, progress) {
+    const lessonIds = Object.keys(lessons);
+    const examRows = [];
+    lessonIds.forEach(function (lid) {
+      const lesson = lessons[lid];
+      const exams = lesson.exams || {};
+      Object.keys(exams).forEach(function (eid) {
+        const exam = exams[eid];
+        const attempt = ((allAttempts[compId] || {})[lid] || {})[eid] || {};
+        const userAttempt = attempt[uid];
+        examRows.push({ lessonId: lid, lessonTitle: lesson.title || 'محاضرة', examId: eid, examTitle: exam.title || 'اختبار', attempt: userAttempt });
+      });
+    });
+
+    if (examRows.length === 0) {
+      retakeBody.innerHTML = '<p style="color:var(--text-muted); font-size:13.5px;">لا توجد اختبارات في هذا المحتوى بعد.</p>';
+      return;
+    }
+
+    const lessonEarned = (lid) => (progress[lid] && progress[lid].earnedPoints) || 0;
+
+    retakeBody.innerHTML = examRows.map(function (row) {
+      let statusHtml;
+      if (!row.attempt) {
+        statusHtml = '<span class="status-pill" style="background:var(--bg); color:var(--text-muted);">' + icon('clock', 'icon-sm') + ' لم يبدأ بعد</span>';
+      } else if (row.attempt.submitted) {
+        statusHtml = '<span class="status-pill live">' + icon('check', 'icon-sm') + ' تم التسليم' + (row.attempt.submittedAt ? ' — ' + formatArabicDate(row.attempt.submittedAt) : '') + '</span>';
+      } else {
+        statusHtml = '<span class="status-pill scheduled">' + icon('hourglass', 'icon-sm') + ' جارٍ التنفيذ الآن</span>';
+      }
+      return '<div class="admin-lesson-row" style="margin-bottom:10px;">' +
+        '<div class="info">' +
+          '<div>' +
+            '<h4 style="margin:0 0 4px;">' + escapeHtml(row.examTitle) + '</h4>' +
+            '<div class="meta-row"><span>' + escapeHtml(row.lessonTitle) + '</span>' + statusHtml + '<span>' + icon('star', 'icon-sm') + ' نقاط المحاضرة الحالية: ' + lessonEarned(row.lessonId) + '</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="actions">' +
+          '<button type="button" class="btn btn-gold btn-sm reopen-exam-btn" data-lesson="' + row.lessonId + '" data-exam="' + row.examId + '" ' + (row.attempt ? '' : 'disabled style="opacity:.45;"') + '>' + icon('rotateLeft', 'icon-sm') + ' فتح لإعادة المحاولة</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    retakeBody.querySelectorAll('.reopen-exam-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (!confirm('فتح هذا الاختبار لإعادة المحاولة؟ سيقدر المستخدم يبدأ محاولة جديدة، وهتُحتسب أعلى نتيجة بين المحاولتين تلقائيًا.')) return;
+        const lid = btn.dataset.lesson, eid = btn.dataset.exam;
+        btn.disabled = true;
+        resetExamAttempt(compId, lid, eid, currentModalUid).then(function () {
+          loadRetakeData(currentModalUid);
+        }).catch(function (err) {
+          alert('تعذر فتح الاختبار: ' + err.message);
+          btn.disabled = false;
+        });
+      });
+    });
+  }
+
 </script>
 </body>
 </html>

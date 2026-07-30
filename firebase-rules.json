@@ -122,7 +122,14 @@
       ".read": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true",
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('isAdmin').val() === true)"
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
+        "$compId": {
+          "$lessonId": {
+            "earnedPoints": {
+              ".validate": "!newData.exists() || !data.exists() || newData.val() >= data.val()"
+            }
+          }
+        }
       }
     },
     "notifications": {
