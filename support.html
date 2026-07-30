@@ -34,7 +34,7 @@
     #support-root{font-family:'Cairo',sans-serif}
     body.chat-active{overflow:hidden}
 
-    .support-shell{display:flex;flex-direction:column;height:100vh;height:100dvh}
+    .support-shell{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow-x:hidden}
 
     .offline-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(243,245,249,0.92);backdrop-filter:blur(25px);z-index:99999;display:flex;justify-content:center;align-items:center;opacity:0;pointer-events:none;transform:scale(1.08);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1)}
     .offline-screen.active{opacity:1;pointer-events:all;transform:scale(1)}
@@ -50,7 +50,7 @@
     .offline-dot:nth-child(3){animation-delay:0.4s}
     @keyframes supJump{0%{transform:translateY(0)}100%{transform:translateY(-8px)}}
 
-    .dashboard-container{display:none;width:100%;flex:1;min-height:0;position:relative}
+    .dashboard-container{display:none;width:auto;flex:1;min-height:0;position:relative;max-width:100%}
     .dashboard-container.active{display:flex}
     @media (min-width:861px){
       .dashboard-container{margin-right:var(--sidebar-w);transition:margin-right .25s ease}

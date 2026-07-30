@@ -897,12 +897,23 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     padding: 22px 16px 20px;
     gap: 0;
   }
+  /* صف العنوان: العنوان دايمًا أول عنصر فوق خالص، وزر الطي/الفتح مثبّت
+     بموضع ثابت جنبه (absolute) عشان يفضل بالظبط في نفس المكان سواء
+     القائمة متوسّعة أو مطوية — بيتغير المحتوى جواها بس مش موضع الزر. */
   .admin-brand-row {
-    padding: 4px 8px 22px;
+    position: relative;
+    padding: 4px 8px 22px 46px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
     margin-bottom: 18px;
+    min-height: 34px;
   }
-  .admin-collapse-toggle { display: flex; }
+  .admin-collapse-toggle {
+    display: flex;
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    z-index: 2;
+  }
   .admin-links {
     flex-direction: column;
     align-items: stretch;
@@ -917,16 +928,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   .admin-links button.danger-link { margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); border-radius: 0; }
   .admin-menu-toggle { display: none !important; }
 
-  /* ---- حالة الطي: القائمة تضغر لتُظهر الأيقونات فقط ---- */
+  /* ---- حالة الطي: القائمة تضغر لتُظهر الأيقونات فقط ----
+     نفس صف العنوان (والزر جوّاه) ونفس محاذاة الروابط بيفضلوا زي ما هما
+     بالظبط؛ الحاجة الوحيدة اللي بتتغير هي اختفاء نص العنوان والتسميات. */
   body.sidebar-collapsed .admin-nav { width: var(--sidebar-w-collapsed); }
-  body.sidebar-collapsed .admin-brand-row { flex-direction: column; gap: 12px; padding: 4px 0 18px; }
-  body.sidebar-collapsed .admin-brand { justify-content: center; width: 100%; }
-  body.sidebar-collapsed .admin-brand-text { display: none; }
+  body.sidebar-collapsed .admin-brand { display: none; }
   body.sidebar-collapsed .link-label { display: none; }
   body.sidebar-collapsed .admin-links a,
   body.sidebar-collapsed .admin-links button {
-    justify-content: center;
-    padding: 12px 0;
+    justify-content: flex-start;
   }
   body.sidebar-collapsed .admin-links a.active::before { display: none; }
   body.sidebar-collapsed .admin-collapse-toggle svg { transform: rotate(180deg); }
