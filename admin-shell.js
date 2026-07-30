@@ -31,7 +31,7 @@ function requireAdminAuth(onReady) {
 
 /**
  * يرسم شريط تنقل المسؤول العلوي داخل #adminNav
- * activePage: 'home' | 'users' | 'competition'
+ * activePage: 'home' | 'users' | 'competition' | 'violations' | 'support'
  */
 function renderAdminNav(activePage) {
   const nav = document.getElementById('adminNav');
@@ -53,6 +53,7 @@ function renderAdminNav(activePage) {
       '<div class="admin-links" id="adminLinks">' +
         '<a href="home.html" class="' + (activePage === 'home' ? 'active' : '') + '">' + icon('gear', 'icon-sm') + ' المسابقات</a>' +
         '<a href="users.html" class="' + (activePage === 'users' ? 'active' : '') + '">' + icon('users', 'icon-sm') + ' الحسابات</a>' +
+        '<a href="violations.html" class="' + (activePage === 'violations' ? 'active' : '') + '">' + icon('exclamation-triangle', 'icon-sm') + ' المخالفات</a>' +
         '<a href="support.html" class="' + (activePage === 'support' ? 'active' : '') + '">' + icon('headset', 'icon-sm') + ' الدعم الفني</a>' +
         '<button class="danger-link" id="adminLogoutBtn">' + icon('logout', 'icon-sm') + ' تسجيل الخروج</button>' +
       '</div>' +
@@ -161,3 +162,62 @@ function deleteUserAccountData(uid) {
     return db.ref().update(updates);
   });
 }
+
+/* ============================================================
+   📋 إدارة المخالفات — جديد
+   ============================================================ */
+
+/**
+ * جلب جميع المخالفات المسجلة.
+ * @returns {Promise<Object>} - كائن بمفاتيح uid ثم violationId.
+ */
+function getAllViolations() {
+  return db.ref('violations').once('value').then(function(snap) {
+    return snap.val() || {};
+  });
+}
+window.getAllViolations = getAllViolations;
+
+/**
+ * جلب مخالفات مستخدم معين.
+ */
+function getUserViolations(uid) {
+  return db.ref('violations/' + uid).once('value').then(function(snap) {
+    return snap.val() || {};
+  });
+}
+window.getUserViolations = getUserViolations;
+
+/**
+ * حذف محاولة اختبار لمستخدم (لإعادة الاختبار أو إلغاء النتيجة).
+ */
+function resetExamAttempt(compId, lessonId, examId, uid) {
+  return db.ref('examAttempts/' + compId + '/' + lessonId + '/' + examId + '/' + uid).remove();
+}
+window.resetExamAttempt = resetExamAttempt;
+
+/**
+ * حذف جميع مخالفات مستخدم معين.
+ */
+function clearUserViolations(uid) {
+  return db.ref('violations/' + uid).remove();
+}
+window.clearUserViolations = clearUserViolations;
+
+/**
+ * تحديث الحد الأقصى للمخالفات في الإعدادات.
+ */
+function setMaxViolations(value) {
+  return db.ref('settings/' + 'maxViolations').set(value);
+}
+window.setMaxViolations = setMaxViolations;
+
+/**
+ * الحصول على الحد الأقصى للمخالفات.
+ */
+function getMaxViolations() {
+  return db.ref('settings/' + 'maxViolations').once('value').then(function(snap) {
+    return snap.val() || 3;
+  });
+}
+window.getMaxViolations = getMaxViolations;

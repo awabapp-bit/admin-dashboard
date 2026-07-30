@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>المخالفات — لوحة تحكم أواب</title>
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="style.css">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<nav class="admin-nav" id="adminNav"></nav>
+
+<main class="admin-page">
+  <h1 class="page-title"><i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i> المخالفات</h1>
+  <p class="page-sub">سجل جميع المخالفات التي تم تسجيلها أثناء الاختبارات</p>
+
+  <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div><div><div class="stat-value" id="totalViolations">0</div><div class="stat-label">إجمالي المخالفات</div></div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div><div class="stat-value" id="usersWithViolations">0</div><div class="stat-label">مستخدمون لديهم مخالفات</div></div></div>
+    <div style="flex:1; display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap;">
+      <button class="btn btn-outline btn-sm" id="refreshBtn" style="width:auto;"><i class="fas fa-sync"></i> تحديث</button>
+      <button class="btn btn-gold btn-sm" id="setMaxViolationsBtn" style="width:auto;"><i class="fas fa-edit"></i> تعديل الحد الأقصى</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>المستخدم</th>
+          <th>نوع المخالفة</th>
+          <th>الامتحان</th>
+          <th>التاريخ والوقت</th>
+          <th>التفاصيل</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="violationsTableBody">
+        <tr><td colspan="6"><div class="center-loading" style="min-height:120px;"><div class="loader"></div></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="icons.js"></script>
+<script src="admin-shell.js"></script>
+<script>
+  requireAdminAuth(function () {
+    renderAdminNav('violations');
+    loadViolations();
+  });
+
+  function loadViolations() {
+    const tbody = document.getElementById('violationsTableBody');
+    tbody.innerHTML = '<tr><td colspan="6"><div class="center-loading" style="min-height:120px;"><div class="loader"></div></div></td></tr>';
+    
+    getAllViolations().then(function(violations) {
+      let total = 0;
+      let users = Object.keys(violations).length;
+      let rows = [];
+      Object.keys(violations).forEach(function(uid) {
+        const userViolations = violations[uid];
+        Object.keys(userViolations).forEach(function(vid) {
+          const v = userViolations[vid];
+          total++;
+          rows.push({
+            uid: uid,
+            vid: vid,
+            type: v.type || 'غير معروف',
+            examRef: v.examRef || '',
+            timestamp: v.timestamp || 0,
+            details: v.details || ''
+          });
+        });
+      });
+      document.getElementById('totalViolations').textContent = total;
+      document.getElementById('usersWithViolations').textContent = users;
+
+      if (rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">لا توجد مخالفات مسجلة.</td></tr>';
+        return;
+      }
+
+      // ترتيب تنازلي حسب التاريخ
+      rows.sort(function(a,b) { return b.timestamp - a.timestamp; });
+
+      // بناء الصفوف مع جلب أسماء المستخدمين
+      let html = '';
+      let pending = rows.length;
+      let resolved = 0;
+
+      rows.forEach(function(row, index) {
+        db.ref('users/' + row.uid + '/name').once('value').then(function(snap) {
+          const name = snap.val() || row.uid;
+          html += `<tr>
+            <td><a href="user-detail.html?uid=${row.uid}" style="font-weight:700;color:var(--primary);">${escapeHtml(name)}</a></td>
+            <td><span class="status-pill" style="background:#FBEAE6;color:var(--danger);">${escapeHtml(row.type)}</span></td>
+            <td><code style="font-size:11px;background:var(--bg);padding:2px 8px;border-radius:4px;">${escapeHtml(row.examRef)}</code></td>
+            <td>${formatArabicDate(row.timestamp)}</td>
+            <td>${escapeHtml(row.details)}</td>
+            <td>
+              <button class="btn btn-outline btn-xs reset-exam-btn" data-uid="${row.uid}" data-examref="${row.examRef}" style="width:auto;"><i class="fas fa-undo"></i> إلغاء النتيجة</button>
+              <button class="btn btn-ghost btn-xs clear-violations-btn" data-uid="${row.uid}" style="width:auto;"><i class="fas fa-eraser"></i> مسح المخالفات</button>
+            </td>
+          </tr>`;
+          resolved++;
+          if (resolved === pending) {
+            tbody.innerHTML = html;
+            attachEvents();
+          }
+        });
+      });
+
+      function attachEvents() {
+        tbody.querySelectorAll('.reset-exam-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            const uid = btn.dataset.uid;
+            const examRef = btn.dataset.examref;
+            if (!examRef) { alert('مرجع الامتحان غير موجود'); return; }
+            const parts = examRef.split('_');
+            if (parts.length !== 3) { alert('مرجع غير صحيح'); return; }
+            if (!confirm('هل تريد إلغاء نتيجة هذا المستخدم وإعادة الاختبار؟')) return;
+            resetExamAttempt(parts[0], parts[1], parts[2], uid).then(function() {
+              alert('✅ تم إلغاء النتيجة. يمكن للمستخدم إعادة الاختبار.');
+              loadViolations();
+            }).catch(function(err) { alert('❌ فشل: ' + err.message); });
+          });
+        });
+        tbody.querySelectorAll('.clear-violations-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            const uid = btn.dataset.uid;
+            if (!confirm('هل تريد مسح جميع مخالفات هذا المستخدم؟')) return;
+            clearUserViolations(uid).then(function() {
+              alert('✅ تم مسح المخالفات.');
+              loadViolations();
+            }).catch(function(err) { alert('❌ فشل: ' + err.message); });
+          });
+        });
+      }
+    });
+  }
+
+  document.getElementById('refreshBtn').addEventListener('click', loadViolations);
+
+  document.getElementById('setMaxViolationsBtn').addEventListener('click', function() {
+    getMaxViolations().then(function(current) {
+      const newVal = prompt('الحد الأقصى للمخالفات قبل إنهاء الامتحان:', current);
+      if (newVal !== null) {
+        const num = parseInt(newVal, 10);
+        if (!isNaN(num) && num >= 1) {
+          setMaxViolations(num).then(function() {
+            alert('✅ تم تحديث الحد الأقصى إلى ' + num);
+          }).catch(function(err) { alert('❌ فشل: ' + err.message); });
+        } else {
+          alert('يرجى إدخال رقم صحيح أكبر من صفر.');
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>
