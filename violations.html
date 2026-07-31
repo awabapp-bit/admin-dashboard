@@ -6,6 +6,7 @@
 <title>المخالفات — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
@@ -123,14 +124,14 @@
           btn.addEventListener('click', function() {
             const uid = btn.dataset.uid;
             const examRef = btn.dataset.examref;
-            if (!examRef) { alert('مرجع الامتحان غير موجود'); return; }
+            if (!examRef) { showToast('مرجع الامتحان غير موجود', 'warning'); return; }
             const parts = examRef.split('_');
-            if (parts.length !== 3) { alert('مرجع غير صحيح'); return; }
+            if (parts.length !== 3) { showToast('مرجع غير صحيح', 'warning'); return; }
             if (!confirm('هل تريد إلغاء نتيجة هذا المستخدم وإعادة الاختبار؟')) return;
             resetExamAttempt(parts[0], parts[1], parts[2], uid).then(function() {
-              alert('✅ تم إلغاء النتيجة. يمكن للمستخدم إعادة الاختبار.');
+              showToast('✅ تم إلغاء النتيجة. يمكن للمستخدم إعادة الاختبار.', 'success');
               loadViolations();
-            }).catch(function(err) { alert('❌ فشل: ' + err.message); });
+            }).catch(function(err) { showToast('❌ فشل: ' + err.message, 'error'); });
           });
         });
         tbody.querySelectorAll('.clear-violations-btn').forEach(function(btn) {
@@ -138,9 +139,9 @@
             const uid = btn.dataset.uid;
             if (!confirm('هل تريد مسح جميع مخالفات هذا المستخدم؟')) return;
             clearUserViolations(uid).then(function() {
-              alert('✅ تم مسح المخالفات.');
+              showToast('✅ تم مسح المخالفات.', 'success');
               loadViolations();
-            }).catch(function(err) { alert('❌ فشل: ' + err.message); });
+            }).catch(function(err) { showToast('❌ فشل: ' + err.message, 'error'); });
           });
         });
       }
@@ -156,10 +157,10 @@
         const num = parseInt(newVal, 10);
         if (!isNaN(num) && num >= 1) {
           setMaxViolations(num).then(function() {
-            alert('✅ تم تحديث الحد الأقصى إلى ' + num);
-          }).catch(function(err) { alert('❌ فشل: ' + err.message); });
+            showToast('✅ تم تحديث الحد الأقصى إلى ' + num, 'success');
+          }).catch(function(err) { showToast('❌ فشل: ' + err.message, 'error'); });
         } else {
-          alert('يرجى إدخال رقم صحيح أكبر من صفر.');
+          showToast('يرجى إدخال رقم صحيح أكبر من صفر.', 'warning');
         }
       }
     });

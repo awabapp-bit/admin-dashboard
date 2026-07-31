@@ -41,11 +41,13 @@ function renderAdminNav(activePage) {
     '<div class="admin-nav-inner">' +
       '<div class="admin-brand-row">' +
         '<div class="admin-brand">' +
-          '<img src="logo.png" alt="" onerror="this.style.display=\'none\'">' +
-          icon('gear', 'icon-md') +
+          '<span class="admin-brand-mark">' +
+            '<img src="logo.png" alt="" onerror="this.style.display=\'none\'">' +
+            icon('gear', 'icon-sm') +
+          '</span>' +
           '<div class="admin-brand-text">' +
-            '<h2>لوحة تحكم أواب</h2>' +
-            '<span>AWWAB ADMIN PANEL</span>' +
+            '<h2>أواب</h2>' +
+            '<span>ADMIN PANEL</span>' +
           '</div>' +
         '</div>' +
         '<button class="admin-collapse-toggle" id="adminCollapseToggle" type="button" aria-label="طي القائمة الجانبية" aria-expanded="true" title="طي/فتح القائمة">' +
@@ -56,14 +58,36 @@ function renderAdminNav(activePage) {
         '<span class="hamburger-lines"><span></span><span></span><span></span></span>' +
       '</button>' +
       '<div class="admin-links" id="adminLinks">' +
-        '<a href="home.html" title="المسابقات" class="' + (activePage === 'home' ? 'active' : '') + '">' + icon('gear', 'icon-sm') + '<span class="link-label">المسابقات</span></a>' +
-        '<a href="users.html" title="الحسابات" class="' + (activePage === 'users' ? 'active' : '') + '">' + icon('users', 'icon-sm') + '<span class="link-label">الحسابات</span></a>' +
-        '<a href="violations.html" title="المخالفات" class="' + (activePage === 'violations' ? 'active' : '') + '">' + icon('bell', 'icon-sm') + '<span class="link-label">المخالفات</span></a>' +
-        '<a href="support.html" title="الدعم الفني" class="' + (activePage === 'support' ? 'active' : '') + '">' + icon('headset', 'icon-sm') + '<span class="link-label">الدعم الفني</span></a>' +
-        '<button class="danger-link" id="adminLogoutBtn" title="تسجيل الخروج">' + icon('logout', 'icon-sm') + '<span class="link-label">تسجيل الخروج</span></button>' +
+        '<div class="admin-profile-block" id="adminProfileBlock">' +
+          '<div class="ap-avatar" id="adminProfileAvatar">…</div>' +
+          '<div class="ap-info"><div class="ap-name" id="adminProfileName">جارٍ التحميل…</div><div class="ap-role">' + icon('shieldCheck', 'icon-xs') + '<span>مسؤول المنصة</span></div></div>' +
+        '</div>' +
+        '<div class="nav-scroll">' +
+          '<div class="nav-group">' +
+            '<span class="nav-group-label">الرئيسية</span>' +
+            '<a href="home.html" title="لوحة القيادة والمحتوى" class="' + (activePage === 'home' ? 'active' : '') + '">' + icon('gauge', 'icon-sm') + '<span class="link-label">لوحة القيادة</span></a>' +
+          '</div>' +
+          '<div class="nav-group">' +
+            '<span class="nav-group-label">المستخدمون</span>' +
+            '<a href="users.html" title="الحسابات" class="' + (activePage === 'users' ? 'active' : '') + '">' + icon('users', 'icon-sm') + '<span class="link-label">الحسابات</span></a>' +
+            '<a href="violations.html" title="المخالفات" class="' + (activePage === 'violations' ? 'active' : '') + '">' + icon('bell', 'icon-sm') + '<span class="link-label">المخالفات</span><span class="nav-badge" id="violationsNavBadge" style="display:none;">0</span></a>' +
+          '</div>' +
+          '<div class="nav-group">' +
+            '<span class="nav-group-label">النظام</span>' +
+            '<a href="support.html" title="الدعم الفني" class="' + (activePage === 'support' ? 'active' : '') + '">' + icon('headset', 'icon-sm') + '<span class="link-label">الدعم الفني</span></a>' +
+          '</div>' +
+        '</div>' +
+        '<div class="nav-foot">' +
+          '<div class="theme-toggle-row">' +
+            '<span class="ttr-label">' + icon('sun', 'icon-sm') + '<span class="link-label">الوضع الليلي</span></span>' +
+            '<button class="theme-switch" id="adminThemeSwitch" type="button" aria-label="تبديل الوضع الليلي"></button>' +
+          '</div>' +
+          '<button class="danger-link" id="adminLogoutBtn" title="تسجيل الخروج">' + icon('logout', 'icon-sm') + '<span class="link-label">تسجيل الخروج</span></button>' +
+        '</div>' +
       '</div>' +
     '</div>' +
-    '<div class="admin-sidebar-overlay" id="adminSidebarOverlay"></div>';
+    '<div class="admin-sidebar-overlay" id="adminSidebarOverlay"></div>' +
+    '<div class="toast-stack" id="adminToastStack"></div>';
 
   document.getElementById('adminLogoutBtn').addEventListener('click', function () {
     auth.signOut().then(function () { window.location.href = 'index.html'; });
@@ -71,7 +95,124 @@ function renderAdminNav(activePage) {
 
   setupAdminMobileNav();
   setupAdminSidebarCollapse();
+  setupAdminThemeToggle();
+  loadAdminProfileBlock();
+  loadViolationsNavBadge();
 }
+
+/**
+ * يعرض بيانات المسؤول الحالي (الاسم + حرف الأفاتار) أعلى القائمة الجانبية.
+ */
+function loadAdminProfileBlock() {
+  const nameEl = document.getElementById('adminProfileName');
+  const avatarEl = document.getElementById('adminProfileAvatar');
+  if (!nameEl || !avatarEl || typeof auth === 'undefined') return;
+  const user = auth.currentUser;
+  if (!user) return;
+
+  function apply(name) {
+    const label = name || (user.email ? user.email.split('@')[0] : 'المسؤول');
+    nameEl.textContent = label;
+    avatarEl.textContent = label.trim().charAt(0).toUpperCase() || 'A';
+  }
+
+  if (typeof db !== 'undefined') {
+    db.ref('users/' + user.uid + '/name').once('value')
+      .then(function (snap) { apply(snap.val()); })
+      .catch(function () { apply(null); });
+  } else {
+    apply(null);
+  }
+}
+
+/**
+ * يجلب إجمالي عدد المخالفات المسجّلة ويعرضه كشارة جنب رابط "المخالفات".
+ */
+function loadViolationsNavBadge() {
+  const badge = document.getElementById('violationsNavBadge');
+  if (!badge || typeof db === 'undefined') return;
+  db.ref('violations').once('value').then(function (snap) {
+    const data = snap.val() || {};
+    let total = 0;
+    Object.keys(data).forEach(function (uid) {
+      total += Object.keys(data[uid] || {}).length;
+    });
+    if (total > 0) {
+      badge.textContent = total > 99 ? '99+' : String(total);
+      badge.style.display = 'inline-flex';
+    }
+  }).catch(function () {});
+}
+
+/* ============================================================
+   🌙 الوضع الليلي (Dark Mode)
+   ============================================================ */
+
+/** يطبّق الثيم المحفوظ فورًا (تُستدعى من سكربت مضمّن في <head> لمنع الوميض) */
+function getAdminTheme() {
+  try { return localStorage.getItem('adminTheme'); } catch (e) { return null; }
+}
+
+function applyAdminTheme(theme) {
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+}
+
+function setupAdminThemeToggle() {
+  const btn = document.getElementById('adminThemeSwitch');
+  if (!btn) return;
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  btn.classList.toggle('on', isDark);
+
+  btn.addEventListener('click', function () {
+    const nowDark = !document.documentElement.hasAttribute('data-theme');
+    applyAdminTheme(nowDark ? 'dark' : 'light');
+    btn.classList.toggle('on', nowDark);
+    try { localStorage.setItem('adminTheme', nowDark ? 'dark' : 'light'); } catch (e) {}
+  });
+}
+
+/* ============================================================
+   🔔 إشعارات Toast — بديل عصري لرسائل alert()
+   ============================================================ */
+
+/**
+ * يعرض إشعار Toast مؤقت أسفل يسار الشاشة.
+ * type: 'success' | 'error' | 'warning' | 'info' (افتراضي)
+ */
+function showToast(message, type) {
+  let stack = document.getElementById('adminToastStack');
+  if (!stack) {
+    stack = document.createElement('div');
+    stack.className = 'toast-stack';
+    stack.id = 'adminToastStack';
+    document.body.appendChild(stack);
+  }
+
+  const iconName = type === 'success' ? 'circleCheck' : type === 'error' ? 'circleXmark' : type === 'warning' ? 'bell' : 'circleInfo';
+
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.innerHTML =
+    '<span class="toast-icon">' + icon(iconName, 'icon-sm') + '</span>' +
+    '<span class="toast-msg"></span>' +
+    '<button class="toast-close" aria-label="إغلاق">' + icon('xmark', 'icon-sm') + '</button>';
+  el.querySelector('.toast-msg').textContent = message;
+  stack.appendChild(el);
+
+  function remove() {
+    el.classList.add('leaving');
+    setTimeout(function () { el.remove(); }, 200);
+  }
+  el.querySelector('.toast-close').addEventListener('click', remove);
+  const timer = setTimeout(remove, 4200);
+  el.addEventListener('mouseenter', function () { clearTimeout(timer); });
+}
+window.showToast = showToast;
 
 /**
  * يفعّل زر السهم أعلى القائمة الجانبية ليطويها لعرض الأيقونات فقط

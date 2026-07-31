@@ -6,6 +6,7 @@
 <title>لوحة تحكم أواب — المحتوى التعليمي</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 </head>
 <body>
 
@@ -20,10 +21,41 @@
     <a href="add-competition.html" class="btn btn-gold" style="width:auto;" id="addBtn">إضافة محتوى جديد</a>
   </div>
 
-  <div class="stat-grid" id="statGrid"></div>
+  <div class="stat-grid" id="statGrid">
+    <div class="skel-stat-grid">
+      <div class="skel skel-stat-card"></div><div class="skel skel-stat-card"></div>
+      <div class="skel skel-stat-card"></div><div class="skel skel-stat-card"></div>
+    </div>
+  </div>
+
+  <div class="dash-grid" id="dashGrid" style="display:none;">
+    <div class="dash-card">
+      <h3 id="newUsersChartTitle">المستخدمون الجدد — آخر 30 يوم</h3>
+      <p class="dash-sub">عدد الحسابات الجديدة يوميًا</p>
+      <div class="bar-chart" id="newUsersChart"></div>
+      <div class="bar-chart-labels"><span>قبل 30 يوم</span><span>اليوم</span></div>
+    </div>
+    <div class="dash-card">
+      <h3>أكثر المحاضرات تفاعلاً</h3>
+      <p class="dash-sub">حسب عدد المستخدمين الذين بدأوها</p>
+      <div class="rank-list" id="topLessonsList"></div>
+    </div>
+  </div>
+
+  <div class="dash-card" id="activityCard" style="display:none; margin-bottom:28px;">
+    <h3>آخر الأنشطة</h3>
+    <p class="dash-sub">أحدث التسجيلات وتسليمات الاختبارات والمخالفات</p>
+    <div class="activity-feed" id="activityFeed"></div>
+  </div>
+
+  <div class="admin-page-head" style="border-bottom:none; margin-bottom:14px; padding-bottom:0;">
+    <h2 class="page-title" style="font-size:18px;">كل الكورسات والمسابقات</h2>
+  </div>
 
   <div id="compsList">
-    <div class="center-loading"><div class="loader"></div></div>
+    <div class="skel skel-row"></div>
+    <div class="skel skel-row"></div>
+    <div class="skel skel-row"></div>
   </div>
 </main>
 
@@ -43,23 +75,184 @@
   });
 
   function loadStats() {
-    Promise.all([db.ref('competitions').once('value'), db.ref('users').once('value')]).then(function (results) {
+    Promise.all([
+      db.ref('competitions').once('value'),
+      db.ref('users').once('value'),
+      db.ref('violations').once('value'),
+      db.ref('examAttempts').once('value'),
+      db.ref('userProgress').once('value')
+    ]).then(function (results) {
       const comps = results[0].val() || {};
-      const users = results[1].val() || {};
-      let lessonCount = 0;
-      Object.keys(comps).forEach(function (cid) {
-        lessonCount += comps[cid].lessons ? Object.keys(comps[cid].lessons).length : 0;
+      const usersObj = results[1].val() || {};
+      const violations = results[2].val() || {};
+      const examAttempts = results[3].val() || {};
+      const userProgress = results[4].val() || {};
+
+      const users = Object.keys(usersObj).map(function (uid) { return Object.assign({ uid: uid }, usersObj[uid]); });
+      const realUsers = users.filter(function (u) { return u.isAdmin !== true; });
+
+      let lessonCount = 0, examCount = 0, competitionOnlyCount = 0;
+      const compIds = Object.keys(comps);
+      compIds.forEach(function (cid) {
+        const lessons = comps[cid].lessons || {};
+        const lessonIds = Object.keys(lessons);
+        lessonCount += lessonIds.length;
+        lessonIds.forEach(function (lid) {
+          examCount += lessons[lid].exams ? Object.keys(lessons[lid].exams).length : 0;
+        });
+        if (comps[cid].type === 'competition') competitionOnlyCount++;
       });
+
+      const activeUsers = realUsers.filter(function (u) { return u.blocked !== true; }).length;
+
+      let violationsTotal = 0;
+      Object.keys(violations).forEach(function (uid) { violationsTotal += Object.keys(violations[uid] || {}).length; });
+
+      const now = Date.now();
+      let submissionsToday = 0;
+      Object.keys(examAttempts).forEach(function (cid) {
+        Object.keys(examAttempts[cid]).forEach(function (lid) {
+          Object.keys(examAttempts[cid][lid]).forEach(function (eid) {
+            Object.keys(examAttempts[cid][lid][eid]).forEach(function (uid) {
+              const a = examAttempts[cid][lid][eid][uid];
+              if (a && a.submittedAt && (now - a.submittedAt) < 86400000) submissionsToday++;
+            });
+          });
+        });
+      });
+
+      let lastReg = 0;
+      realUsers.forEach(function (u) { if ((u.createdAt || 0) > lastReg) lastReg = u.createdAt || 0; });
+
       document.getElementById('statGrid').innerHTML =
-        statCard('trophy', Object.keys(comps).length, 'كورس/مسابقة') +
+        statCard('users', realUsers.length, 'إجمالي المستخدمين') +
+        statCard('circleCheck', activeUsers, 'مستخدم نشط') +
         statCard('listCheck', lessonCount, 'محاضرة') +
-        statCard('users', Math.max(Object.keys(users).length - 1, 0), 'حساب مستخدم');
+        statCard('trophy', competitionOnlyCount, 'مسابقة') +
+        statCard('pen', examCount, 'اختبار') +
+        statCard('fire', submissionsToday, 'مشاركة اليوم') +
+        statCard('bell', violationsTotal, 'مخالفة مسجّلة') +
+        statCard('clock', lastReg ? formatArabicDate(lastReg) : '—', 'آخر تسجيل', true);
+
+      renderNewUsersChart(realUsers);
+      renderTopLessons(comps, userProgress);
+      renderActivityFeed(realUsers, violations, examAttempts, comps);
+
+      document.getElementById('dashGrid').style.display = '';
+      document.getElementById('activityCard').style.display = '';
     });
   }
 
-  function statCard(iconName, value, label) {
+  function statCard(iconName, value, label, small) {
     return '<div class="stat-card"><div class="stat-icon">' + icon(iconName, 'icon-md') + '</div>' +
-      '<div><div class="stat-value">' + value + '</div><div class="stat-label">' + label + '</div></div></div>';
+      '<div><div class="stat-value"' + (small ? ' style="font-size:15px;"' : '') + '>' + value + '</div><div class="stat-label">' + label + '</div></div></div>';
+  }
+
+  function renderNewUsersChart(realUsers) {
+    const days = 30;
+    const counts = new Array(days).fill(0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    realUsers.forEach(function (u) {
+      if (!u.createdAt) return;
+      const d = new Date(u.createdAt); d.setHours(0, 0, 0, 0);
+      const diffDays = Math.round((today - d) / 86400000);
+      if (diffDays >= 0 && diffDays < days) counts[days - 1 - diffDays]++;
+    });
+    const max = Math.max.apply(null, counts.concat([1]));
+    document.getElementById('newUsersChart').innerHTML = counts.map(function (c) {
+      const h = Math.max(Math.round((c / max) * 100), c > 0 ? 6 : 2);
+      return '<div class="bar-col" title="' + c + ' حساب جديد"><span class="bar-tip">' + (c > 0 ? c : '') + '</span><div class="bar" style="height:' + h + '%;"></div></div>';
+    }).join('');
+  }
+
+  function renderTopLessons(comps, userProgress) {
+    const counts = {};
+    const titles = {};
+    Object.keys(comps).forEach(function (cid) {
+      const lessons = comps[cid].lessons || {};
+      Object.keys(lessons).forEach(function (lid) {
+        titles[cid + '_' + lid] = (lessons[lid].title || 'محاضرة') + ' — ' + (comps[cid].title || '');
+        counts[cid + '_' + lid] = 0;
+      });
+    });
+    Object.keys(userProgress).forEach(function (uid) {
+      const compsProg = userProgress[uid] || {};
+      Object.keys(compsProg).forEach(function (cid) {
+        const lessonsProg = compsProg[cid] || {};
+        Object.keys(lessonsProg).forEach(function (lid) {
+          const key = cid + '_' + lid;
+          if (key in counts) counts[key]++;
+        });
+      });
+    });
+
+    const top = Object.keys(counts)
+      .map(function (k) { return { key: k, title: titles[k], count: counts[k] }; })
+      .sort(function (a, b) { return b.count - a.count; })
+      .filter(function (r) { return r.count > 0; })
+      .slice(0, 6);
+
+    const list = document.getElementById('topLessonsList');
+    if (top.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-muted); font-size:12.5px;">لا يوجد تفاعل مسجّل بعد.</p>';
+      return;
+    }
+    const max = top[0].count || 1;
+    list.innerHTML = top.map(function (r, i) {
+      return '<div class="rank-item">' +
+        '<div class="rank-no">' + (i + 1) + '</div>' +
+        '<div class="rank-body"><div class="rank-name">' + escapeHtml(r.title) + '</div>' +
+        '<div class="rank-track"><div class="rank-fill" style="width:' + Math.round((r.count / max) * 100) + '%;"></div></div></div>' +
+        '<div class="rank-count">' + r.count + ' مستخدم</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderActivityFeed(realUsers, violations, examAttempts, comps) {
+    const events = [];
+
+    realUsers.forEach(function (u) {
+      if (!u.createdAt) return;
+      events.push({ ts: u.createdAt, type: 'user', text: '<b>' + escapeHtml(u.name || u.email || 'مستخدم') + '</b> سجّل حسابًا جديدًا' });
+    });
+
+    Object.keys(violations).forEach(function (uid) {
+      Object.keys(violations[uid] || {}).forEach(function (vid) {
+        const v = violations[uid][vid];
+        if (!v || !v.timestamp) return;
+        events.push({ ts: v.timestamp, type: 'violation', text: 'تسجيل <b>مخالفة</b> (' + escapeHtml(v.type || 'غير معروف') + ')' });
+      });
+    });
+
+    Object.keys(examAttempts).forEach(function (cid) {
+      Object.keys(examAttempts[cid]).forEach(function (lid) {
+        Object.keys(examAttempts[cid][lid]).forEach(function (eid) {
+          Object.keys(examAttempts[cid][lid][eid]).forEach(function (uid) {
+            const a = examAttempts[cid][lid][eid][uid];
+            if (a && a.submittedAt) {
+              events.push({ ts: a.submittedAt, type: 'comp', text: 'تسليم اختبار في <b>' + escapeHtml((comps[cid] && comps[cid].title) || 'محتوى') + '</b>' });
+            }
+          });
+        });
+      });
+    });
+
+    events.sort(function (a, b) { return b.ts - a.ts; });
+    const top = events.slice(0, 8);
+    const feed = document.getElementById('activityFeed');
+
+    if (top.length === 0) {
+      feed.innerHTML = '<p style="color:var(--text-muted); font-size:12.5px;">لا يوجد نشاط مسجّل بعد.</p>';
+      return;
+    }
+
+    const iconFor = { user: 'user', violation: 'bell', comp: 'trophy' };
+    feed.innerHTML = top.map(function (e) {
+      return '<div class="activity-item act-' + e.type + '">' +
+        '<div class="act-icon">' + icon(iconFor[e.type], 'icon-sm') + '</div>' +
+        '<div class="act-body"><div class="act-text">' + e.text + '</div><div class="act-time">' + formatArabicDate(e.ts) + '</div></div>' +
+      '</div>';
+    }).join('');
   }
 
   function loadCompetitions() {
@@ -110,7 +303,9 @@
       wrap.querySelectorAll('.delete-comp-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
           if (!confirm('هل أنت متأكد من حذف هذا المحتوى نهائيًا؟ سيتم حذف كل محاضراتها وأسئلتها.')) return;
-          db.ref('competitions/' + btn.dataset.id).remove();
+          db.ref('competitions/' + btn.dataset.id).remove()
+            .then(function () { showToast('تم حذف المحتوى بنجاح', 'success'); })
+            .catch(function (err) { showToast('تعذر الحذف: ' + err.message, 'error'); });
         });
       });
     });

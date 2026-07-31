@@ -6,6 +6,7 @@
 <title>دخول المسؤول — منصة أواب الإلكترونية</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 </head>
 <body>
 
@@ -33,7 +34,7 @@
           <button type="button" class="password-toggle" id="togglePass" aria-label="إظهار كلمة المرور"></button>
         </div>
       </div>
-      <button type="submit" class="btn btn-primary" id="loginBtn">دخول لوحة التحكم</button>
+      <button type="submit" class="btn btn-primary" id="loginBtn"><span>دخول لوحة التحكم</span></button>
     </form>
 
     <div class="auth-switch"><a href="https://awabapp-bit.github.io/awab-user-site/">← العودة لموقع المنصة</a></div>
@@ -92,7 +93,7 @@
     }
 
     loginBtn.disabled = true;
-    loginBtn.textContent = 'جارٍ الدخول...';
+    loginBtn.classList.add('is-loading');
 
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
       .then(function () { return auth.signInWithEmailAndPassword(ADMIN_REAL_EMAIL, ADMIN_REAL_PASSWORD); })
@@ -111,11 +112,11 @@
             .then(function () { window.location.href = 'home.html'; })
             .catch(function (err2) {
               showMsg('تعذر تجهيز حساب المسؤول: ' + (err2.code || err2.message), 'error');
-              loginBtn.disabled = false; loginBtn.textContent = 'دخول لوحة التحكم';
+              loginBtn.disabled = false; loginBtn.classList.remove('is-loading');
             });
         } else {
           showMsg('حدث خطأ أثناء الدخول (' + (err.code || 'غير معروف') + ')', 'error');
-          loginBtn.disabled = false; loginBtn.textContent = 'دخول لوحة التحكم';
+          loginBtn.disabled = false; loginBtn.classList.remove('is-loading');
         }
       });
   });

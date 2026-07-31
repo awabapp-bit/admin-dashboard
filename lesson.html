@@ -6,6 +6,7 @@
 <title>محاضرة — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 </head>
 <body>
 
@@ -265,9 +266,9 @@
     const url = urlInput.value.trim();
     const type = document.querySelector('input[name="materialType"]:checked').value;
 
-    if (!name) { alert('من فضلك اكتب اسم المرفق'); return; }
-    if (!url) { alert('من فضلك الصق رابط الملف'); return; }
-    try { new URL(url); } catch (e) { alert('الرابط غير صحيح'); return; }
+    if (!name) { showToast('من فضلك اكتب اسم المرفق', 'warning'); return; }
+    if (!url) { showToast('من فضلك الصق رابط الملف', 'warning'); return; }
+    try { new URL(url); } catch (e) { showToast('الرابط غير صحيح', 'warning'); return; }
 
     const materialId = 'm' + Date.now();
     materials[materialId] = { name: name, url: url, type: type, createdAt: Date.now() };
@@ -443,12 +444,12 @@
       });
       Promise.all(promises).then(function () {
         if (failCount > 0) {
-          alert('تنبيه: تعذر إرسال الإشعار لـ ' + failCount + ' من ' + uids.length + ' مشترك. الأرجح إن قواعد Firebase (Realtime Database Rules) القديمة لسه شغالة ولازم تنسخ محتوى ملف firebase-rules.json وتلزقه في Firebase Console > Realtime Database > Rules ثم Publish.');
+          showToast('تنبيه: تعذر إرسال الإشعار لـ ' + failCount + ' من ' + uids.length + ' مشترك. الأرجح إن قواعد Firebase (Realtime Database Rules) القديمة لسه شغالة ولازم تنسخ محتوى ملف firebase-rules.json وتلزقه في Firebase Console > Realtime Database > Rules ثم Publish.', 'error');
         }
       });
     }).catch(function (err) {
       console.error('تعذر قراءة قائمة المشتركين:', err);
-      alert('تعذر قراءة قائمة المشتركين في هذا الكورس (enrollments/' + compId + '): ' + err.message);
+      showToast('تعذر قراءة قائمة المشتركين في هذا الكورس (enrollments/' + compId + '): ' + err.message, 'error');
     });
   }
 </script>

@@ -6,6 +6,7 @@
 <title>الحسابات — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 </head>
 <body>
 
@@ -132,7 +133,7 @@
         const uid = btn.dataset.uid;
         if (!confirm('هل تريد إعادة تعيين كل نقاط "' + btn.dataset.name + '" إلى صفر؟ سيتم مسح كل تقدّمه في كل الكورسات والمسابقات ولا يمكن التراجع.')) return;
         Promise.all([db.ref('users/' + uid + '/points').set(0), db.ref('userProgress/' + uid).remove()])
-          .catch(function (err) { alert('تعذر إعادة التعيين: ' + err.message); });
+          .catch(function (err) { showToast('تعذر إعادة التعيين: ' + err.message, 'error'); });
       });
     });
 
@@ -144,7 +145,7 @@
           ? 'إلغاء حظر "' + btn.dataset.name + '"؟ سيتمكن من الدخول للمنصة مرة أخرى.'
           : 'حظر "' + btn.dataset.name + '"؟ لن يتمكن من الدخول للمنصة حتى تُلغي الحظر.';
         if (!confirm(msg)) return;
-        db.ref('users/' + uid + '/blocked').set(!currentlyBlocked).catch(function (err) { alert('تعذر تنفيذ الإجراء: ' + err.message); });
+        db.ref('users/' + uid + '/blocked').set(!currentlyBlocked).catch(function (err) { showToast('تعذر تنفيذ الإجراء: ' + err.message, 'error'); });
       });
     });
 
@@ -153,11 +154,11 @@
         const uid = btn.dataset.uid;
         const name = btn.dataset.name || btn.dataset.email || 'هذا المستخدم';
         if (!confirm('هل أنت متأكد من حذف حساب "' + name + '" نهائيًا؟ سيُحذف نهائيًا كل شيء: نقاطه، تقدّمه، اشتراكاته في كل المسابقات، إشعاراته، ومحادثات الدعم الفني معه. لا يمكن التراجع عن هذا الإجراء.')) return;
-        if (prompt('للتأكيد، اكتب "حذف" في المربع التالي:') !== 'حذف') { alert('تم إلغاء الحذف.'); return; }
+        if (prompt('للتأكيد، اكتب "حذف" في المربع التالي:') !== 'حذف') { showToast('تم إلغاء الحذف.', 'warning'); return; }
         btn.disabled = true;
         btn.textContent = 'جارٍ الحذف...';
         deleteUserAccountData(uid).catch(function (err) {
-          alert('تعذر حذف الحساب: ' + err.message);
+          showToast('تعذر حذف الحساب: ' + err.message, 'error');
           btn.disabled = false;
           btn.innerHTML = icon('trash', 'icon-sm') + ' حذف الحساب';
         });

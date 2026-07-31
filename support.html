@@ -7,6 +7,7 @@
   <link rel="icon" href="logo.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
+  <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
   <style>
     :root {
       --sup-bg-gradient: linear-gradient(135deg, var(--bg) 0%, #eef1f6 50%, #e4e8f0 100%);
@@ -20,7 +21,7 @@
       --sup-text-muted: var(--text-muted);
       --sup-danger: var(--danger);
       --sup-success: var(--success);
-      --sup-message-admin: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      --sup-message-admin: linear-gradient(135deg, var(--primary) 0%, var(--primary-navy) 100%);
       --sup-message-user: #f1f5f9;
       --sup-input-bg: #ffffff;
       --sup-input-border: var(--border);
@@ -29,6 +30,42 @@
       --sup-chat-messages-bg: rgba(243,245,249,0.6);
       --sup-recording-bg: rgba(255,255,255,0.98);
       --sup-sidebar-bg: rgba(243,245,249,0.92);
+      /* أسطح زجاجية إضافية كانت مكتوبة بقيم ثابتة مباشرة داخل القواعد
+         تحت (offline screen، لوح المحادثة، الهيدر، شريط الإدخال، أفاتار
+         المستخدم، خط التمرير...)، فمكنتش بتستجيب للوضع الليلي خالص. */
+      --sup-offline-bg: rgba(243,245,249,0.92);
+      --sup-offline-card-bg: rgba(255,255,255,0.85);
+      --sup-chatpane-bg: rgba(255,255,255,0.1);
+      --sup-placeholder-bg: rgba(243,245,249,0.95);
+      --sup-bar-bg: rgba(255,255,255,0.45);
+      --sup-user-avatar-bg: rgba(0,0,0,0.04);
+      --sup-user-avatar-border: rgba(0,0,0,0.06);
+      --sup-scrollbar-thumb: rgba(0,0,0,0.08);
+      --sup-active-tint-bg: rgba(29,78,216,0.1);
+      --sup-active-tint-border: rgba(29,78,216,0.2);
+    }
+    /* نسخة الوضع الليلي من كل متغيّرات صفحة الدعم الفني أعلاه */
+    :root[data-theme="dark"] {
+      --sup-bg-gradient: linear-gradient(135deg, var(--bg) 0%, #0d1426 50%, #0a0f1f 100%);
+      --sup-card-bg: rgba(19,27,48,0.7);
+      --sup-primary-glow: rgba(102,153,255,0.2);
+      --sup-message-user: var(--border-soft);
+      --sup-input-bg: #0F1728;
+      --sup-dropdown-bg: rgba(19,27,48,0.97);
+      --sup-hover-bg: rgba(102,153,255,0.12);
+      --sup-chat-messages-bg: rgba(6,10,20,0.6);
+      --sup-recording-bg: rgba(19,27,48,0.98);
+      --sup-sidebar-bg: rgba(16,23,42,0.92);
+      --sup-offline-bg: rgba(6,10,20,0.92);
+      --sup-offline-card-bg: rgba(19,27,48,0.85);
+      --sup-chatpane-bg: rgba(255,255,255,0.03);
+      --sup-placeholder-bg: rgba(6,10,20,0.95);
+      --sup-bar-bg: rgba(19,27,48,0.45);
+      --sup-user-avatar-bg: rgba(255,255,255,0.06);
+      --sup-user-avatar-border: rgba(255,255,255,0.1);
+      --sup-scrollbar-thumb: rgba(255,255,255,0.14);
+      --sup-active-tint-bg: rgba(102,153,255,0.14);
+      --sup-active-tint-border: rgba(102,153,255,0.28);
     }
     #support-root *{box-sizing:border-box}
     #support-root{font-family:'Cairo',sans-serif}
@@ -36,9 +73,9 @@
 
     .support-shell{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow-x:hidden}
 
-    .offline-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(243,245,249,0.92);backdrop-filter:blur(25px);z-index:99999;display:flex;justify-content:center;align-items:center;opacity:0;pointer-events:none;transform:scale(1.08);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1)}
+    .offline-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--sup-offline-bg);backdrop-filter:blur(25px);z-index:99999;display:flex;justify-content:center;align-items:center;opacity:0;pointer-events:none;transform:scale(1.08);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1)}
     .offline-screen.active{opacity:1;pointer-events:all;transform:scale(1)}
-    .offline-content{text-align:center;padding:40px;max-width:420px;width:90%;background:rgba(255,255,255,0.85);border:1px solid var(--sup-card-border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+    .offline-content{text-align:center;padding:40px;max-width:420px;width:90%;background:var(--sup-offline-card-bg);border:1px solid var(--sup-card-border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
     .offline-icon-wrapper{width:100px;height:100px;border-radius:50%;background:rgba(217,45,32,0.1);display:flex;justify-content:center;align-items:center;margin:0 auto 25px;position:relative}
     .offline-icon-wrapper::after{content:'';position:absolute;width:100%;height:100%;border-radius:50%;border:2px solid rgba(217,45,32,0.3);animation:supPulseGlow 2s infinite}
     @keyframes supPulseGlow{0%{transform:scale(1);opacity:1}100%{transform:scale(1.4);opacity:0}}
@@ -66,11 +103,11 @@
 
     .conv-list{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
     .conv-list::-webkit-scrollbar{width:5px}
-    .conv-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:3px}
+    .conv-list::-webkit-scrollbar-thumb{background:var(--sup-scrollbar-thumb);border-radius:3px}
     .conv-item{display:flex;align-items:center;gap:15px;padding:12px 18px;border-radius:16px;cursor:pointer;position:relative}
     .conv-item:hover{background:var(--sup-hover-bg)}
-    .conv-item.active{background:rgba(29,78,216,0.1);border:1px solid rgba(29,78,216,0.2)}
-    .user-avatar{width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.06);display:flex;justify-content:center;align-items:center;font-size:20px;color:var(--sup-primary);flex-shrink:0}
+    .conv-item.active{background:var(--sup-active-tint-bg);border:1px solid var(--sup-active-tint-border)}
+    .user-avatar{width:48px;height:48px;border-radius:50%;background:var(--sup-user-avatar-bg);border:1px solid var(--sup-user-avatar-border);display:flex;justify-content:center;align-items:center;font-size:20px;color:var(--sup-primary);flex-shrink:0}
     .conv-details{flex:1;min-width:0}
     .conv-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
     .conv-name{font-weight:700;font-size:14px;color:var(--sup-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -79,11 +116,11 @@
     .unread-badge{background:var(--sup-danger);color:#fff;font-size:10px;font-weight:bold;min-width:18px;height:18px;border-radius:50%;display:flex;justify-content:center;align-items:center;padding:0 4px}
     .no-conv-msg{text-align:center;color:var(--sup-text-muted);padding:40px 20px;font-size:14px}
 
-    .chat-pane{flex:1;display:flex;flex-direction:column;height:100%;background:rgba(255,255,255,0.1);position:relative}
-    .chat-placeholder{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:15px;color:var(--sup-text-muted);z-index:5;background:rgba(243,245,249,0.95)}
+    .chat-pane{flex:1;display:flex;flex-direction:column;height:100%;background:var(--sup-chatpane-bg);position:relative}
+    .chat-placeholder{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:15px;color:var(--sup-text-muted);z-index:5;background:var(--sup-placeholder-bg)}
     .chat-placeholder i{font-size:60px;background:linear-gradient(135deg,var(--sup-primary),var(--sup-accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0.8}
 
-    .chat-header{padding:15px 25px;background:rgba(255,255,255,0.45);border-bottom:1px solid var(--sup-card-border);display:flex;align-items:center;gap:15px}
+    .chat-header{padding:15px 25px;background:var(--sup-bar-bg);border-bottom:1px solid var(--sup-card-border);display:flex;align-items:center;gap:15px}
     .back-btn{display:none;background:none;border:none;color:var(--sup-text);font-size:20px;cursor:pointer;width:36px;height:36px;border-radius:50%;justify-content:center;align-items:center}
     .back-btn:hover{background:var(--sup-hover-bg)}
     .header-user-info{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
@@ -95,7 +132,7 @@
 
     .chat-messages{flex:1;padding:25px;overflow-y:auto;display:flex;flex-direction:column;gap:15px;background:var(--sup-chat-messages-bg)}
     .chat-messages::-webkit-scrollbar{width:6px}
-    .chat-messages::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:3px}
+    .chat-messages::-webkit-scrollbar-thumb{background:var(--sup-scrollbar-thumb);border-radius:3px}
 
     .msg-group{display:flex;flex-direction:column;max-width:75%}
     .msg-group.admin{align-self:flex-start;align-items:flex-end}
@@ -112,7 +149,7 @@
     .voice-play-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;color:#fff;cursor:pointer;display:flex;justify-content:center;align-items:center;font-size:14px;flex-shrink:0}
     .msg-group.user .voice-play-btn{background:var(--sup-hover-bg);color:var(--sup-text)}
     .voice-progress-bar{flex:1;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;position:relative;cursor:pointer}
-    .msg-group.user .voice-progress-bar{background:rgba(0,0,0,0.08)}
+    .msg-group.user .voice-progress-bar{background:var(--sup-scrollbar-thumb)}
     .voice-progress-fill{height:100%;width:0%;background:#fff;border-radius:2px;position:absolute;top:0;right:0}
     .msg-group.user .voice-progress-fill{background:var(--sup-primary)}
     .voice-time{font-size:11px;color:#fff;min-width:35px}
@@ -123,7 +160,7 @@
     .msg-file-download:hover{opacity:0.85}
     .file-name-txt{max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    .chat-input-bar{padding:20px 25px;background:rgba(255,255,255,0.45);border-top:1px solid var(--sup-card-border);display:flex;align-items:center;gap:12px;position:relative}
+    .chat-input-bar{padding:20px 25px;background:var(--sup-bar-bg);border-top:1px solid var(--sup-card-border);display:flex;align-items:center;gap:12px;position:relative}
     .chat-input-wrapper{flex:1;display:flex;align-items:center;background:var(--sup-input-bg);border:1px solid var(--sup-input-border);border-radius:16px;padding:5px 15px}
     .chat-input-wrapper:focus-within{border-color:var(--sup-primary);box-shadow:0 0 15px var(--sup-primary-glow)}
     .chat-input-wrapper textarea{width:100%;background:none;border:none;outline:none;color:var(--sup-text);font-size:14px;resize:none;padding:8px 0;height:38px;max-height:100px;line-height:22px;font-family:'Cairo',sans-serif}
@@ -476,7 +513,7 @@
   // ----- Send Message -----
   async function sendMessage(type, text='', fileUrl='', fileName='') {
     if (!selectedUserId) return;
-    if (!navigator.onLine) { alert('لا يوجد اتصال بالإنترنت'); return; }
+    if (!navigator.onLine) { showToast('لا يوجد اتصال بالإنترنت', 'error'); return; }
     const msgId = db.ref().push().key;
     await db.ref(`messages/${selectedUserId}/${msgId}`).set({ id:msgId, sender:'admin', text, type, timestamp:Date.now(), fileUrl, fileName });
     const snippets = { text, image:'📷 صورة', voice:'🎤 رسالة صوتية', audio:'🎵 ملف صوتي', file:'📁 ملف مرفق' };
@@ -510,7 +547,7 @@
   function stopTracks() { if (localStream) { localStream.getTracks().forEach(t=>t.stop()); localStream=null; } }
 
   async function startRecording() {
-    if (!navigator.onLine) { alert('لا يوجد اتصال'); return; }
+    if (!navigator.onLine) { showToast('لا يوجد اتصال', 'error'); return; }
     try {
       localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const types = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus','audio/ogg'];
@@ -527,7 +564,7 @@
         const s = Math.floor((Date.now()-recordStartTime)/1000);
         recDuration.textContent = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
       }, 1000);
-    } catch(err) { console.error(err); alert('لا يمكن الوصول للميكروفون — تأكد من إعطاء الصلاحية'); }
+    } catch(err) { console.error(err); showToast('لا يمكن الوصول للميكروفون — تأكد من إعطاء الصلاحية', 'error'); }
   }
 
   $('btn-cancel-recording').addEventListener('click', () => {
@@ -541,7 +578,7 @@
     if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
     mediaRecorder.onstop = async () => {
       stopTracks();
-      if (!audioChunks.length) { alert('لم يتم التقاط صوت'); return; }
+      if (!audioChunks.length) { showToast('لم يتم التقاط صوت', 'warning'); return; }
       let ext = 'webm';
       if (currentMimeType.includes('mp4')) ext = 'mp4';
       else if (currentMimeType.includes('ogg')) ext = 'ogg';
@@ -553,7 +590,7 @@
         const b64 = await toBase64(file, 'voice');
         $(id)?.remove();
         await sendMessage('voice', '', b64, file.name);
-      } catch(err) { $(id)?.remove(); alert(err.message); }
+      } catch(err) { $(id)?.remove(); showToast(err.message, 'warning'); }
     };
     mediaRecorder.stop();
   });
@@ -572,7 +609,7 @@
       const b64 = await toBase64(file, type);
       $(id)?.remove();
       await sendMessage(type === 'file' ? 'file' : type, '', b64, file.name);
-    } catch(err) { $(id)?.remove(); alert(err.message); }
+    } catch(err) { $(id)?.remove(); showToast(err.message, 'warning'); }
     $(inputId).value = '';
   }
 
