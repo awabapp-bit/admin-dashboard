@@ -12,9 +12,6 @@
   --primary-light: #5686F5;
   --primary-pale: #EEF3FE;
   --primary-rgb: 30, 79, 214;
-  /* لون كحلي غامق ثابت (بيفضل زي ما هو في الوضعين) لاستخدامه في الخلفيات
-     المتدرّجة اللي بيقعد فوقيها نص/أيقونات بيضا؛ عكس --primary-dark اللي
-     بيتقلب لدرجة فاتحة في الوضع الليلي عشان يصلح كلون نص على كارت غامق. */
   --primary-navy: #0A1B42;
 
   --gold: #AD7A17;
@@ -22,7 +19,7 @@
   --gold-pale: #FAF3E3;
   --gold-rgb: 173, 122, 23;
 
-  /* ---- المحايدات (Slate) ---- */
+  /* ---- المحايدات ---- */
   --bg: #F6F7FA;
   --bg-soft: #F0F2F6;
   --card-bg: #FFFFFF;
@@ -1490,7 +1487,7 @@ a.lesson-row.locked { cursor: not-allowed; }
   .admin-page { padding: 18px 16px 50px; }
   .admin-page-head { flex-direction: column; align-items: stretch; }
   .admin-page-head > div:last-child { display: flex; flex-direction: column; gap: 8px; }
-  .admin-page-head a.btn, .admin-page-head button.btn { width: 100% !important; }
+  .admin-page-head > div:last-child a.btn, .admin-page-head > div:last-child button.btn { width: 100% !important; }
 
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
 

@@ -147,8 +147,7 @@ function loadViolationsNavBadge() {
 
 /**
  * يراقب لحظيًا إجمالي الرسائل غير المقروءة في كل محادثات الدعم الفني
- * ويعرضها كشارة جنب رابط "الدعم الفني" (بتتحدث فورًا زي عدّاد
- * المخالفات، من غير ما تحتاج تفتح صفحة الدعم أو تعمل تحديث للصفحة).
+ * ويعرضها كشارة جنب رابط "الدعم الفني".
  */
 function loadSupportNavBadge() {
   const badge = document.getElementById('supportNavBadge');
@@ -201,7 +200,7 @@ function setupAdminThemeToggle() {
 }
 
 /* ============================================================
-   🔔 إشعارات Toast — بديل عصري لرسائل alert()
+   🔔 إشعارات Toast
    ============================================================ */
 
 /**
@@ -240,8 +239,7 @@ window.showToast = showToast;
 
 /**
  * يفعّل زر السهم أعلى القائمة الجانبية ليطويها لعرض الأيقونات فقط
- * (على شاشات سطح المكتب)، ويحفظ حالة الطي في localStorage عشان تفضل
- * زي ما هي بين الصفحات وبعد تحديث المتصفح.
+ * (على شاشات سطح المكتب)، ويحفظ حالة الطي في localStorage.
  */
 function setupAdminSidebarCollapse() {
   const toggle = document.getElementById('adminCollapseToggle');
@@ -264,8 +262,7 @@ function setupAdminSidebarCollapse() {
 
 /**
  * يفعّل زر الهمبرغر ليفتح/يقفل القائمة الجانبية على الشاشات الصغيرة
- * (هواتف وتابلت)، مع إغلاقها بالنقر على الستارة، أو زر Escape،
- * أو اختيار أي رابط، أو تكبير الشاشة لحجم سطح المكتب.
+ * مع إغلاقها بالنقر على الستارة، أو زر Escape، أو اختيار أي رابط.
  */
 function setupAdminMobileNav() {
   const toggle = document.getElementById('adminMenuToggle');
@@ -303,7 +300,7 @@ function setupAdminMobileNav() {
   });
 }
 
-/** يهرّب أي نص قبل إدراجه في HTML (نفس escapeHtml المستخدمة بالموقع الرئيسي) */
+/** يهرّب أي نص قبل إدراجه في HTML */
 if (typeof escapeHtml !== 'function') {
   function escapeHtml(str) {
     const div = document.createElement('div');
@@ -312,7 +309,7 @@ if (typeof escapeHtml !== 'function') {
   }
 }
 
-/** يهرّب معرف يوتيوب من رابط (نفس الدالة المستخدمة بالموقع الرئيسي) */
+/** يهرّب معرف يوتيوب من رابط */
 if (typeof extractYouTubeId !== 'function') {
   function extractYouTubeId(url) {
     if (!url) return null;
@@ -329,12 +326,8 @@ function formatArabicDate(ts) {
 }
 
 /**
- * يحذف كل بيانات حساب مستخدم من قاعدة البيانات (نقاطه، تقدّمه، اشتراكاته في كل
- * المسابقات، إشعاراته، محادثات الدعم الفني، إلخ) في عملية واحدة (multi-path update).
- * ملحوظة مهمة: هذا يحذف بيانات الحساب فقط من Realtime Database. حساب الدخول
- * نفسه (Firebase Authentication) هيفضل موجود تقنيًا لأن حذفه لمستخدم تاني غير
- * ممكن من كود الموقع مباشرة (محتاج صلاحيات Admin SDK من سيرفر)، لكن بما إن كل
- * بياناته اتمسحت هيتعامل معاه الموقع كأنه حساب جديد تمامًا لو دخل تاني.
+ * يحذف كل بيانات حساب مستخدم من قاعدة البيانات (نقاطه، تقدّمه، اشتراكاته، إلخ)
+ * في عملية واحدة (multi-path update).
  * بيرجّع Promise.
  */
 function deleteUserAccountData(uid) {
@@ -359,13 +352,9 @@ function deleteUserAccountData(uid) {
 }
 
 /* ============================================================
-   📋 إدارة المخالفات — جديد
+   📋 إدارة المخالفات
    ============================================================ */
 
-/**
- * جلب جميع المخالفات المسجلة.
- * @returns {Promise<Object>} - كائن بمفاتيح uid ثم violationId.
- */
 function getAllViolations() {
   return db.ref('violations').once('value').then(function(snap) {
     return snap.val() || {};
@@ -373,9 +362,6 @@ function getAllViolations() {
 }
 window.getAllViolations = getAllViolations;
 
-/**
- * جلب مخالفات مستخدم معين.
- */
 function getUserViolations(uid) {
   return db.ref('violations/' + uid).once('value').then(function(snap) {
     return snap.val() || {};
@@ -383,20 +369,11 @@ function getUserViolations(uid) {
 }
 window.getUserViolations = getUserViolations;
 
-/**
- * حذف محاولة اختبار لمستخدم (لإعادة الاختبار أو إلغاء النتيجة).
- */
 function resetExamAttempt(compId, lessonId, examId, uid) {
   return db.ref('examAttempts/' + compId + '/' + lessonId + '/' + examId + '/' + uid).remove();
 }
 window.resetExamAttempt = resetExamAttempt;
 
-/**
- * حذف مخالفات مستخدم معين الخاصة باختبار معيّن فقط (examRef بصيغة
- * compId_lessonId_examId)، من غير ما تمسح باقي مخالفاته في اختبارات
- * تانية. مستخدمة عند "فتح اختبار لإعادة المحاولة" عشان محدش يتمنع من
- * محاولة جديدة بسبب مخالفات مسجلة على نفس الاختبار.
- */
 function clearExamViolations(uid, examRef) {
   return db.ref('violations/' + uid).once('value').then(function (snap) {
     const all = snap.val() || {};
@@ -410,25 +387,16 @@ function clearExamViolations(uid, examRef) {
 }
 window.clearExamViolations = clearExamViolations;
 
-/**
- * حذف جميع مخالفات مستخدم معين.
- */
 function clearUserViolations(uid) {
   return db.ref('violations/' + uid).remove();
 }
 window.clearUserViolations = clearUserViolations;
 
-/**
- * تحديث الحد الأقصى للمخالفات في الإعدادات.
- */
 function setMaxViolations(value) {
   return db.ref('settings/' + 'maxViolations').set(value);
 }
 window.setMaxViolations = setMaxViolations;
 
-/**
- * الحصول على الحد الأقصى للمخالفات.
- */
 function getMaxViolations() {
   return db.ref('settings/' + 'maxViolations').once('value').then(function(snap) {
     return snap.val() || 3;
