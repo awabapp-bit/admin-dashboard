@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-  <title>الدعم الفني — لوحة تحكم أواب (v2-تشخيص)</title>
+  <title>الدعم الفني — لوحة تحكم أواب</title>
   <link rel="icon" href="logo.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
   <style>
-    /* ===== متغيرات خاصة بالدعم الفني (مع دعم الوضع الليلي) ===== */
+    /* ===== متغيرات خاصة بالدعم الفني ===== */
     :root {
       --sup-bg-gradient: linear-gradient(135deg, var(--bg) 0%, #eef1f6 50%, #e4e8f0 100%);
       --sup-card-bg: rgba(255,255,255,0.7);
@@ -296,6 +296,7 @@
       color: var(--sup-text-muted);
       z-index: 5;
       background: var(--sup-placeholder-bg);
+      padding: 20px;
     }
     .chat-placeholder i {
       font-size: 60px;
@@ -304,6 +305,19 @@
       -webkit-text-fill-color: transparent;
       opacity: 0.8;
     }
+    .chat-placeholder .open-sidebar-btn {
+      background: var(--sup-primary);
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: none; /* مخفي على سطح المكتب، يظهر فقط على الموبايل */
+      box-shadow: 0 4px 12px var(--sup-primary-glow);
+    }
+    .chat-placeholder .open-sidebar-btn:hover { background: var(--sup-primary-hover); }
 
     /* ===== Chat Header ===== */
     .chat-header {
@@ -703,6 +717,10 @@
       .chat-pane { width: 100%; }
       .back-btn { display: flex; }
 
+      .chat-placeholder .open-sidebar-btn {
+        display: inline-flex; /* يظهر فقط على الموبايل */
+      }
+
       .chat-header {
         padding: 10px 12px;
         gap: 8px;
@@ -822,6 +840,9 @@
           <i class="fa-solid fa-comments"></i>
           <h2>لوحة محادثات الدعم الفني</h2>
           <p>اختر مستخدماً من القائمة للرد عليه.</p>
+          <button class="open-sidebar-btn" id="open-sidebar-mobile-btn">
+            <i class="fa-solid fa-bars"></i> عرض المحادثات
+          </button>
         </div>
 
         <div class="chat-header">
@@ -935,6 +956,7 @@
     const dashboardSidebar          = $('dashboard-sidebar');
     const sidebarOverlay            = $('sidebar-overlay');
     const sidebarCloseMobile        = $('sidebar-close-mobile');
+    const openSidebarMobileBtn      = $('open-sidebar-mobile-btn');
     const conversationsListContainer= $('conversations-list-container');
     const chatPlaceholderEl         = $('chat-placeholder-el');
     const chatHeaderName            = $('chat-header-name');
@@ -966,7 +988,7 @@
     let currentMimeType  = '';
     let usersStatusUnsub = null;
     let chatMsgsUnsub    = null;
-    let conversationsListener = null; // سنحتفظ بها لإزالتها عند الحذف
+    let conversationsListener = null;
 
     // ============================================================
     // Offline
@@ -987,6 +1009,11 @@
       document.body.classList.add('chat-active');
       renderAdminNav('support');
       listenConversations();
+
+      // على الموبايل، نفتح القائمة الجانبية تلقائياً إذا لم تكن هناك محادثة مفتوحة
+      if (window.innerWidth <= 860 && !selectedUserId) {
+        openSidebarMobile();
+      }
     });
 
     // ============================================================
@@ -1003,19 +1030,28 @@
     function openSidebarMobile() {
       dashboardSidebar.classList.add('open');
       sidebarOverlay.classList.add('active');
+      // إخفاء زر الفتح في placeholder إذا كان ظاهراً
+      if (openSidebarMobileBtn) openSidebarMobileBtn.style.display = 'none';
     }
     function closeSidebarMobile() {
       dashboardSidebar.classList.remove('open');
       sidebarOverlay.classList.remove('active');
+      // إظهار زر الفتح في placeholder إذا كنا في وضع placeholder
+      if (openSidebarMobileBtn && !selectedUserId) {
+        openSidebarMobileBtn.style.display = 'inline-flex';
+      }
     }
     sidebarCloseMobile.addEventListener('click', closeSidebarMobile);
     sidebarOverlay.addEventListener('click', closeSidebarMobile);
+    // زر فتح القائمة من placeholder
+    if (openSidebarMobileBtn) {
+      openSidebarMobileBtn.addEventListener('click', openSidebarMobile);
+    }
 
     // ============================================================
-    // Conversations List (مع زر مسح لكل محادثة)
+    // Conversations List
     // ============================================================
     function listenConversations() {
-      // إزالة المستمع القديم إن وجد
       if (conversationsListener) {
         db.ref('conversations').off('value', conversationsListener);
       }
@@ -1083,20 +1119,16 @@
         </button>
       `;
 
-      // فتح المحادثة
       item.addEventListener('click', (e) => {
-        // منع فتح المحادثة إذا كان الضغط على زر الحذف
         if (e.target.closest('.conv-delete-btn')) return;
         document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
         item.classList.add('active');
         openChat(conv.userId, conv.userName);
-        // إغلاق القائمة الجانبية في الموبايل
         if (window.innerWidth <= 860) {
           closeSidebarMobile();
         }
       });
 
-      // زر مسح المحادثة
       const deleteBtn = item.querySelector('.conv-delete-btn');
       deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1115,7 +1147,6 @@
       const name = selectedUserId === userId ? selectedUserName : 'هذا المستخدم';
       if (!confirm(`هل تريد مسح محادثة "${name}" بالكامل؟\nسيتم حذف كل الرسائل ولا يمكن التراجع.`)) return;
 
-      // حذف من conversations و messages
       const updates = {};
       updates[`conversations/${userId}`] = null;
       updates[`messages/${userId}`] = null;
@@ -1123,11 +1154,9 @@
       db.ref().update(updates)
         .then(() => {
           showToast('✅ تم مسح المحادثة بنجاح', 'success');
-          // إذا كانت هذه المحادثة مفتوحة، نغلقها
           if (selectedUserId === userId) {
             closeCurrentChat();
           }
-          // تحديث القائمة (سيحدث تلقائياً عبر المستمع)
         })
         .catch(err => {
           showToast('❌ تعذر مسح المحادثة: ' + err.message, 'error');
@@ -1145,18 +1174,19 @@
       chatHeaderAvatar.textContent = 'M';
       chatHeaderStatus.className = 'header-user-status';
       chatHeaderStatus.textContent = 'غير متصل';
-      // إزالة الـ active من عناصر القائمة
       document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
+      // إظهار زر فتح القائمة في placeholder إذا كنا على الموبايل
+      if (window.innerWidth <= 860 && openSidebarMobileBtn) {
+        openSidebarMobileBtn.style.display = 'inline-flex';
+      }
     }
 
     // ============================================================
     // فتح المحادثة
     // ============================================================
     function openChat(userId, userName) {
-      // إذا كانت نفس المحادثة المفتوحة، لا نعيد تهيئة كل شيء
       if (selectedUserId === userId) return;
 
-      // إلغاء المستمعات القديمة
       if (chatMsgsUnsub) chatMsgsUnsub();
       if (usersStatusUnsub) usersStatusUnsub();
 
@@ -1164,13 +1194,11 @@
       selectedUserName = userName;
       chatPlaceholderEl.style.display = 'none';
 
-      // تحديث الهيدر
       chatHeaderName.textContent   = userName;
       chatHeaderAvatar.textContent = userName.trim()[0] || 'U';
       chatHeaderStatus.className   = 'header-user-status';
       chatHeaderStatus.textContent = 'غير متصل';
 
-      // رصد حالة المستخدم (متصل/غير متصل)
       {
         const userStatusRef = db.ref(`users/${userId}`);
         const userStatusCb = snap => {
@@ -1184,10 +1212,7 @@
         usersStatusUnsub = () => userStatusRef.off('value', userStatusCb);
       }
 
-      // تصفير عدد الرسائل غير المقروءة للمسؤول
       db.ref(`conversations/${userId}`).update({ unreadCountByAdmin: 0 });
-
-      // الاستماع للرسائل
       listenMessages(userId);
     }
 
@@ -1439,7 +1464,6 @@
     // ============================================================
     backToListBtn.addEventListener('click', () => {
       closeCurrentChat();
-      // في الموبايل نفتح القائمة الجانبية
       if (window.innerWidth <= 860) {
         openSidebarMobile();
       }
@@ -1462,7 +1486,7 @@
     });
 
     // ============================================================
-    // Keyboard shortcut: Escape لإغلاق الـ Lightbox والقائمة الجانبية
+    // Keyboard shortcut: Escape
     // ============================================================
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -1470,6 +1494,15 @@
         if (window.innerWidth <= 860 && dashboardSidebar.classList.contains('open')) {
           closeSidebarMobile();
         }
+      }
+    });
+
+    // ============================================================
+    // إعادة فتح القائمة عند تغيير حجم الشاشة من كبير إلى صغير
+    // ============================================================
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 860 && !selectedUserId && !dashboardSidebar.classList.contains('open')) {
+        openSidebarMobile();
       }
     });
 
