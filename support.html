@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-  <title>الدعم الفني — لوحة تحكم أواب</title>
+  <title>الدعم الفني — لوحة تحكم أواب (v2-تشخيص)</title>
   <link rel="icon" href="logo.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
@@ -439,52 +439,93 @@
   $('close-lightbox').addEventListener('click', () => imageLightbox.classList.remove('active'));
   function openLightbox(src) { lightboxImgEl.src = src; imageLightbox.classList.add('active'); }
 
-  // ----- Conversations -----
+  // ----- Conversations (تم إصلاحها لضمان ظهور كل المحادثات) -----
   function listenConversations() {
     db.ref('conversations').on('value', snap => {
       conversationsListContainer.innerHTML = '';
       if (!snap.exists()) {
-        conversationsListContainer.innerHTML = `<div class="no-conv-msg"><i class="fa-solid fa-inbox" style="font-size:30px;margin-bottom:10px;display:block;opacity:0.5"></i>لا توجد رسائل واردة حالياً.</div>`;
+        conversationsListContainer.innerHTML = `
+          <div class="no-conv-msg">
+            <i class="fa-solid fa-inbox" style="font-size:30px;margin-bottom:10px;display:block;opacity:0.5"></i>
+            لا توجد رسائل واردة حالياً.
+          </div>`;
         return;
       }
+
       const list = [];
-      snap.forEach(c => list.push(c.val()));
-      list.sort((a,b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
-      list.forEach(renderConvItem);
+      snap.forEach(child => {
+        const data = child.val() || {};
+        const userId = child.key;
+        // نضمن وجود userId و userName كحد أدنى
+        list.push({
+          userId: userId,
+          userName: data.userName || data.name || 'مستخدم',
+          lastMessage: data.lastMessage || '...',
+          lastMessageTimestamp: data.lastMessageTimestamp || 0,
+          unreadCountByAdmin: data.unreadCountByAdmin || 0,
+          unreadCountByUser: data.unreadCountByUser || 0,
+          ...data // احتفظ بباقي الحقول إن وجدت
+        });
+      });
+
+      // ترتيب تنازلي حسب آخر رسالة
+      list.sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
+
+      // عرض كل محادثة
+      list.forEach(conv => renderConvItem(conv));
+    }, err => {
+      conversationsListContainer.innerHTML = `
+        <div class="no-conv-msg" style="color:var(--sup-danger)">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size:30px;margin-bottom:10px;display:block;"></i>
+          تعذّر تحميل المحادثات: ${escapeHtml(err.message || String(err))}
+        </div>`;
     });
   }
 
   function renderConvItem(conv) {
     const item = document.createElement('div');
     item.className = `conv-item ${selectedUserId === conv.userId ? 'active' : ''}`;
-    const initial = (conv.userName || '').trim()[0] || 'U';
-    const badge   = conv.unreadCountByAdmin > 0 ? `<span class="unread-badge">${conv.unreadCountByAdmin}</span>` : '';
-    const time    = new Date(conv.lastMessageTimestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    const initial = (conv.userName || 'U').trim()[0] || 'U';
+    const badge = conv.unreadCountByAdmin > 0 ? `<span class="unread-badge">${conv.unreadCountByAdmin}</span>` : '';
+    const time = conv.lastMessageTimestamp
+      ? new Date(conv.lastMessageTimestamp).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+      : '';
+
     item.innerHTML = `
       <div class="user-avatar">${initial}</div>
       <div class="conv-details">
-        <div class="conv-row"><span class="conv-name">${conv.userName}</span><span class="conv-time">${time}</span></div>
-        <div class="conv-row"><span class="conv-last-msg">${conv.lastMessage}</span>${badge}</div>
+        <div class="conv-row">
+          <span class="conv-name">${escapeHtml(conv.userName)}</span>
+          <span class="conv-time">${time}</span>
+        </div>
+        <div class="conv-row">
+          <span class="conv-last-msg">${escapeHtml(conv.lastMessage || '...')}</span>
+          ${badge}
+        </div>
       </div>`;
+
     item.addEventListener('click', () => {
       document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
       item.classList.add('active');
       openChat(conv.userId, conv.userName);
     });
+
     conversationsListContainer.appendChild(item);
   }
 
-  // ----- Open Chat -----
+  // ----- Open Chat (مع تصفير unreadCountByAdmin) -----
   function openChat(userId, userName) {
     selectedUserId   = userId;
     selectedUserName = userName;
     chatPlaceholderEl.style.display = 'none';
     if (window.innerWidth <= 768) dashboardSidebar.classList.add('hidden');
+
     chatHeaderName.textContent   = userName;
-    chatHeaderAvatar.textContent = userName.trim()[0];
+    chatHeaderAvatar.textContent = userName.trim()[0] || 'U';
     chatHeaderStatus.className   = 'header-user-status';
     chatHeaderStatus.textContent = 'غير متصل';
 
+    // رصد حالة المستخدم (متصل/غير متصل)
     if (usersStatusUnsub) usersStatusUnsub();
     {
       const userStatusRef = db.ref(`users/${userId}`);
@@ -499,7 +540,10 @@
       usersStatusUnsub = () => userStatusRef.off('value', userStatusCb);
     }
 
+    // تصفير عدد الرسائل غير المقروءة للمسؤول
     db.ref(`conversations/${userId}`).update({ unreadCountByAdmin: 0 });
+
+    // الاستماع للرسائل
     listenMessages(userId);
   }
 

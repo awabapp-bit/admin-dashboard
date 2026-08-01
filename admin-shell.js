@@ -74,7 +74,7 @@ function renderAdminNav(activePage) {
           '</div>' +
           '<div class="nav-group">' +
             '<span class="nav-group-label">النظام</span>' +
-            '<a href="support.html" title="الدعم الفني" class="' + (activePage === 'support' ? 'active' : '') + '">' + icon('headset', 'icon-sm') + '<span class="link-label">الدعم الفني</span></a>' +
+            '<a href="support.html" title="الدعم الفني" class="' + (activePage === 'support' ? 'active' : '') + '">' + icon('headset', 'icon-sm') + '<span class="link-label">الدعم الفني</span><span class="nav-badge" id="supportNavBadge" style="display:none;">0</span></a>' +
           '</div>' +
         '</div>' +
         '<div class="nav-foot">' +
@@ -98,6 +98,7 @@ function renderAdminNav(activePage) {
   setupAdminThemeToggle();
   loadAdminProfileBlock();
   loadViolationsNavBadge();
+  loadSupportNavBadge();
 }
 
 /**
@@ -142,6 +143,29 @@ function loadViolationsNavBadge() {
       badge.style.display = 'inline-flex';
     }
   }).catch(function () {});
+}
+
+/**
+ * يراقب لحظيًا إجمالي الرسائل غير المقروءة في كل محادثات الدعم الفني
+ * ويعرضها كشارة جنب رابط "الدعم الفني" (بتتحدث فورًا زي عدّاد
+ * المخالفات، من غير ما تحتاج تفتح صفحة الدعم أو تعمل تحديث للصفحة).
+ */
+function loadSupportNavBadge() {
+  const badge = document.getElementById('supportNavBadge');
+  if (!badge || typeof db === 'undefined') return;
+  db.ref('conversations').on('value', function (snap) {
+    const data = snap.val() || {};
+    let total = 0;
+    Object.keys(data).forEach(function (uid) {
+      total += Number(data[uid] && data[uid].unreadCountByAdmin) || 0;
+    });
+    if (total > 0) {
+      badge.textContent = total > 99 ? '99+' : String(total);
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  });
 }
 
 /* ============================================================

@@ -120,7 +120,7 @@
 
     const opts = (existingQ && existingQ.options) || ['', '', '', ''];
     const correct = existingQ && existingQ.correct != null ? existingQ.correct : 0;
-    const points = existingQ ? existingQ.points : 10;
+    const points = existingQ ? existingQ.points : 1;
     const text = existingQ ? existingQ.text : '';
 
     qBlock.innerHTML =
@@ -134,7 +134,7 @@
           '<input type="text" class="qq-option" placeholder="نص الإجابة ' + (i + 1) + '" value="' + escapeHtml(opts[i] || '') + '" required>' +
         '</div>';
       }).join('') +
-      '<div class="field" style="margin:10px 0 0;"><label>نقاط الإجابة الصحيحة</label><input type="number" class="qq-points" min="1" value="' + (points || 10) + '" required style="max-width:120px;"></div>';
+      '<div class="field" style="margin:10px 0 0;"><label>نقاط الإجابة الصحيحة</label><input type="number" class="qq-points" min="1" value="' + (points || 1) + '" required style="max-width:120px;"></div>';
 
     questionsWrap.appendChild(qBlock);
 
@@ -178,7 +178,7 @@
       const text = qb.querySelector('.qq-text').value.trim();
       const options = Array.from(qb.querySelectorAll('.qq-option')).map(function (inp) { return inp.value.trim(); });
       const correctRadio = qb.querySelector('.qq-correct:checked');
-      const points = parseInt(qb.querySelector('.qq-points').value, 10) || 10;
+      const points = parseInt(qb.querySelector('.qq-points').value, 10) || 1;
       if (!text || options.some(function (o) { return !o; }) || !correctRadio) {
         msg.textContent = 'تأكد من إكمال كل حقول السؤال #' + (i + 1);
         msg.className = 'form-msg show error';
