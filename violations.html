@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
 <title>المخالفات — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
@@ -103,7 +103,7 @@
           html += `<tr>
             <td><a href="user-detail.html?uid=${row.uid}" style="font-weight:700;color:var(--primary);">${escapeHtml(name)}</a></td>
             <td><span class="status-pill" style="background:#FBEAE6;color:var(--danger);">${escapeHtml(row.type)}</span></td>
-            <td><code style="font-size:11px;background:var(--bg);padding:2px 8px;border-radius:4px;">${escapeHtml(row.examRef)}</code></td>
+            <td><code style="font-size:0.6875rem;background:var(--bg);padding:2px 8px;border-radius:4px;">${escapeHtml(row.examRef)}</code></td>
             <td>${formatArabicDate(row.timestamp)}</td>
             <td>${escapeHtml(row.details)}</td>
             <td>

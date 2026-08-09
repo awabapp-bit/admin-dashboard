@@ -66,6 +66,7 @@ function renderAdminNav(activePage) {
           '<div class="nav-group">' +
             '<span class="nav-group-label">الرئيسية</span>' +
             '<a href="home.html" title="لوحة القيادة والمحتوى" class="' + (activePage === 'home' ? 'active' : '') + '">' + icon('gauge', 'icon-sm') + '<span class="link-label">لوحة القيادة</span></a>' +
+            '<button type="button" id="adminActivityBtn" title="آخر الأنشطة">' + icon('clock', 'icon-sm') + '<span class="link-label">آخر الأنشطة</span></button>' +
           '</div>' +
           '<div class="nav-group">' +
             '<span class="nav-group-label">المستخدمون</span>' +
@@ -96,6 +97,7 @@ function renderAdminNav(activePage) {
   setupAdminMobileNav();
   setupAdminSidebarCollapse();
   setupAdminThemeToggle();
+  setupActivityDrawer();
   loadAdminProfileBlock();
   loadViolationsNavBadge();
   loadSupportNavBadge();
@@ -297,6 +299,140 @@ function setupAdminMobileNav() {
   });
   window.addEventListener('resize', function () {
     if (window.innerWidth > 860) closeMenu();
+  });
+}
+
+/* ============================================================
+   🕘 درج "آخر الأنشطة" الجانبي (متاح من كل صفحات لوحة التحكم)
+   ============================================================ */
+
+/**
+ * ينشئ (لو مش موجود) ويربط زرار "آخر الأنشطة" في الشريط الجانبي
+ * بدرج منزلق يعرض أحدث التسجيلات والمخالفات وتسليمات الاختبارات،
+ * بيتحمّل من قاعدة البيانات أول ما المستخدم يفتح الدرج فقط (مش تحميل زيادة لو مافتحوش).
+ */
+function setupActivityDrawer() {
+  const btn = document.getElementById('adminActivityBtn');
+  if (!btn || typeof db === 'undefined') return;
+
+  let drawer = document.getElementById('activityDrawer');
+  let overlay = document.getElementById('activityDrawerOverlay');
+  if (!drawer) {
+    overlay = document.createElement('div');
+    overlay.className = 'activity-drawer-overlay';
+    overlay.id = 'activityDrawerOverlay';
+    document.body.appendChild(overlay);
+
+    drawer = document.createElement('div');
+    drawer.className = 'activity-drawer';
+    drawer.id = 'activityDrawer';
+    drawer.innerHTML =
+      '<div class="activity-drawer-head">' +
+        '<h3>' + icon('clock', 'icon-sm') + ' آخر الأنشطة</h3>' +
+        '<button type="button" class="activity-drawer-close" id="activityDrawerClose" aria-label="إغلاق">' + icon('xmark', 'icon-sm') + '</button>' +
+      '</div>' +
+      '<div class="activity-drawer-body" id="activityDrawerBody">' +
+        '<div class="center-loading" style="min-height:160px;"><div class="loader"></div></div>' +
+      '</div>';
+    document.body.appendChild(drawer);
+
+    document.getElementById('activityDrawerClose').addEventListener('click', closeActivityDrawer);
+    overlay.addEventListener('click', closeActivityDrawer);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeActivityDrawer();
+    });
+  }
+
+  btn.addEventListener('click', function () {
+    openActivityDrawer();
+  });
+}
+
+function openActivityDrawer() {
+  const drawer = document.getElementById('activityDrawer');
+  const overlay = document.getElementById('activityDrawerOverlay');
+  if (!drawer || !overlay) return;
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  loadActivityDrawerData();
+}
+
+function closeActivityDrawer() {
+  const drawer = document.getElementById('activityDrawer');
+  const overlay = document.getElementById('activityDrawerOverlay');
+  if (!drawer || !overlay) return;
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/** يجيب أحدث الأنشطة من قاعدة البيانات ويعرضها جوه الدرج */
+function loadActivityDrawerData() {
+  const body = document.getElementById('activityDrawerBody');
+  if (!body) return;
+  body.innerHTML = '<div class="center-loading" style="min-height:160px;"><div class="loader"></div></div>';
+
+  Promise.all([
+    db.ref('users').once('value'),
+    db.ref('violations').once('value'),
+    db.ref('examAttempts').once('value'),
+    db.ref('competitions').once('value')
+  ]).then(function (results) {
+    const usersObj = results[0].val() || {};
+    const violations = results[1].val() || {};
+    const examAttempts = results[2].val() || {};
+    const comps = results[3].val() || {};
+
+    const realUsers = Object.keys(usersObj)
+      .map(function (uid) { return Object.assign({ uid: uid }, usersObj[uid]); })
+      .filter(function (u) { return u.isAdmin !== true; });
+
+    const events = [];
+
+    realUsers.forEach(function (u) {
+      if (!u.createdAt) return;
+      events.push({ ts: u.createdAt, type: 'user', text: '<b>' + escapeHtml(u.name || u.email || 'مستخدم') + '</b> سجّل حسابًا جديدًا' });
+    });
+
+    Object.keys(violations).forEach(function (uid) {
+      Object.keys(violations[uid] || {}).forEach(function (vid) {
+        const v = violations[uid][vid];
+        if (!v || !v.timestamp) return;
+        events.push({ ts: v.timestamp, type: 'violation', text: 'تسجيل <b>مخالفة</b> (' + escapeHtml(v.type || 'غير معروف') + ')' });
+      });
+    });
+
+    Object.keys(examAttempts).forEach(function (cid) {
+      Object.keys(examAttempts[cid]).forEach(function (lid) {
+        Object.keys(examAttempts[cid][lid]).forEach(function (eid) {
+          Object.keys(examAttempts[cid][lid][eid]).forEach(function (uid) {
+            const a = examAttempts[cid][lid][eid][uid];
+            if (a && a.submittedAt) {
+              events.push({ ts: a.submittedAt, type: 'comp', text: 'تسليم اختبار في <b>' + escapeHtml((comps[cid] && comps[cid].title) || 'محتوى') + '</b>' });
+            }
+          });
+        });
+      });
+    });
+
+    events.sort(function (a, b) { return b.ts - a.ts; });
+    const top = events.slice(0, 30);
+
+    if (top.length === 0) {
+      body.innerHTML = '<p style="color:var(--text-muted); font-size:0.8125rem; text-align:center; padding:20px 0;">لا يوجد نشاط مسجّل بعد.</p>';
+      return;
+    }
+
+    const iconFor = { user: 'user', violation: 'bell', comp: 'trophy' };
+    body.innerHTML = '<div class="activity-feed">' + top.map(function (e) {
+      return '<div class="activity-item act-' + e.type + '">' +
+        '<div class="act-icon">' + icon(iconFor[e.type], 'icon-sm') + '</div>' +
+        '<div class="act-body"><div class="act-text">' + e.text + '</div><div class="act-time">' + formatArabicDate(e.ts) + '</div></div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }).catch(function (err) {
+    body.innerHTML = '<p style="color:var(--danger); font-size:0.8125rem; text-align:center; padding:20px 0;">تعذر تحميل الأنشطة: ' + escapeHtml(err.message || '') + '</p>';
   });
 }
 

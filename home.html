@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
 <title>لوحة تحكم أواب — المحتوى التعليمي</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
@@ -42,14 +42,8 @@
     </div>
   </div>
 
-  <div class="dash-card" id="activityCard" style="display:none; margin-bottom:28px;">
-    <h3>آخر الأنشطة</h3>
-    <p class="dash-sub">أحدث التسجيلات وتسليمات الاختبارات والمخالفات</p>
-    <div class="activity-feed" id="activityFeed"></div>
-  </div>
-
   <div class="admin-page-head" style="border-bottom:none; margin-bottom:14px; padding-bottom:0;">
-    <h2 class="page-title" style="font-size:18px;">كل الكورسات والمسابقات</h2>
+    <h2 class="page-title" style="font-size:1.125rem;">كل الكورسات والمسابقات</h2>
   </div>
 
   <div id="compsList">
@@ -137,16 +131,14 @@
 
       renderNewUsersChart(realUsers);
       renderTopLessons(comps, userProgress);
-      renderActivityFeed(realUsers, violations, examAttempts, comps);
 
       document.getElementById('dashGrid').style.display = '';
-      document.getElementById('activityCard').style.display = '';
     });
   }
 
   function statCard(iconName, value, label, small) {
     return '<div class="stat-card"><div class="stat-icon">' + icon(iconName, 'icon-md') + '</div>' +
-      '<div><div class="stat-value"' + (small ? ' style="font-size:15px;"' : '') + '>' + value + '</div><div class="stat-label">' + label + '</div></div></div>';
+      '<div><div class="stat-value"' + (small ? ' style="font-size:0.9375rem;"' : '') + '>' + value + '</div><div class="stat-label">' + label + '</div></div></div>';
   }
 
   function renderNewUsersChart(realUsers) {
@@ -195,7 +187,7 @@
 
     const list = document.getElementById('topLessonsList');
     if (top.length === 0) {
-      list.innerHTML = '<p style="color:var(--text-muted); font-size:12.5px;">لا يوجد تفاعل مسجّل بعد.</p>';
+      list.innerHTML = '<p style="color:var(--text-muted); font-size:0.7812rem;">لا يوجد تفاعل مسجّل بعد.</p>';
       return;
     }
     const max = top[0].count || 1;
@@ -205,53 +197,6 @@
         '<div class="rank-body"><div class="rank-name">' + escapeHtml(r.title) + '</div>' +
         '<div class="rank-track"><div class="rank-fill" style="width:' + Math.round((r.count / max) * 100) + '%;"></div></div></div>' +
         '<div class="rank-count">' + r.count + ' مستخدم</div>' +
-      '</div>';
-    }).join('');
-  }
-
-  function renderActivityFeed(realUsers, violations, examAttempts, comps) {
-    const events = [];
-
-    realUsers.forEach(function (u) {
-      if (!u.createdAt) return;
-      events.push({ ts: u.createdAt, type: 'user', text: '<b>' + escapeHtml(u.name || u.email || 'مستخدم') + '</b> سجّل حسابًا جديدًا' });
-    });
-
-    Object.keys(violations).forEach(function (uid) {
-      Object.keys(violations[uid] || {}).forEach(function (vid) {
-        const v = violations[uid][vid];
-        if (!v || !v.timestamp) return;
-        events.push({ ts: v.timestamp, type: 'violation', text: 'تسجيل <b>مخالفة</b> (' + escapeHtml(v.type || 'غير معروف') + ')' });
-      });
-    });
-
-    Object.keys(examAttempts).forEach(function (cid) {
-      Object.keys(examAttempts[cid]).forEach(function (lid) {
-        Object.keys(examAttempts[cid][lid]).forEach(function (eid) {
-          Object.keys(examAttempts[cid][lid][eid]).forEach(function (uid) {
-            const a = examAttempts[cid][lid][eid][uid];
-            if (a && a.submittedAt) {
-              events.push({ ts: a.submittedAt, type: 'comp', text: 'تسليم اختبار في <b>' + escapeHtml((comps[cid] && comps[cid].title) || 'محتوى') + '</b>' });
-            }
-          });
-        });
-      });
-    });
-
-    events.sort(function (a, b) { return b.ts - a.ts; });
-    const top = events.slice(0, 8);
-    const feed = document.getElementById('activityFeed');
-
-    if (top.length === 0) {
-      feed.innerHTML = '<p style="color:var(--text-muted); font-size:12.5px;">لا يوجد نشاط مسجّل بعد.</p>';
-      return;
-    }
-
-    const iconFor = { user: 'user', violation: 'bell', comp: 'trophy' };
-    feed.innerHTML = top.map(function (e) {
-      return '<div class="activity-item act-' + e.type + '">' +
-        '<div class="act-icon">' + icon(iconFor[e.type], 'icon-sm') + '</div>' +
-        '<div class="act-body"><div class="act-text">' + e.text + '</div><div class="act-time">' + formatArabicDate(e.ts) + '</div></div>' +
       '</div>';
     }).join('');
   }

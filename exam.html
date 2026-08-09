@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
 <title>أسئلة الاختبار — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
@@ -13,9 +13,9 @@
     background: var(--gold-pale); border: 1px solid var(--gold-light);
     border-radius: var(--radius); padding: 14px 20px; margin: 18px 0 26px;
   }
-  .exam-summary-item{ display:flex; align-items:center; gap:8px; font-size:14px; color: var(--primary-dark); font-weight:700; }
+  .exam-summary-item{ display:flex; align-items:center; gap:8px; font-size:0.875rem; color: var(--primary-dark); font-weight:700; }
   .exam-summary-item .icon{ color: var(--gold); }
-  .exam-summary-item span.num{ font-family:'Cairo',sans-serif; font-weight:800; font-size:18px; }
+  .exam-summary-item span.num{ font-family:'Cairo',sans-serif; font-weight:800; font-size:1.125rem; }
 </style>
 </head>
 <body>
@@ -93,7 +93,7 @@
   requireAdminAuth(function () {
     renderAdminNav('home');
 
-    const raw = sessionStorage.getItem(draftKey);
+    const raw = localStorage.getItem(draftKey);
     if (!raw) { window.location.href = document.getElementById('backLink').href; return; }
     try { draft = JSON.parse(raw); } catch (e) { window.location.href = document.getElementById('backLink').href; return; }
 
@@ -142,13 +142,54 @@
       qBlock.remove();
       Array.from(questionsWrap.children).forEach(function (el, i) { el.querySelector('.qi-index').textContent = i + 1; });
       updateSummary();
+      autosaveDraft();
     });
     qBlock.querySelectorAll('.qq-points, .qq-correct').forEach(function (inp) {
       inp.addEventListener('input', updateSummary);
       inp.addEventListener('change', updateSummary);
     });
   }
-  document.getElementById('addQuestionBtn').addEventListener('click', function () { addQuestionBlock(); updateSummary(); });
+  document.getElementById('addQuestionBtn').addEventListener('click', function () { addQuestionBlock(); updateSummary(); autosaveDraft(); });
+
+  /* ---------------- حفظ تلقائي فوري في localStorage أثناء الكتابة ----------------
+     كده لو حصل ريفريش للصفحة أو المستخدم قفل المتصفح/التطبيق قبل ما يضغط "حفظ"،
+     الأسئلة اللي كتبها لسه محفوظة ومش هتتشال. localStorage (مش sessionStorage)
+     عشان يفضل موجود حتى لو الموبايل قفل التبويب أو اتفصل ورجع تاني على نفس الجهاز. */
+  function collectExamStateLenient() {
+    const qBlocks = Array.from(questionsWrap.children);
+    const questions = qBlocks.map(function (qb) {
+      const correctRadio = qb.querySelector('.qq-correct:checked');
+      return {
+        key: qb.dataset.key || '',
+        text: qb.querySelector('.qq-text').value,
+        options: Array.from(qb.querySelectorAll('.qq-option')).map(function (inp) { return inp.value; }),
+        correct: correctRadio ? parseInt(correctRadio.value, 10) : null,
+        points: parseInt(qb.querySelector('.qq-points').value, 10) || 1
+      };
+    });
+    return { title: examTitleInput.value, releaseAt: examReleaseInput.value, questions: questions };
+  }
+
+  function autosaveDraft() {
+    if (!draft || !examEntry) return;
+    const state = collectExamStateLenient();
+    examEntry.title = state.title;
+    examEntry.releaseAt = state.releaseAt;
+    examEntry.questions = state.questions;
+    const idx = draft.exams.findIndex(function (e) { return e.localId === examLocalId; });
+    if (idx >= 0) draft.exams[idx] = examEntry; else draft.exams.push(examEntry);
+    try { localStorage.setItem(draftKey, JSON.stringify(draft)); } catch (e) { /* تجاهل خطأ تخزين مؤقت */ }
+  }
+
+  let autosaveTimer = null;
+  function scheduleAutosave() {
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(autosaveDraft, 300);
+  }
+  document.addEventListener('input', scheduleAutosave);
+  document.addEventListener('change', scheduleAutosave);
+  window.addEventListener('beforeunload', autosaveDraft);
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') autosaveDraft(); });
 
   function updateSummary() {
     const blocks = Array.from(questionsWrap.children);
@@ -195,7 +236,7 @@
     if (idx >= 0) draft.exams[idx] = examEntry; else draft.exams.push(examEntry);
 
     try {
-      sessionStorage.setItem(draftKey, JSON.stringify(draft));
+      localStorage.setItem(draftKey, JSON.stringify(draft));
     } catch (e) {
       msg.textContent = 'تعذر حفظ التغييرات مؤقتًا: ' + e.message;
       msg.className = 'form-msg show error';

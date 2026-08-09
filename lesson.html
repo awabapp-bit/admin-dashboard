@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
 <title>محاضرة — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
@@ -33,19 +33,19 @@
     </div>
 
     <div class="admin-page-head" style="margin:26px 0 14px;">
-      <h3 style="font-family:'Cairo',sans-serif;font-weight:800;color:var(--primary-dark);margin:0;">الفيديوهات <span class="muted" style="font-size:12px;">(اختياري)</span></h3>
+      <h3 style="font-family:'Cairo',sans-serif;font-weight:800;color:var(--primary-dark);margin:0;">الفيديوهات <span class="muted" style="font-size:0.75rem;">(اختياري)</span></h3>
       <button type="button" class="btn btn-outline btn-sm" id="addVideoBtn" style="width:auto;">إضافة فيديو</button>
     </div>
     <div id="videosWrap"></div>
 
     <div class="admin-page-head" style="margin:30px 0 14px;">
-      <h3 style="font-family:'Cairo',sans-serif;font-weight:800;color:var(--primary-dark);margin:0;">الاختبارات <span class="muted" style="font-size:12px;">(اختياري)</span></h3>
+      <h3 style="font-family:'Cairo',sans-serif;font-weight:800;color:var(--primary-dark);margin:0;">الاختبارات <span class="muted" style="font-size:0.75rem;">(اختياري)</span></h3>
       <button type="button" class="btn btn-outline btn-sm" id="addExamBtn" style="width:auto;">إضافة اختبار</button>
     </div>
     <div id="examsWrap"></div>
 
     <div class="admin-page-head" style="margin:30px 0 14px;">
-      <h3 style="font-family:'Cairo',sans-serif;font-weight:800;color:var(--primary-dark);margin:0;">المرفقات (PDF / صور) <span class="muted" style="font-size:12px;">(اختياري)</span></h3>
+      <h3 style="font-family:'Cairo',sans-serif;font-weight:800;color:var(--primary-dark);margin:0;">المرفقات (PDF / صور) <span class="muted" style="font-size:0.75rem;">(اختياري)</span></h3>
     </div>
     <div class="info-card" style="margin-bottom:14px;">
       <div class="field">
@@ -104,12 +104,12 @@
     renderAdminNav('home');
     const backLink = document.getElementById('backLink');
     backLink.href = 'competition.html?id=' + encodeURIComponent(compId);
-    backLink.addEventListener('click', function () { sessionStorage.removeItem(draftKey); });
+    backLink.addEventListener('click', function () { localStorage.removeItem(draftKey); });
 
     if (lessonId) document.getElementById('pageTitle').textContent = 'تعديل المحاضرة';
 
     fetchOriginalLesson().then(function () {
-      const draftRaw = sessionStorage.getItem(draftKey);
+      const draftRaw = localStorage.getItem(draftKey);
       if (draftRaw) {
         try {
           const draft = JSON.parse(draftRaw);
@@ -178,9 +178,22 @@
   }
 
   function saveDraftToStorage() {
-    try { sessionStorage.setItem(draftKey, JSON.stringify(buildDraftObject())); }
+    try { localStorage.setItem(draftKey, JSON.stringify(buildDraftObject())); }
     catch (e) { console.warn('تعذر حفظ المسودة المؤقتة', e); }
   }
+
+  /* حفظ تلقائي أثناء الكتابة (عنوان المحاضرة، معادها، الفيديوهات) بحيث ريفريش
+     الصفحة أو قفل المتصفح/التطبيق قبل ما ينتقل لصفحة الأسئلة أو يضغط حفظ
+     ما يشيلش اللي كتبه. localStorage (مش sessionStorage) عشان يفضل موجود
+     حتى لو الموبايل اتفصل ورجع على نفس الجهاز بعدين. */
+  let lessonAutosaveTimer = null;
+  function scheduleLessonAutosave() {
+    clearTimeout(lessonAutosaveTimer);
+    lessonAutosaveTimer = setTimeout(saveDraftToStorage, 300);
+  }
+  document.addEventListener('input', scheduleLessonAutosave);
+  window.addEventListener('beforeunload', saveDraftToStorage);
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') saveDraftToStorage(); });
 
   function saveDraftAndGoToExam(localId) {
     saveDraftToStorage();
@@ -214,7 +227,7 @@
   function renderExamsList() {
     examsWrap.innerHTML = '';
     if (examsData.length === 0) {
-      examsWrap.innerHTML = '<p class="muted" style="font-size:13px;margin:2px 0 4px;">لا توجد اختبارات مضافة بعد.</p>';
+      examsWrap.innerHTML = '<p class="muted" style="font-size:0.8125rem;margin:2px 0 4px;">لا توجد اختبارات مضافة بعد.</p>';
       return;
     }
     examsData.forEach(function (exam, idx) {
@@ -227,7 +240,7 @@
       card.innerHTML =
         '<div class="q-header"><h4>اختبار #' + (idx + 1) + (exam.title ? (' — ' + escapeHtml(exam.title)) : ' (بلا عنوان بعد)') + '</h4>' +
           '<button type="button" class="q-remove-btn exam-del-btn" data-local="' + exam.localId + '">' + icon('trash', 'icon-sm') + ' حذف الاختبار</button></div>' +
-        '<div style="display:flex; gap:22px; flex-wrap:wrap; margin:6px 0 14px; font-size:13px; color:var(--text-muted);">' +
+        '<div style="display:flex; gap:22px; flex-wrap:wrap; margin:6px 0 14px; font-size:0.8125rem; color:var(--text-muted);">' +
           '<span>' + icon('listCheck', 'icon-sm') + ' عدد الأسئلة: <strong style="color:var(--primary-dark)">' + qCount + '</strong></span>' +
           '<span>' + icon('medal', 'icon-sm') + ' إجمالي النقاط: <strong style="color:var(--primary-dark)">' + totalPoints + '</strong></span>' +
           '<span>' + icon('clock', 'icon-sm') + ' ينزل: <strong style="color:var(--primary-dark)">' + (exam.releaseAt ? formatArabicDate(new Date(exam.releaseAt).getTime()) : 'لم يُحدد بعد') + '</strong></span>' +
@@ -409,7 +422,7 @@
     }
 
     writePromise.then(function () {
-      sessionStorage.removeItem(draftKey);
+      localStorage.removeItem(draftKey);
       window.location.href = 'competition.html?id=' + encodeURIComponent(compId);
     }).catch(function (err) {
       msg.textContent = 'تعذر حفظ المحاضرة: ' + err.message;
