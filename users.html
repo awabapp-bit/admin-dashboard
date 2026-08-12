@@ -43,7 +43,7 @@
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
 <script>
-  document.getElementById('searchIcon').innerHTML = icon('user', 'icon-sm');
+  document.getElementById('searchIcon').innerHTML = icon('search', 'icon-sm');
 
   let allUsers = [];
 
@@ -116,13 +116,13 @@
           '<span class="ac-date">' + icon('calendar', 'icon-sm') + ' ' + formatArabicDate(u.createdAt) + '</span>' +
         '</div>' +
         '<div class="ac-actions">' +
-          '<a class="btn btn-outline btn-xs" href="user-detail.html?uid=' + u.uid + '">' + icon('eye', 'icon-sm') + ' التفاصيل</a>' +
+          '<a class="btn btn-outline btn-xs ac-primary-btn" href="user-detail.html?uid=' + u.uid + '">' + icon('eye', 'icon-sm') + ' عرض التفاصيل الكاملة</a>' +
           (u.isAdmin ? '' :
-            '<button class="btn btn-outline btn-xs reset-btn" data-uid="' + u.uid + '" data-name="' + escapeHtml(u.name || '') + '">' + icon('hourglass', 'icon-sm') + ' تصفير النقاط</button>' +
-            '<button class="btn ' + (blocked ? 'btn-primary' : 'btn-ghost') + ' btn-xs block-btn" data-uid="' + u.uid + '" data-blocked="' + blocked + '" data-name="' + escapeHtml(u.name || '') + '">' +
-              icon('lock', 'icon-sm') + ' ' + (blocked ? 'إلغاء الحظر' : 'حظر') +
-            '</button>' +
-            '<button class="btn btn-danger btn-xs delete-btn" data-uid="' + u.uid + '" data-name="' + escapeHtml(u.name || '') + '" data-email="' + escapeHtml(u.email || '') + '">' + icon('trash', 'icon-sm') + ' حذف الحساب</button>'
+            '<div class="ac-actions-row">' +
+              '<button class="ac-icon-btn reset-btn" data-tip="تصفير النقاط" data-uid="' + u.uid + '" data-name="' + escapeHtml(u.name || '') + '">' + icon('hourglass', 'icon-sm') + '</button>' +
+              '<button class="ac-icon-btn block-btn ' + (blocked ? 'is-active' : '') + '" data-tip="' + (blocked ? 'إلغاء الحظر' : 'حظر الحساب') + '" data-uid="' + u.uid + '" data-blocked="' + blocked + '" data-name="' + escapeHtml(u.name || '') + '">' + icon('lock', 'icon-sm') + '</button>' +
+              '<button class="ac-icon-btn danger delete-btn" data-tip="حذف الحساب" data-uid="' + u.uid + '" data-name="' + escapeHtml(u.name || '') + '" data-email="' + escapeHtml(u.email || '') + '">' + icon('trash', 'icon-sm') + '</button>' +
+            '</div>'
           ) +
         '</div>' +
       '</div>';
@@ -156,11 +156,11 @@
         if (!confirm('هل أنت متأكد من حذف حساب "' + name + '" نهائيًا؟ سيُحذف نهائيًا كل شيء: نقاطه، تقدّمه، اشتراكاته في كل المسابقات، إشعاراته، ومحادثات الدعم الفني معه. لا يمكن التراجع عن هذا الإجراء.')) return;
         if (prompt('للتأكيد، اكتب "حذف" في المربع التالي:') !== 'حذف') { showToast('تم إلغاء الحذف.', 'warning'); return; }
         btn.disabled = true;
-        btn.textContent = 'جارٍ الحذف...';
+        btn.setAttribute('data-tip', 'جارٍ الحذف...');
         deleteUserAccountData(uid).catch(function (err) {
           showToast('تعذر حذف الحساب: ' + err.message, 'error');
           btn.disabled = false;
-          btn.innerHTML = icon('trash', 'icon-sm') + ' حذف الحساب';
+          btn.setAttribute('data-tip', 'حذف الحساب');
         });
       });
     });

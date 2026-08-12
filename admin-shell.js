@@ -47,7 +47,7 @@ function renderAdminNav(activePage) {
           '</span>' +
           '<div class="admin-brand-text">' +
             '<h2>أواب</h2>' +
-            '<span>ADMIN PANEL</span>' +
+            '<span>لوحة التحكم بمنصة أواب</span>' +
           '</div>' +
         '</div>' +
         '<button class="admin-collapse-toggle" id="adminCollapseToggle" type="button" aria-label="طي القائمة الجانبية" aria-expanded="true" title="طي/فتح القائمة">' +
@@ -94,6 +94,7 @@ function renderAdminNav(activePage) {
     auth.signOut().then(function () { window.location.href = 'index.html'; });
   });
 
+  renderAdminBottomNav(activePage);
   setupAdminMobileNav();
   setupAdminSidebarCollapse();
   setupAdminThemeToggle();
@@ -101,6 +102,47 @@ function renderAdminNav(activePage) {
   loadAdminProfileBlock();
   loadViolationsNavBadge();
   loadSupportNavBadge();
+}
+
+/**
+ * يرسم شريط التنقل السفلي الثابت (يظهر على الموبايل فقط عبر CSS).
+ * بيحتوي على أهم 4 أقسام + زر "المزيد" اللي بيفتح نفس القائمة الجانبية
+ * (بالبروفايل، آخر الأنشطة، الوضع الليلي، تسجيل الخروج).
+ */
+function renderAdminBottomNav(activePage) {
+  let bar = document.getElementById('adminBottomNav');
+  if (!bar) {
+    bar = document.createElement('nav');
+    bar.className = 'admin-bottom-nav';
+    bar.id = 'adminBottomNav';
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML =
+    '<a href="home.html" class="' + (activePage === 'home' ? 'active' : '') + '">' +
+      icon('gauge', 'icon') + '<span>الرئيسية</span>' +
+    '</a>' +
+    '<a href="users.html" class="' + (activePage === 'users' ? 'active' : '') + '">' +
+      icon('users', 'icon') + '<span>المستخدمون</span>' +
+    '</a>' +
+    '<a href="violations.html" class="' + (activePage === 'violations' ? 'active' : '') + '">' +
+      icon('bell', 'icon') + '<span class="bn-badge" id="bottomNavViolationsBadge">0</span><span>المخالفات</span>' +
+    '</a>' +
+    '<a href="support.html" class="' + (activePage === 'support' ? 'active' : '') + '">' +
+      icon('headset', 'icon') + '<span class="bn-badge" id="bottomNavSupportBadge">0</span><span>الدعم</span>' +
+    '</a>' +
+    '<button type="button" id="adminBottomNavMore">' +
+      icon('ellipsis', 'icon') + '<span>المزيد</span>' +
+    '</button>';
+
+  const moreBtn = document.getElementById('adminBottomNavMore');
+  const menuToggle = document.getElementById('adminMenuToggle');
+  if (moreBtn && menuToggle) {
+    moreBtn.addEventListener('click', function () {
+      // بيستخدم نفس منطق فتح/قفل القائمة الجانبية الخاص بزر الهمبرغر
+      // (بما فيه قفل تمرير الصفحة) بدل ما نكرر الكود
+      menuToggle.click();
+    });
+  }
 }
 
 /**
@@ -133,38 +175,43 @@ function loadAdminProfileBlock() {
  */
 function loadViolationsNavBadge() {
   const badge = document.getElementById('violationsNavBadge');
-  if (!badge || typeof db === 'undefined') return;
+  const bnBadge = document.getElementById('bottomNavViolationsBadge');
+  if ((!badge && !bnBadge) || typeof db === 'undefined') return;
   db.ref('violations').once('value').then(function (snap) {
     const data = snap.val() || {};
     let total = 0;
     Object.keys(data).forEach(function (uid) {
       total += Object.keys(data[uid] || {}).length;
     });
+    const text = total > 99 ? '99+' : String(total);
     if (total > 0) {
-      badge.textContent = total > 99 ? '99+' : String(total);
-      badge.style.display = 'inline-flex';
+      if (badge) { badge.textContent = text; badge.style.display = 'inline-flex'; }
+      if (bnBadge) { bnBadge.textContent = text; bnBadge.classList.add('show'); }
     }
   }).catch(function () {});
 }
 
 /**
  * يراقب لحظيًا إجمالي الرسائل غير المقروءة في كل محادثات الدعم الفني
- * ويعرضها كشارة جنب رابط "الدعم الفني".
+ * ويعرضها كشارة جنب رابط "الدعم الفني" (في القائمة الجانبية وشريط التنقل السفلي).
  */
 function loadSupportNavBadge() {
   const badge = document.getElementById('supportNavBadge');
-  if (!badge || typeof db === 'undefined') return;
+  const bnBadge = document.getElementById('bottomNavSupportBadge');
+  if ((!badge && !bnBadge) || typeof db === 'undefined') return;
   db.ref('conversations').on('value', function (snap) {
     const data = snap.val() || {};
     let total = 0;
     Object.keys(data).forEach(function (uid) {
       total += Number(data[uid] && data[uid].unreadCountByAdmin) || 0;
     });
+    const text = total > 99 ? '99+' : String(total);
     if (total > 0) {
-      badge.textContent = total > 99 ? '99+' : String(total);
-      badge.style.display = 'inline-flex';
+      if (badge) { badge.textContent = text; badge.style.display = 'inline-flex'; }
+      if (bnBadge) { bnBadge.textContent = text; bnBadge.classList.add('show'); }
     } else {
-      badge.style.display = 'none';
+      if (badge) badge.style.display = 'none';
+      if (bnBadge) bnBadge.classList.remove('show');
     }
   });
 }
@@ -239,6 +286,43 @@ function showToast(message, type) {
 }
 window.showToast = showToast;
 
+/* ============================================================
+   🔒 قفل تمرير الصفحة (يُستخدم كل ما يُفتح أي درج/قائمة فوق المحتوى:
+   القائمة الجانبية، درج الأنشطة، قائمة محادثات الدعم الفني...)
+   بيستخدم عدّاد (reference count) عشان لو أكتر من عنصر فاتح في نفس
+   الوقت، الصفحة تفضل مقفولة لحد ما كل حاجة تتقفل. وبيحافظ على مكان
+   التمرير الحالي بدل ما يرجّع المستخدم لأعلى الصفحة (مهم جدًا على
+   الموبايل/سفاري عشان القفل يبقى فعلي 100% ومايفلتش مع اللمس).
+   ============================================================ */
+let __scrollLockCount = 0;
+let __scrollLockY = 0;
+function lockBodyScroll() {
+  if (__scrollLockCount === 0) {
+    __scrollLockY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.position = 'fixed';
+    document.body.style.top = (-__scrollLockY) + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    document.body.classList.add('scroll-locked');
+  }
+  __scrollLockCount++;
+}
+function unlockBodyScroll() {
+  __scrollLockCount = Math.max(0, __scrollLockCount - 1);
+  if (__scrollLockCount === 0) {
+    document.body.classList.remove('scroll-locked');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, __scrollLockY);
+  }
+}
+window.lockBodyScroll = lockBodyScroll;
+window.unlockBodyScroll = unlockBodyScroll;
+
 /**
  * يفعّل زر السهم أعلى القائمة الجانبية ليطويها لعرض الأيقونات فقط
  * (على شاشات سطح المكتب)، ويحفظ حالة الطي في localStorage.
@@ -272,19 +356,27 @@ function setupAdminMobileNav() {
   const overlay = document.getElementById('adminSidebarOverlay');
   if (!toggle || !links || !overlay) return;
 
+  let menuIsOpen = false;
+  const moreBtn = document.getElementById('adminBottomNavMore');
   function openMenu() {
+    if (menuIsOpen) return;
+    menuIsOpen = true;
     links.classList.add('open');
     overlay.classList.add('open');
     toggle.classList.add('open');
     toggle.setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
+    if (moreBtn) moreBtn.classList.add('active');
+    lockBodyScroll();
   }
   function closeMenu() {
+    if (!menuIsOpen) return;
+    menuIsOpen = false;
     links.classList.remove('open');
     overlay.classList.remove('open');
     toggle.classList.remove('open');
     toggle.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
+    if (moreBtn) moreBtn.classList.remove('active');
+    unlockBodyScroll();
   }
 
   toggle.addEventListener('click', function () {
@@ -352,9 +444,10 @@ function openActivityDrawer() {
   const drawer = document.getElementById('activityDrawer');
   const overlay = document.getElementById('activityDrawerOverlay');
   if (!drawer || !overlay) return;
+  if (drawer.classList.contains('open')) return;
   drawer.classList.add('open');
   overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockBodyScroll();
   loadActivityDrawerData();
 }
 
@@ -362,9 +455,10 @@ function closeActivityDrawer() {
   const drawer = document.getElementById('activityDrawer');
   const overlay = document.getElementById('activityDrawerOverlay');
   if (!drawer || !overlay) return;
+  if (!drawer.classList.contains('open')) return;
   drawer.classList.remove('open');
   overlay.classList.remove('open');
-  document.body.style.overflow = '';
+  unlockBodyScroll();
 }
 
 /** يجيب أحدث الأنشطة من قاعدة البيانات ويعرضها جوه الدرج */

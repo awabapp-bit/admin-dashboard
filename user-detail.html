@@ -12,7 +12,7 @@
 
 <nav class="admin-nav" id="adminNav"></nav>
 
-<main class="admin-page" style="max-width:620px;">
+<main class="admin-page" style="max-width:760px;">
   <a class="back-link" href="users.html" id="backLink">كل الحسابات</a>
   <h1 class="page-title" id="pageTitle">تفاصيل الحساب</h1>
 
@@ -63,6 +63,20 @@
           : '<span class="status-pill live" style="margin:0;">' + icon('check', 'icon-sm') + ' نشط</span>') +
       '</div>' +
 
+      '<div class="stat-grid" id="userStatGrid" style="margin:16px 0;">' +
+        '<div class="center-loading" style="grid-column:1/-1; min-height:70px;"><div class="loader"></div></div>' +
+      '</div>' +
+
+      '<h3 class="section-title">' + icon('trophy', 'icon-sm') + ' التقدّم الدراسي</h3>' +
+      '<div id="userProgressWrap" style="margin-bottom:20px;">' +
+        '<div class="center-loading" style="min-height:80px;"><div class="loader"></div></div>' +
+      '</div>' +
+
+      '<h3 class="section-title">' + icon('clock', 'icon-sm') + ' سجل النشاط والحركات</h3>' +
+      '<div class="detail-card" id="userActivityWrap" style="margin-bottom:20px;">' +
+        '<div class="center-loading" style="min-height:100px;"><div class="loader"></div></div>' +
+      '</div>' +
+
       '<div class="no-password-note">' +
         icon('key', 'icon-md') +
         '<span>لأسباب أمنية، Firebase لا يخزّن كلمة المرور الحقيقية في أي مكان (حتى نحن كمطوّرين لا نقدر نصل لها)، فمفيش طريقة تقنية لعرضها. البديل الفعلي: ابعت للمستخدم رابط إعادة تعيين كلمة مرور آمن مباشرة على بريده الإلكتروني.</span>' +
@@ -83,6 +97,8 @@
         ) +
       '</div>' +
       '<div class="form-msg" id="actionMsg" style="margin-top:16px;"></div>';
+
+    loadFullActivity(u);
 
     document.getElementById('resetLinkBtn').addEventListener('click', function () {
       const msg = document.getElementById('actionMsg');
@@ -135,6 +151,125 @@
           });
       });
     }
+  }
+
+  /**
+   * يجمع كل نشاط وحركات المستخدم من كل أجزاء قاعدة البيانات:
+   * المخالفات، الاختبارات المُقدَّمة، التقدّم الدراسي، ومحادثة الدعم الفني،
+   * ويعرضهم في 3 أقسام: إحصائيات سريعة، تقدّم دراسي، وسجل نشاط زمني.
+   */
+  function loadFullActivity(u) {
+    Promise.all([
+      db.ref('violations/' + targetUid).once('value'),
+      db.ref('userProgress/' + targetUid).once('value'),
+      db.ref('examAttempts').once('value'),
+      db.ref('competitions').once('value'),
+      db.ref('conversations/' + targetUid).once('value')
+    ]).then(function (results) {
+      const violations = results[0].val() || {};
+      const progress = results[1].val() || {};
+      const allAttempts = results[2].val() || {};
+      const comps = results[3].val() || {};
+      const conversation = results[4].val() || null;
+
+      // -------- سجل الأحداث الزمني --------
+      const events = [];
+
+      if (u.createdAt) {
+        events.push({ ts: u.createdAt, type: 'user', text: 'تسجيل الحساب على المنصة' });
+      }
+      if (u.lastLoginAt) {
+        events.push({ ts: u.lastLoginAt, type: 'user', text: 'آخر تسجيل دخول' });
+      }
+
+      Object.keys(violations).forEach(function (vid) {
+        const v = violations[vid];
+        if (!v) return;
+        events.push({
+          ts: v.timestamp || 0,
+          type: 'violation',
+          text: 'تسجيل <b>مخالفة</b> (' + escapeHtml(v.type || 'غير معروف') + ')' + (v.details ? ' — ' + escapeHtml(v.details) : '')
+        });
+      });
+
+      let examsSubmitted = 0;
+      Object.keys(allAttempts).forEach(function (cid) {
+        const lessons = allAttempts[cid] || {};
+        Object.keys(lessons).forEach(function (lid) {
+          const exams = lessons[lid] || {};
+          Object.keys(exams).forEach(function (eid) {
+            const a = (exams[eid] || {})[targetUid];
+            if (!a) return;
+            if (a.submitted || a.submittedAt) {
+              examsSubmitted++;
+              const compTitle = (comps[cid] && comps[cid].title) || 'محتوى';
+              const lessonTitle = (comps[cid] && comps[cid].lessons && comps[cid].lessons[lid] && comps[cid].lessons[lid].title) || 'محاضرة';
+              const examTitle = (comps[cid] && comps[cid].lessons && comps[cid].lessons[lid] && comps[cid].lessons[lid].exams && comps[cid].lessons[lid].exams[eid] && comps[cid].lessons[lid].exams[eid].title) || 'اختبار';
+              events.push({
+                ts: a.submittedAt || 0,
+                type: 'comp',
+                text: 'تسليم اختبار <b>' + escapeHtml(examTitle) + '</b> في محاضرة "' + escapeHtml(lessonTitle) + '" — ' + escapeHtml(compTitle)
+              });
+            }
+          });
+        });
+      });
+
+      if (conversation && conversation.lastMessage) {
+        events.push({
+          ts: conversation.lastMessageTimestamp || 0,
+          type: 'support',
+          text: 'آخر رسالة في محادثة <b>الدعم الفني</b>: "' + escapeHtml(String(conversation.lastMessage).slice(0, 60)) + '"'
+        });
+      }
+
+      events.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+
+      const activityWrap = document.getElementById('userActivityWrap');
+      if (events.length === 0) {
+        activityWrap.innerHTML = '<p style="color:var(--text-muted); font-size:0.8125rem; text-align:center; padding:16px 0; margin:0;">لا يوجد أي نشاط مسجّل لهذا الحساب بعد.</p>';
+      } else {
+        const iconFor = { user: 'user', violation: 'bell', comp: 'trophy', support: 'headset' };
+        activityWrap.innerHTML = '<div class="activity-feed">' + events.map(function (e) {
+          return '<div class="activity-item act-' + e.type + '">' +
+            '<div class="act-icon">' + icon(iconFor[e.type] || 'clock', 'icon-sm') + '</div>' +
+            '<div class="act-body"><div class="act-text">' + e.text + '</div><div class="act-time">' + (e.ts ? formatArabicDate(e.ts) : '—') + '</div></div>' +
+          '</div>';
+        }).join('') + '</div>';
+      }
+
+      // -------- التقدّم الدراسي --------
+      const compIds = Object.keys(progress);
+      const progressWrap = document.getElementById('userProgressWrap');
+      if (compIds.length === 0) {
+        progressWrap.innerHTML = '<p style="color:var(--text-muted); font-size:0.8125rem; text-align:center; padding:16px 0; margin:0;">لسه ما بدأش أي محتوى تعليمي.</p>';
+      } else {
+        progressWrap.innerHTML = compIds.map(function (cid) {
+          const comp = comps[cid] || {};
+          const lessonsProgress = progress[cid] || {};
+          const lessonIds = Object.keys(lessonsProgress);
+          const totalPoints = lessonIds.reduce(function (sum, lid) { return sum + (Number(lessonsProgress[lid] && lessonsProgress[lid].earnedPoints) || 0); }, 0);
+          return '<div class="admin-lesson-row" style="margin-bottom:10px;">' +
+            '<div class="info">' +
+              '<h4>' + escapeHtml(comp.title || 'محتوى محذوف') + '</h4>' +
+              '<div class="meta-row">' +
+                '<span>' + icon('book', 'icon-sm') + ' ' + lessonIds.length + ' محاضرة تم التفاعل معها</span>' +
+                '<span>' + icon('star', 'icon-sm') + ' ' + totalPoints + ' نقطة مكتسبة من هذا المحتوى</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      // -------- إحصائيات سريعة --------
+      document.getElementById('userStatGrid').innerHTML =
+        '<div class="stat-card"><div class="stat-icon">' + icon('bell', 'icon-md') + '</div><div><div class="stat-value">' + Object.keys(violations).length + '</div><div class="stat-label">مخالفة مسجّلة</div></div></div>' +
+        '<div class="stat-card"><div class="stat-icon">' + icon('trophy', 'icon-md') + '</div><div><div class="stat-value">' + examsSubmitted + '</div><div class="stat-label">اختبار تم تسليمه</div></div></div>' +
+        '<div class="stat-card"><div class="stat-icon">' + icon('book', 'icon-md') + '</div><div><div class="stat-value">' + compIds.length + '</div><div class="stat-label">محتوى تعليمي شارك فيه</div></div></div>' +
+        '<div class="stat-card"><div class="stat-icon">' + icon('headset', 'icon-md') + '</div><div><div class="stat-value">' + (conversation ? (conversation.unreadCountByAdmin || 0) : '—') + '</div><div class="stat-label">رسالة دعم غير مقروءة</div></div></div>';
+    }).catch(function (err) {
+      document.getElementById('userActivityWrap').innerHTML = '<p style="color:var(--danger); font-size:0.8125rem; text-align:center; padding:16px 0; margin:0;">تعذر تحميل النشاط: ' + escapeHtml(err.message || '') + '</p>';
+    });
   }
 
   function detailRow(iconName, label, value) {
