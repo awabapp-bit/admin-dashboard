@@ -416,15 +416,16 @@ button { font-family: inherit; cursor: pointer; }
   width: 38px; height: 38px;
   flex-shrink: 0;
   border-radius: 9px;
-  background: var(--accent);
+  /* أسود عشان اللوجو نفسه فاتح/أبيض، فبيبان بوضوح وتباين عالي فوق خلفية سودا */
+  background: #0A0A0A;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   position: relative;
   transition: transform .25s var(--ease);
 }
 .admin-brand:hover .admin-brand-mark { transform: translateY(-1px); }
-.admin-brand img { width: 20px; height: 20px; border-radius: 3px; object-fit: contain; }
+.admin-brand img { width: 24px; height: 24px; border-radius: 3px; object-fit: contain; }
 .admin-brand-mark .icon { color: #fff; flex-shrink: 0; }
 .admin-brand-text { min-width: 0; overflow: hidden; }
 .admin-brand-text h2 {
@@ -441,32 +442,46 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .admin-collapse-toggle { display: none; }
+/* ============================================================
+   👤 زرار حساب المسؤول في الهيدر (اسم + سهم) — بيفتح قائمة الحساب
+   (البروفايل، آخر الأنشطة، الوضع الليلي، تسجيل الخروج)
+   ============================================================ */
 .admin-menu-toggle {
   display: flex;
-  width: 40px; height: 40px;
-  align-items: center; justify-content: center;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 8px 0 10px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 9px;
+  border-radius: 999px;
   flex-shrink: 0;
+  max-width: 44vw;
   color: #fff;
-  transition: all .25s var(--ease);
+  cursor: pointer;
+  transition: background .25s var(--ease), border-color .25s var(--ease);
 }
 .admin-menu-toggle:hover { background: rgba(255, 255, 255, 0.16); }
-.admin-menu-toggle:active { transform: scale(0.94); }
+.admin-menu-toggle:active { transform: scale(0.97); }
 .admin-menu-toggle.open { background: var(--accent); border-color: var(--accent); }
-.admin-menu-toggle.open .hamburger-lines span { background: #fff; }
-.admin-menu-toggle .hamburger-lines { position: relative; width: 18px; height: 12px; display: block; }
-.admin-menu-toggle .hamburger-lines span {
-  position: absolute; right: 0; left: 0; height: 2px; border-radius: 2px; background: #fff;
-  transition: transform .3s var(--ease), opacity .2s var(--ease), top .3s var(--ease);
+.admin-menu-toggle .amt-avatar {
+  width: 26px; height: 26px; flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6875rem; font-weight: 800;
 }
-.admin-menu-toggle .hamburger-lines span:nth-child(1) { top: 0; }
-.admin-menu-toggle .hamburger-lines span:nth-child(2) { top: 5px; }
-.admin-menu-toggle .hamburger-lines span:nth-child(3) { top: 10px; }
-.admin-menu-toggle.open .hamburger-lines span:nth-child(1) { top: 5px; transform: rotate(45deg); }
-.admin-menu-toggle.open .hamburger-lines span:nth-child(2) { opacity: 0; }
-.admin-menu-toggle.open .hamburger-lines span:nth-child(3) { top: 5px; transform: rotate(-45deg); }
+.admin-menu-toggle.open .amt-avatar { background: rgba(0, 0, 0, 0.2); }
+.admin-menu-toggle .amt-name {
+  font-size: 0.75rem; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0;
+}
+/* السهم بيتلف بأنيميشن سلس لما نفتح/نقفل قائمة الحساب، عشان يوضح
+   اتجاه الحركة زي أي قائمة منسدلة احترافية */
+.admin-menu-toggle svg { flex-shrink: 0; transition: transform .3s var(--ease); }
+.admin-menu-toggle.open svg { transform: rotate(180deg); }
 
 /* ============================================================
    📱 شريط تنقل سفلي على الموبايل (بديل احترافي أنسب من زرار
@@ -530,14 +545,20 @@ button { font-family: inherit; cursor: pointer; }
   }
   .admin-bottom-nav .bn-badge.show { display: flex; }
 
-  /* الهيدر بقى مخصص للعلامة التجارية بس على الموبايل، والتنقل
-     الأساسي بقى من الشريط السفلي — زر الهمبرغر القديم بقى غير لازم */
-  .admin-menu-toggle { display: none; }
+  /* زرار حساب المسؤول (اسم + سهم) في الهيدر هو المدخل الوحيد لقائمة
+     الحساب على الموبايل دلوقتي (بدل زرار همبرغر قديم بلا معنى واضح) */
 
   /* مساحة كافية أسفل كل صفحة عشان الشريط السفلي مايغطيش آخر عنصر فيها
      (important لأن فيه استعلامات مقاس تانية بعدها بالملف بتحدد padding
      كامل لـ admin-page وممكن تلغي القيمة دي لو مفيش أولوية أعلى) */
   .admin-page { padding-bottom: calc(82px + env(safe-area-inset-bottom)) !important; }
+
+  /* قائمة "المزيد" (زر الثلاث نقاط) بقت تعرض بس الحاجات اللي مش
+     موجودة أصلاً في الشريط السفلي (الرئيسية/المستخدمين/المخالفات/الدعم)
+     — بتفضل بس: بروفايل الأدمن، آخر الأنشطة، الوضع الليلي، تسجيل الخروج */
+  .admin-links .nav-group-label { display: none; }
+  .admin-links a.dup-mobile { display: none; }
+  .admin-links .nav-group.dup-mobile-group { display: none; }
 }
 
 .admin-links {
@@ -669,6 +690,63 @@ body.scroll-locked { overflow: hidden; touch-action: none; overscroll-behavior: 
 .admin-sidebar-overlay.open { opacity: 1; pointer-events: auto; }
 
 /* ============================================================
+   📱 على الموبايل، قائمة الحساب (اللي بتتفتح من زرار الاسم في
+   الهيدر) بقت قائمة صغيرة منسدلة تحت الزرار بالظبط، مش درج كامل
+   طول الشاشة — لأن محتواها بقى قليل (بروفايل + آخر الأنشطة + الوضع
+   الليلي + تسجيل الخروج) ومحتاجش ياخد الشاشة كلها.
+   ============================================================ */
+@media (max-width: 860px) {
+  .admin-links {
+    top: auto;
+    bottom: auto;
+    right: auto;
+    left: 14px;
+    /* بتتحط تحت زرار الحساب مباشرة (ارتفاع الهيدر + مسافة بسيطة) */
+    top: calc(env(safe-area-inset-top) + 54px);
+    width: min(78vw, 260px);
+    height: auto;
+    max-height: min(72vh, 440px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    /* أنيميشن ظهور "قائمة منسدلة" (تكبير + تلاشي من فوق) بدل انزلاق
+       درج من حافة الشاشة */
+    transform-origin: top left;
+    transform: scale(0.92) translateY(-6px);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform .22s var(--ease), opacity .18s var(--ease), visibility 0s linear .22s;
+  }
+  .admin-links.open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    visibility: visible;
+    transition: transform .22s var(--ease), opacity .18s var(--ease), visibility 0s;
+  }
+  /* سهم صغير واصل بصريًا بين زرار الحساب في الهيدر والقائمة اللي فتحها،
+     عشان يبان واضح إن القائمة دي تابعة لنفس الزرار مش عنصر منفصل */
+  .admin-links::before {
+    content: "";
+    position: absolute;
+    top: -6px; left: 22px;
+    width: 12px; height: 12px;
+    background: var(--primary-dark);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 3px 0 0 0;
+    transform: rotate(45deg);
+  }
+  .admin-links .admin-profile-block { margin-bottom: 8px; }
+  .admin-links .nav-scroll { overflow-y: auto; }
+  /* أوفرلاي أخف بكتير من درج كامل الشاشة، بما إن القائمة بقت صغيرة
+     ومكانها واضح تحت الزرار مباشرة */
+  .admin-sidebar-overlay { background: rgba(0, 0, 0, 0.12); backdrop-filter: none; }
+}
+
+/* ============================================================
    🕘 درج "آخر الأنشطة" — بينفتح من زرار في الشريط الجانبي فوق كل صفحات اللوحة
    ============================================================ */
 .activity-drawer-overlay {
@@ -747,8 +825,10 @@ body.scroll-locked { overflow: hidden; touch-action: none; overscroll-behavior: 
 .admin-profile-block .ap-info { min-width: 0; overflow: hidden; }
 .admin-profile-block .ap-name {
   font-size: 0.8125rem; font-weight: 700; color: #fff;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: flex; align-items: center; gap: 5px; min-width: 0;
 }
+.admin-profile-block .ap-name-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.admin-profile-block .ap-name .icon { color: rgba(255, 255, 255, 0.45); flex-shrink: 0; }
 .admin-profile-block .ap-role {
   font-size: 0.5625rem; color: var(--accent-light); font-weight: 600;
   display: flex; align-items: center; gap: 4px; margin-top: 1px;
@@ -1323,13 +1403,9 @@ table.data-table tr:hover td { background: var(--glass-bg); }
   .admin-brand-mark { width: 28px; height: 28px; }
   .admin-brand-text h2 { font-size: 0.875rem; }
   .admin-brand-text span { font-size: 0.4375rem; }
-  .admin-menu-toggle { width: 34px; height: 34px; }
-  .admin-menu-toggle .hamburger-lines { width: 16px; height: 10px; }
-  .admin-menu-toggle .hamburger-lines span:nth-child(1) { top: 0; }
-  .admin-menu-toggle .hamburger-lines span:nth-child(2) { top: 4px; }
-  .admin-menu-toggle .hamburger-lines span:nth-child(3) { top: 8px; }
-  .admin-menu-toggle.open .hamburger-lines span:nth-child(1) { top: 4px; }
-  .admin-menu-toggle.open .hamburger-lines span:nth-child(3) { top: 4px; }
+  .admin-menu-toggle { height: 34px; max-width: 40vw; padding: 0 6px 0 8px; gap: 6px; }
+  .admin-menu-toggle .amt-avatar { width: 22px; height: 22px; font-size: 0.625rem; }
+  .admin-menu-toggle .amt-name { font-size: 0.6875rem; }
   .admin-links { padding: 60px 10px 16px; padding-top: max(60px, calc(env(safe-area-inset-top) + 50px)); }
   .admin-links a, .admin-links button { font-size: 0.75rem; padding: 8px 12px; min-height: 36px; gap: 10px; }
   .admin-profile-block { padding: 8px 12px; gap: 10px; }

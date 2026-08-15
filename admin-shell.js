@@ -42,8 +42,7 @@ function renderAdminNav(activePage) {
       '<div class="admin-brand-row">' +
         '<div class="admin-brand">' +
           '<span class="admin-brand-mark">' +
-            '<img src="logo.png" alt="" onerror="this.style.display=\'none\'">' +
-            icon('gear', 'icon-sm') +
+            '<img src="logo.png" alt="أواب">' +
           '</span>' +
           '<div class="admin-brand-text">' +
             '<h2>أواب</h2>' +
@@ -54,26 +53,28 @@ function renderAdminNav(activePage) {
           icon('chevronLeft', 'icon-sm') +
         '</button>' +
       '</div>' +
-      '<button class="admin-menu-toggle" id="adminMenuToggle" type="button" aria-label="فتح القائمة" aria-expanded="false" aria-controls="adminLinks">' +
-        '<span class="hamburger-lines"><span></span><span></span><span></span></span>' +
+      '<button class="admin-menu-toggle" id="adminMenuToggle" type="button" aria-label="حساب المسؤول وقائمة الإعدادات" aria-expanded="false" aria-controls="adminLinks">' +
+        '<span class="amt-avatar" id="adminHeaderAvatar">…</span>' +
+        '<span class="amt-name" id="adminHeaderName">جارٍ التحميل…</span>' +
+        icon('chevronDown', 'icon-xs') +
       '</button>' +
       '<div class="admin-links" id="adminLinks">' +
         '<div class="admin-profile-block" id="adminProfileBlock">' +
           '<div class="ap-avatar" id="adminProfileAvatar">…</div>' +
-          '<div class="ap-info"><div class="ap-name" id="adminProfileName">جارٍ التحميل…</div><div class="ap-role">' + icon('shieldCheck', 'icon-xs') + '<span>مسؤول المنصة</span></div></div>' +
+          '<div class="ap-info"><div class="ap-name"><span class="ap-name-text" id="adminProfileName">جارٍ التحميل…</span>' + icon('chevronDown', 'icon-xs') + '</div><div class="ap-role">' + icon('shieldCheck', 'icon-xs') + '<span>مسؤول المنصة</span></div></div>' +
         '</div>' +
         '<div class="nav-scroll">' +
           '<div class="nav-group">' +
             '<span class="nav-group-label">الرئيسية</span>' +
-            '<a href="home.html" title="لوحة القيادة والمحتوى" class="' + (activePage === 'home' ? 'active' : '') + '">' + icon('gauge', 'icon-sm') + '<span class="link-label">لوحة القيادة</span></a>' +
+            '<a href="home.html" title="لوحة القيادة والمحتوى" class="dup-mobile ' + (activePage === 'home' ? 'active' : '') + '">' + icon('gauge', 'icon-sm') + '<span class="link-label">لوحة القيادة</span></a>' +
             '<button type="button" id="adminActivityBtn" title="آخر الأنشطة">' + icon('clock', 'icon-sm') + '<span class="link-label">آخر الأنشطة</span></button>' +
           '</div>' +
-          '<div class="nav-group">' +
+          '<div class="nav-group dup-mobile-group">' +
             '<span class="nav-group-label">المستخدمون</span>' +
             '<a href="users.html" title="الحسابات" class="' + (activePage === 'users' ? 'active' : '') + '">' + icon('users', 'icon-sm') + '<span class="link-label">الحسابات</span></a>' +
             '<a href="violations.html" title="المخالفات" class="' + (activePage === 'violations' ? 'active' : '') + '">' + icon('bell', 'icon-sm') + '<span class="link-label">المخالفات</span><span class="nav-badge" id="violationsNavBadge" style="display:none;">0</span></a>' +
           '</div>' +
-          '<div class="nav-group">' +
+          '<div class="nav-group dup-mobile-group">' +
             '<span class="nav-group-label">النظام</span>' +
             '<a href="support.html" title="الدعم الفني" class="' + (activePage === 'support' ? 'active' : '') + '">' + icon('headset', 'icon-sm') + '<span class="link-label">الدعم الفني</span><span class="nav-badge" id="supportNavBadge" style="display:none;">0</span></a>' +
           '</div>' +
@@ -106,8 +107,9 @@ function renderAdminNav(activePage) {
 
 /**
  * يرسم شريط التنقل السفلي الثابت (يظهر على الموبايل فقط عبر CSS).
- * بيحتوي على أهم 4 أقسام + زر "المزيد" اللي بيفتح نفس القائمة الجانبية
- * (بالبروفايل، آخر الأنشطة، الوضع الليلي، تسجيل الخروج).
+ * بيحتوي على أهم 4 أقسام: الرئيسية، المستخدمون، المخالفات، الدعم الفني.
+ * حساب المسؤول (البروفايل/آخر الأنشطة/الوضع الليلي/تسجيل الخروج) بقى
+ * ليه زرار مخصص في الهيدر نفسه (اسم المسؤول + سهم) بدل ما يتكرر هنا.
  */
 function renderAdminBottomNav(activePage) {
   let bar = document.getElementById('adminBottomNav');
@@ -129,20 +131,7 @@ function renderAdminBottomNav(activePage) {
     '</a>' +
     '<a href="support.html" class="' + (activePage === 'support' ? 'active' : '') + '">' +
       icon('headset', 'icon') + '<span class="bn-badge" id="bottomNavSupportBadge">0</span><span>الدعم</span>' +
-    '</a>' +
-    '<button type="button" id="adminBottomNavMore">' +
-      icon('ellipsis', 'icon') + '<span>المزيد</span>' +
-    '</button>';
-
-  const moreBtn = document.getElementById('adminBottomNavMore');
-  const menuToggle = document.getElementById('adminMenuToggle');
-  if (moreBtn && menuToggle) {
-    moreBtn.addEventListener('click', function () {
-      // بيستخدم نفس منطق فتح/قفل القائمة الجانبية الخاص بزر الهمبرغر
-      // (بما فيه قفل تمرير الصفحة) بدل ما نكرر الكود
-      menuToggle.click();
-    });
-  }
+    '</a>';
 }
 
 /**
@@ -151,14 +140,21 @@ function renderAdminBottomNav(activePage) {
 function loadAdminProfileBlock() {
   const nameEl = document.getElementById('adminProfileName');
   const avatarEl = document.getElementById('adminProfileAvatar');
-  if (!nameEl || !avatarEl || typeof auth === 'undefined') return;
+  const headerNameEl = document.getElementById('adminHeaderName');
+  const headerAvatarEl = document.getElementById('adminHeaderAvatar');
+  if ((!nameEl || !avatarEl) && (!headerNameEl || !headerAvatarEl)) return;
+  if (typeof auth === 'undefined') return;
   const user = auth.currentUser;
   if (!user) return;
 
   function apply(name) {
     const label = name || (user.email ? user.email.split('@')[0] : 'المسؤول');
-    nameEl.textContent = label;
-    avatarEl.textContent = label.trim().charAt(0).toUpperCase() || 'A';
+    const initial = label.trim().charAt(0).toUpperCase() || 'A';
+    if (nameEl) nameEl.textContent = label;
+    if (avatarEl) avatarEl.textContent = initial;
+    // زرار "اسم المسؤول + سهم" في الهيدر نفسه (بيفتح نفس قائمة الحساب)
+    if (headerNameEl) headerNameEl.textContent = label;
+    if (headerAvatarEl) headerAvatarEl.textContent = initial;
   }
 
   if (typeof db !== 'undefined') {
@@ -347,8 +343,9 @@ function setupAdminSidebarCollapse() {
 }
 
 /**
- * يفعّل زر الهمبرغر ليفتح/يقفل القائمة الجانبية على الشاشات الصغيرة
- * مع إغلاقها بالنقر على الستارة، أو زر Escape، أو اختيار أي رابط.
+ * يفعّل زرار حساب المسؤول في الهيدر (الاسم + السهم) ليفتح/يقفل قائمة
+ * الحساب على الشاشات الصغيرة، مع إغلاقها بالنقر على الستارة، أو زر
+ * Escape، أو اختيار أي رابط/زرار جواها.
  */
 function setupAdminMobileNav() {
   const toggle = document.getElementById('adminMenuToggle');
@@ -357,7 +354,6 @@ function setupAdminMobileNav() {
   if (!toggle || !links || !overlay) return;
 
   let menuIsOpen = false;
-  const moreBtn = document.getElementById('adminBottomNavMore');
   function openMenu() {
     if (menuIsOpen) return;
     menuIsOpen = true;
@@ -365,7 +361,6 @@ function setupAdminMobileNav() {
     overlay.classList.add('open');
     toggle.classList.add('open');
     toggle.setAttribute('aria-expanded', 'true');
-    if (moreBtn) moreBtn.classList.add('active');
     lockBodyScroll();
   }
   function closeMenu() {
@@ -375,7 +370,6 @@ function setupAdminMobileNav() {
     overlay.classList.remove('open');
     toggle.classList.remove('open');
     toggle.setAttribute('aria-expanded', 'false');
-    if (moreBtn) moreBtn.classList.remove('active');
     unlockBodyScroll();
   }
 
