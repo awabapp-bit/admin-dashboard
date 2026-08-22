@@ -593,10 +593,84 @@ function getUserViolations(uid) {
 }
 window.getUserViolations = getUserViolations;
 
+/**
+ * فتح اختبار لإعادة المحاولة — من غير ما نفقد أفضل نتيجة سابقة.
+ * قبل كده الدالة كانت بتمسح كل بيانات المحاولة نهائيًا (remove())، وده
+ * كان بيمسح "أفضل نتيجة" (bestScore/earnedPoints) المحفوظة من المحاولة
+ * الأولى، فلو المستخدم جاب في المحاولة الثانية درجة أقل، مفيش حاجة
+ * تفضل تتذكر إن درجته الأولى كانت أعلى. دلوقتي: بنمسح فقط حالة
+ * "المحاولة الحالية" (الإجابات، وقت التسليم، وعلامة submitted) ونسيب
+ * أفضل نتيجة (bestScore/bestPoints) زي ما هي، عشان submitExamResult()
+ * تحت تقدر تقارن بيها صح وقت ما المستخدم يسلّم من تاني.
+ */
 function resetExamAttempt(compId, lessonId, examId, uid) {
-  return db.ref('examAttempts/' + compId + '/' + lessonId + '/' + examId + '/' + uid).remove();
+  const ref = db.ref('examAttempts/' + compId + '/' + lessonId + '/' + examId + '/' + uid);
+  return ref.once('value').then(function (snap) {
+    const prev = snap.val() || {};
+    const keep = {};
+    if (prev.bestScore != null) keep.bestScore = prev.bestScore;
+    if (prev.bestMaxScore != null) keep.bestMaxScore = prev.bestMaxScore;
+    if (prev.bestPoints != null) keep.bestPoints = prev.bestPoints;
+    keep.retakeOpenedAt = firebase.database.ServerValue.TIMESTAMP;
+    return ref.set(keep);
+  });
 }
 window.resetExamAttempt = resetExamAttempt;
+
+/**
+ * تسجيل نتيجة محاولة اختبار — بتحتفظ دايمًا بأعلى درجة بين كل المحاولات.
+ *
+ * ⚠️ الدالة دي لازم تتنادى من كود تسليم الاختبار الفعلي (صفحة الاختبار
+ * اللي الطالب بياخده على الموقع نفسه — مش موجودة في ملفات لوحة التحكم
+ * دي، فمقدرش أعدّلها مباشرة). استبدل أي كود بيكتب النتيجة/النقاط في
+ * examAttempts أو userProgress بنداء لها بدل الكتابة المباشرة، وهي هتتكفل
+ * بمنطق "لو الدرجة الجديدة أعلى من الأول يتحط مكانها، ولو أقل أو تساوي
+ * متتغيّرش حاجة" تلقائيًا وبأمان حتى مع محاولات متزامنة (عن طريق transaction).
+ *
+ * @param {string} compId، lessonId، examId، uid — نفس مسارات examAttempts المعتادة
+ * @param {number} score — عدد الإجابات الصحيحة (أو أي مقياس درجة) في المحاولة الحالية
+ * @param {number} maxScore — أقصى درجة ممكنة لهذا الاختبار (عدد الأسئلة مثلاً)
+ * @param {number} pointsEarned — عدد النقاط المستحقة عن هذه المحاولة
+ * @returns {Promise<{improved:boolean, bestScore:number, bestMaxScore:number, bestPoints:number}>}
+ */
+function submitExamResult(compId, lessonId, examId, uid, score, maxScore, pointsEarned) {
+  const attemptRef = db.ref('examAttempts/' + compId + '/' + lessonId + '/' + examId + '/' + uid);
+  let improved = false;
+
+  return attemptRef.transaction(function (current) {
+    current = current || {};
+    const prevBest = typeof current.bestScore === 'number' ? current.bestScore : -1;
+    improved = score > prevBest;
+
+    return {
+      // نحتفظ بأعلى درجة/نقاط وصل لها المستخدم عبر كل محاولاته
+      bestScore: improved ? score : current.bestScore != null ? current.bestScore : score,
+      bestMaxScore: improved ? maxScore : current.bestMaxScore != null ? current.bestMaxScore : maxScore,
+      bestPoints: improved ? pointsEarned : current.bestPoints != null ? current.bestPoints : pointsEarned,
+      // ونحتفظ كمان بتفاصيل آخر محاولة تحديدًا (للعرض في سجل النشاط)
+      lastScore: score,
+      lastMaxScore: maxScore,
+      submitted: true,
+      submittedAt: firebase.database.ServerValue.TIMESTAMP,
+      attemptsCount: (current.attemptsCount || 0) + 1
+    };
+  }).then(function (result) {
+    const finalData = result.snapshot.val() || {};
+    // نحدّث نقاط المحاضرة في تقدّم المستخدم بنفس منطق "الاحتفاظ بالأعلى فقط"
+    const progressRef = db.ref('userProgress/' + uid + '/' + compId + '/' + lessonId);
+    return progressRef.transaction(function (current) {
+      current = current || {};
+      const prevPoints = typeof current.earnedPoints === 'number' ? current.earnedPoints : -1;
+      return {
+        completed: true,
+        earnedPoints: finalData.bestPoints > prevPoints ? finalData.bestPoints : current.earnedPoints
+      };
+    }).then(function () {
+      return { improved: improved, bestScore: finalData.bestScore, bestMaxScore: finalData.bestMaxScore, bestPoints: finalData.bestPoints };
+    });
+  });
+}
+window.submitExamResult = submitExamResult;
 
 function clearExamViolations(uid, examRef) {
   return db.ref('violations/' + uid).once('value').then(function (snap) {

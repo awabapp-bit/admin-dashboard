@@ -55,6 +55,7 @@
       '<div class="detail-card">' +
         detailRow('user', 'الاسم', escapeHtml(u.name || '—')) +
         detailRow('envelope', 'البريد الإلكتروني', escapeHtml(u.email || '—')) +
+        detailRow('phone', 'رقم الهاتف', u.phone ? escapeHtml(u.phone) : '<span class="muted">غير مسجّل</span>') +
         detailRow('star', 'النقاط', u.points || 0) +
         detailRow('calendar', 'تاريخ التسجيل', formatArabicDate(u.createdAt)) +
         detailRow('clock', 'آخر تسجيل دخول', u.lastLoginAt ? formatArabicDate(u.lastLoginAt) : 'لم يسجّل دخول بعد') +

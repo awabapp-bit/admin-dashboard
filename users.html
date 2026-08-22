@@ -20,7 +20,7 @@
 
   <div class="accounts-toolbar">
     <div class="search-wrap">
-      <input type="text" id="searchBox" placeholder="ابحث بالاسم أو البريد الإلكتروني...">
+      <input type="text" id="searchBox" placeholder="ابحث بالاسم أو البريد الإلكتروني أو رقم الهاتف...">
       <span class="icon" id="searchIcon"></span>
     </div>
     <select class="sort-select" id="sortSelect">
@@ -78,7 +78,7 @@
     let list = allUsers.slice();
     if (q) {
       list = list.filter(function (u) {
-        return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+        return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q) || (u.phone || '').toLowerCase().includes(q);
       });
     }
 
@@ -109,6 +109,7 @@
               (blocked ? '<span class="status-chip blocked">' + icon('lock', 'icon-sm') + ' محظور</span>' : '') +
             '</div>' +
             '<div class="ac-email">' + escapeHtml(u.email || '—') + '</div>' +
+            '<div class="ac-phone">' + icon('phone', 'icon-xs') + ' ' + escapeHtml(u.phone || 'رقم الهاتف غير مسجّل') + '</div>' +
           '</div>' +
         '</div>' +
         '<div class="ac-stats">' +
