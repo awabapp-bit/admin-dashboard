@@ -49,6 +49,17 @@
         }
       }
     },
+    "forumQuestions": {
+      "$compId": {
+        ".read": "auth != null",
+        "$questionId": {
+          ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid && root.child('userEnrollments').child(auth.uid).child($compId).exists()) || (data.exists() && data.child('uid').val() === auth.uid && !newData.child('adminReply').exists()))",
+          "adminReply": {
+            ".write": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true"
+          }
+        }
+      }
+    },
     "examBank": {
       ".read": "auth != null",
       ".write": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true",
@@ -79,6 +90,9 @@
               },
               "violationList": {
                 ".validate": "newData.isArray()"
+              },
+              "reloadCount": {
+                ".validate": "newData.isNumber()"
               },
               "submitted": {
                 ".validate": "newData.isBoolean()"
@@ -122,20 +136,25 @@
       ".read": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true",
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
-        "$compId": {
-          "$lessonId": {
-            "earnedPoints": {
-              ".validate": "!newData.exists() || !data.exists() || newData.val() >= data.val()"
-            }
-          }
-        }
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('isAdmin').val() === true)"
       }
     },
     "notifications": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('isAdmin').val() === true)"
+      }
+    },
+    "notes": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "favorites": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
       }
     },
     "notifiedLessons": {
@@ -162,6 +181,13 @@
       ".write": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true",
       "maxViolations": {
         ".validate": "newData.isNumber() && newData.val() >= 1"
+      }
+    },
+    "phoneIndex": {
+      "$phone": {
+        ".read": true,
+        ".write": "auth != null && newData.val() === auth.token.email && (!data.exists() || data.val() === auth.token.email)",
+        ".validate": "newData.isString()"
       }
     }
   }

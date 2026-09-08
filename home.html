@@ -230,6 +230,13 @@
             '<div class="info">' +
               '<h3>' + escapeHtml(c.title || 'بدون عنوان') + '</h3>' +
               (c.description ? '<p>' + escapeHtml(c.description) + '</p>' : '') +
+              (c.instructorName ?
+                '<div class="comp-instructor-row">' +
+                  (c.instructorPhotoUrl
+                    ? '<img src="' + escapeHtml(c.instructorPhotoUrl) + '" alt="" class="comp-instructor-avatar" onerror="this.style.display=\'none\'">'
+                    : icon('graduationCap', 'icon-sm')) +
+                  '<span>' + escapeHtml(c.instructorName) + '</span>' +
+                '</div>' : '') +
               '<div class="tags">' +
                 '<span class="tag ' + (isCourse ? '' : 'mix-tag') + '">' + icon(isCourse ? 'bookOpen' : 'trophy', 'icon-sm') + ' ' + (isCourse ? 'كورس' : 'مسابقة') + '</span>' +
                 '<span class="tag">' + icon('listCheck', 'icon-sm') + ' ' + lessonIds.length + ' محاضرة</span>' +
@@ -240,6 +247,7 @@
             '<div class="actions">' +
               '<a class="btn btn-outline btn-sm" href="competition.html?id=' + encodeURIComponent(id) + '">' + icon('pen', 'icon-sm') + ' إدارة المحاضرات</a>' +
               '<a class="btn btn-outline btn-sm" href="participants.html?id=' + encodeURIComponent(id) + '">' + icon('medal', 'icon-sm') + ' المشتركون</a>' +
+              '<a class="btn btn-outline btn-sm" href="forum.html?id=' + encodeURIComponent(id) + '">' + icon('commentDots', 'icon-sm') + ' المنتدى</a>' +
               '<button class="btn btn-ghost btn-sm delete-comp-btn" data-id="' + id + '">' + icon('trash', 'icon-sm') + ' حذف</button>' +
             '</div>' +
           '</div>';

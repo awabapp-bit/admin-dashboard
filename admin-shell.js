@@ -70,6 +70,10 @@ function renderAdminNav(activePage) {
             '<button type="button" id="adminActivityBtn" title="آخر الأنشطة">' + icon('clock', 'icon-sm') + '<span class="link-label">آخر الأنشطة</span></button>' +
           '</div>' +
           '<div class="nav-group dup-mobile-group">' +
+            '<span class="nav-group-label">إدارة المحتوى</span>' +
+            '<a href="forum.html" title="منتدى الأسئلة" class="' + (activePage === 'forum' ? 'active' : '') + '">' + icon('commentDots', 'icon-sm') + '<span class="link-label">منتدى الأسئلة</span><span class="nav-badge" id="forumNavBadge" style="display:none;">0</span></a>' +
+          '</div>' +
+          '<div class="nav-group dup-mobile-group">' +
             '<span class="nav-group-label">المستخدمون</span>' +
             '<a href="users.html" title="الحسابات" class="' + (activePage === 'users' ? 'active' : '') + '">' + icon('users', 'icon-sm') + '<span class="link-label">الحسابات</span></a>' +
             '<a href="violations.html" title="المخالفات" class="' + (activePage === 'violations' ? 'active' : '') + '">' + icon('bell', 'icon-sm') + '<span class="link-label">المخالفات</span><span class="nav-badge" id="violationsNavBadge" style="display:none;">0</span></a>' +
@@ -103,6 +107,7 @@ function renderAdminNav(activePage) {
   loadAdminProfileBlock();
   loadViolationsNavBadge();
   loadSupportNavBadge();
+  loadForumNavBadge();
 }
 
 /**
@@ -122,6 +127,9 @@ function renderAdminBottomNav(activePage) {
   bar.innerHTML =
     '<a href="home.html" class="' + (activePage === 'home' ? 'active' : '') + '">' +
       icon('gauge', 'icon') + '<span>الرئيسية</span>' +
+    '</a>' +
+    '<a href="forum.html" class="' + (activePage === 'forum' ? 'active' : '') + '">' +
+      icon('commentDots', 'icon') + '<span class="bn-badge" id="bottomNavForumBadge">0</span><span>المنتدى</span>' +
     '</a>' +
     '<a href="users.html" class="' + (activePage === 'users' ? 'active' : '') + '">' +
       icon('users', 'icon') + '<span>المستخدمون</span>' +
@@ -200,6 +208,34 @@ function loadSupportNavBadge() {
     let total = 0;
     Object.keys(data).forEach(function (uid) {
       total += Number(data[uid] && data[uid].unreadCountByAdmin) || 0;
+    });
+    const text = total > 99 ? '99+' : String(total);
+    if (total > 0) {
+      if (badge) { badge.textContent = text; badge.style.display = 'inline-flex'; }
+      if (bnBadge) { bnBadge.textContent = text; bnBadge.classList.add('show'); }
+    } else {
+      if (badge) badge.style.display = 'none';
+      if (bnBadge) bnBadge.classList.remove('show');
+    }
+  });
+}
+
+/**
+ * يراقب لحظيًا إجمالي الأسئلة اللي لسه ماردش عليها الأدمن في كل منتديات
+ * الكورسات/المسابقات، ويعرضها كشارة جنب رابط "منتدى الأسئلة".
+ */
+function loadForumNavBadge() {
+  const badge = document.getElementById('forumNavBadge');
+  const bnBadge = document.getElementById('bottomNavForumBadge');
+  if ((!badge && !bnBadge) || typeof db === 'undefined') return;
+  db.ref('forumQuestions').on('value', function (snap) {
+    const data = snap.val() || {};
+    let total = 0;
+    Object.keys(data).forEach(function (compId) {
+      const questions = data[compId] || {};
+      Object.keys(questions).forEach(function (qid) {
+        if (!questions[qid].adminReply) total++;
+      });
     });
     const text = total > 99 ? '99+' : String(total);
     if (total > 0) {

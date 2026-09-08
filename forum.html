@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+<title>منتدى الأسئلة — لوحة تحكم أواب</title>
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
+<style>
+  .fr-list-card {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px;
+    text-decoration: none; transition: all .2s var(--ease);
+  }
+  .fr-list-card:hover { box-shadow: var(--shadow-lift); transform: translateY(-2px); }
+  .fr-list-thumb {
+    width: 52px; height: 52px; border-radius: var(--radius-sm); object-fit: cover;
+    flex-shrink: 0; border: 1px solid var(--glass-border);
+  }
+  .fr-list-thumb-placeholder {
+    width: 52px; height: 52px; border-radius: var(--radius-sm); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(var(--primary-rgb), 0.08); color: var(--primary);
+  }
+  .fr-list-info { flex: 1; min-width: 0; }
+  .fr-list-info h3 { margin: 0 0 3px; font-size: 0.9375rem; font-weight: 700; color: var(--text); }
+  .fr-list-info span { font-size: 0.75rem; color: var(--text-muted); }
+  .fr-pending-badge {
+    background: var(--danger); color: #fff; font-size: 0.6875rem; font-weight: 700;
+    padding: 3px 10px; border-radius: 999px; flex-shrink: 0; white-space: nowrap;
+  }
+  .fr-no-pending {
+    font-size: 0.6875rem; font-weight: 600; color: var(--success); flex-shrink: 0; white-space: nowrap;
+  }
+
+  .fr-post {
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+  }
+  .fr-post.is-pending { border-color: rgba(var(--accent-rgb), 0.4); }
+  .fr-post-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .fr-avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(var(--primary-rgb), 0.1); color: var(--primary);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8125rem;
+  }
+  .fr-name { font-size: 0.8125rem; font-weight: 700; color: var(--text); }
+  .fr-time { font-size: 0.6875rem; color: var(--text-muted); margin-inline-start: auto; }
+  .fr-text { font-size: 0.875rem; color: var(--text); line-height: 1.75; margin: 0 0 8px; white-space: pre-wrap; word-break: break-word; }
+  .fr-image { max-width: 220px; max-height: 220px; border-radius: var(--radius-sm); display: block; margin-bottom: 8px; border: 1px solid var(--border); }
+  .fr-reply-card {
+    margin-top: 10px; margin-inline-start: 38px; padding: 10px 14px;
+    background: rgba(var(--secondary-rgb), 0.08); border-radius: var(--radius-sm);
+    border-inline-start: 3px solid var(--secondary);
+  }
+  .fr-reply-card .fr-name { color: var(--secondary); }
+  .fr-pending-note {
+    margin-top: 10px; margin-inline-start: 38px; font-size: 0.75rem; font-weight: 600;
+    color: var(--accent); display: flex; align-items: center; gap: 6px;
+  }
+  .fr-reply-form { margin-top: 10px; margin-inline-start: 38px; display: flex; gap: 8px; align-items: flex-start; }
+  .fr-reply-form textarea {
+    flex: 1; min-height: 44px; max-height: 130px; padding: 10px 12px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); font-family: inherit; font-size: 0.8125rem; resize: vertical; background: var(--card-bg); color: var(--text);
+  }
+  .fr-reply-form textarea.shake { border-color: var(--danger); animation: frShake .3s; }
+  @keyframes frShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+  .fr-reply-form .btn { flex-shrink: 0; margin-top: 0; }
+
+  @media (max-width: 640px) {
+    .fr-reply-card, .fr-pending-note, .fr-reply-form { margin-inline-start: 0; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="admin-nav" id="adminNav"></nav>
+
+<main class="admin-page">
+  <a class="back-link" id="backLink" href="home.html">كل المحتوى</a>
+
+  <div id="frListWrap">
+    <h1 class="page-title">منتدى الأسئلة</h1>
+    <p class="page-sub">اختر كورس أو مسابقة عشان تشوف أسئلة المشتركين وترد عليها</p>
+    <div id="frCompsList">
+      <div class="skel skel-row"></div>
+      <div class="skel skel-row"></div>
+      <div class="skel skel-row"></div>
+    </div>
+  </div>
+
+  <div id="frDetailWrap" style="display:none;">
+    <div class="admin-page-head">
+      <div>
+        <h1 class="page-title" id="frCompTitle">منتدى الأسئلة</h1>
+        <p class="page-sub" id="frCompSub"></p>
+      </div>
+    </div>
+    <div id="frFeed">
+      <div class="center-loading"><div class="loader"></div></div>
+    </div>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="icons.js"></script>
+<script src="admin-shell.js"></script>
+<script>
+  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل المحتوى';
+
+  const params = new URLSearchParams(window.location.search);
+  const compId = params.get('id');
+
+  let currentAdmin = null;
+
+  requireAdminAuth(function (user) {
+    currentAdmin = user;
+    renderAdminNav('forum');
+    if (compId) {
+      document.getElementById('backLink').href = 'competition.html?id=' + encodeURIComponent(compId);
+      document.getElementById('frListWrap').style.display = 'none';
+      document.getElementById('frDetailWrap').style.display = 'block';
+      loadCompAndQuestions(compId);
+    } else {
+      document.getElementById('frListWrap').style.display = 'block';
+      document.getElementById('frDetailWrap').style.display = 'none';
+      loadCompsList();
+    }
+  });
+
+  /* ===================== وضع القائمة: كل الكورسات/المسابقات وعدد أسئلتها المعلّقة ===================== */
+  function loadCompsList() {
+    Promise.all([
+      db.ref('competitions').once('value'),
+      db.ref('forumQuestions').once('value')
+    ]).then(function (results) {
+      const comps = results[0].val() || {};
+      const allQuestions = results[1].val() || {};
+      const ids = Object.keys(comps);
+      const wrap = document.getElementById('frCompsList');
+
+      if (ids.length === 0) {
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon('commentDots', 'icon-xl') + '</div><p>لا يوجد محتوى بعد.</p></div>';
+        return;
+      }
+
+      // رتّب: الأكتر عدد أسئلة معلّقة أولاً
+      const rows = ids.map(function (id) {
+        const c = comps[id];
+        const questions = allQuestions[id] || {};
+        const total = Object.keys(questions).length;
+        const pending = Object.keys(questions).filter(function (qid) { return !questions[qid].adminReply; }).length;
+        return { id: id, c: c, total: total, pending: pending };
+      }).sort(function (a, b) { return b.pending - a.pending; });
+
+      wrap.innerHTML = rows.map(function (r) {
+        const c = r.c;
+        const isCourse = c.type !== 'competition';
+        return (
+          '<a class="fr-list-card" href="forum.html?id=' + encodeURIComponent(r.id) + '">' +
+            (c.coverUrl
+              ? '<img class="fr-list-thumb" src="' + escapeHtml(c.coverUrl) + '" alt="" onerror="this.style.display=\'none\'">'
+              : '<span class="fr-list-thumb-placeholder">' + icon(isCourse ? 'bookOpen' : 'trophy', 'icon-md') + '</span>') +
+            '<div class="fr-list-info">' +
+              '<h3>' + escapeHtml(c.title || 'بدون عنوان') + '</h3>' +
+              '<span>' + (isCourse ? 'كورس' : 'مسابقة') + ' — ' + r.total + ' سؤال إجمالًا</span>' +
+            '</div>' +
+            (r.pending > 0
+              ? '<span class="fr-pending-badge">' + r.pending + ' بانتظار الرد</span>'
+              : '<span class="fr-no-pending">' + icon('circleCheck', 'icon-sm') + ' لا يوجد أسئلة معلّقة</span>') +
+          '</a>'
+        );
+      }).join('');
+    }).catch(function (err) {
+      document.getElementById('frCompsList').innerHTML =
+        '<p style="color:var(--danger); font-size:0.8125rem;">تعذر تحميل المحتوى: ' + escapeHtml(err.message || '') + '</p>';
+    });
+  }
+
+  /* ===================== وضع التفاصيل: أسئلة كورس/مسابقة واحدة ===================== */
+  function loadCompAndQuestions(id) {
+    db.ref('competitions/' + id).once('value').then(function (snap) {
+      if (!snap.exists()) { window.location.href = 'forum.html'; return; }
+      const c = snap.val();
+      const isCourse = c.type !== 'competition';
+      document.getElementById('frCompTitle').textContent = c.title || 'بدون عنوان';
+      document.getElementById('frCompSub').textContent = (isCourse ? 'أسئلة الطلاب المشتركين في هذا الكورس' : 'أسئلة المشتركين في هذه المسابقة');
+      listenQuestions(id);
+    }).catch(function (err) {
+      document.getElementById('frFeed').innerHTML =
+        '<p style="color:var(--danger); font-size:0.8125rem;">تعذر تحميل المحتوى: ' + escapeHtml(err.message || '') + '</p>';
+    });
+  }
+
+  function forumRef(id) { return db.ref('forumQuestions/' + id); }
+
+  function listenQuestions(id) {
+    forumRef(id).on('value', function (snap) {
+      const data = snap.val() || {};
+      const ids = Object.keys(data).sort(function (a, b) { return (data[b].createdAt || 0) - (data[a].createdAt || 0); });
+      const feed = document.getElementById('frFeed');
+
+      if (ids.length === 0) {
+        feed.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon('commentDots', 'icon-xl') + '</div><p>لا توجد أسئلة بعد في هذا المنتدى.</p></div>';
+        return;
+      }
+
+      feed.innerHTML = ids.map(function (qid) {
+        const q = data[qid];
+        const initial = (q.name || '؟').trim().charAt(0);
+        const reply = q.adminReply;
+
+        let statusHtml;
+        if (reply) {
+          statusHtml =
+            '<div class="fr-reply-card">' +
+              '<div class="fr-post-head"><span class="fr-avatar">' + icon('shield', 'icon-sm') + '</span>' +
+              '<span class="fr-name">إدارة أواب</span>' +
+              '<span class="fr-time">' + formatArabicDate(reply.createdAt) + '</span></div>' +
+              '<p class="fr-text">' + escapeHtml(reply.text) + '</p>' +
+            '</div>';
+        } else {
+          statusHtml =
+            '<div class="fr-pending-note">' + icon('hourglass', 'icon-sm') + ' بانتظار الرد</div>' +
+            '<div class="fr-reply-form">' +
+              '<textarea class="fr-reply-input" data-question="' + qid + '" placeholder="اكتب ردًا كإدارة المنصة..." rows="2"></textarea>' +
+              '<button type="button" class="btn btn-gold btn-sm fr-reply-send-btn" data-question="' + qid + '" style="width:auto;">' + icon('reply', 'icon-sm') + ' رد</button>' +
+            '</div>';
+        }
+
+        return (
+          '<div class="fr-post ' + (reply ? '' : 'is-pending') + '">' +
+            '<div class="fr-post-head"><span class="fr-avatar">' + escapeHtml(initial) + '</span>' +
+            '<span class="fr-name">' + escapeHtml(q.name || 'مستخدم') + '</span>' +
+            '<span class="fr-time">' + formatArabicDate(q.createdAt) + '</span></div>' +
+            '<p class="fr-text">' + escapeHtml(q.text) + '</p>' +
+            (q.imageData ? '<a href="' + q.imageData + '" target="_blank" rel="noopener"><img class="fr-image" src="' + q.imageData + '" alt="" loading="lazy"></a>' : '') +
+            statusHtml +
+          '</div>'
+        );
+      }).join('');
+
+      feed.querySelectorAll('.fr-reply-send-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () { sendAdminReply(id, btn.dataset.question); });
+      });
+    });
+  }
+
+  function sendAdminReply(compIdForReply, questionId) {
+    const input = document.querySelector('.fr-reply-input[data-question="' + questionId + '"]');
+    const btn = document.querySelector('.fr-reply-send-btn[data-question="' + questionId + '"]');
+    const text = input.value.trim();
+
+    if (!text) {
+      input.classList.remove('shake');
+      void input.offsetWidth;
+      input.classList.add('shake');
+      input.focus();
+      return;
+    }
+
+    input.disabled = true;
+    btn.disabled = true;
+    btn.classList.add('is-loading');
+
+    const qRef = forumRef(compIdForReply).child(questionId);
+    qRef.once('value').then(function (snap) {
+      const q = snap.val();
+      return qRef.child('adminReply').set({
+        text: text,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      }).then(function () {
+        if (q && q.uid && q.uid !== currentAdmin.uid) {
+          return db.ref('notifications/' + q.uid).push({
+            type: 'reply',
+            title: 'تم الرد على سؤالك في المنتدى',
+            body: text.length > 60 ? text.slice(0, 60) + '…' : text,
+            link: 'forum.html?id=' + compIdForReply,
+            read: false,
+            createdAt: firebase.database.ServerValue.TIMESTAMP
+          }).catch(function () {});
+        }
+      });
+    }).then(function () {
+      showToast('تم إرسال الرد بنجاح', 'success');
+    }).catch(function (err) {
+      showToast('تعذر إرسال الرد' + (err && err.message ? ': ' + err.message : ''), 'error');
+      input.disabled = false;
+      btn.disabled = false;
+      btn.classList.remove('is-loading');
+    });
+  }
+</script>
+</body>
+</html>

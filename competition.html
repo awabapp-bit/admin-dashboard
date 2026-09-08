@@ -19,9 +19,15 @@
     <div>
       <h1 class="page-title" id="compTitle">جارٍ التحميل...</h1>
       <p class="page-sub" id="compDesc"></p>
+      <div id="compInstructorRow" style="display:none; align-items:center; gap:8px; margin-top:8px;">
+        <img id="compInstructorImg" src="" alt="" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:1px solid var(--border); display:none;">
+        <span id="compInstructorIconWrap" style="display:none; color:var(--gold);"></span>
+        <span style="font-size:0.8125rem; color:var(--text-muted);">المعلم: <strong id="compInstructorName" style="color:var(--text);"></strong></span>
+      </div>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <button type="button" class="btn btn-outline" id="settingsToggleBtn" style="width:auto;">إعدادات المحتوى</button>
+      <a class="btn btn-outline" id="forumLink" href="#" style="width:auto;">منتدى الأسئلة</a>
       <a class="btn btn-outline" id="participantsLink" href="#" style="width:auto;">المشتركون والنقاط</a>
       <a class="btn btn-gold" id="addLessonLink" href="#" style="width:auto;">إضافة محاضرة جديدة</a>
     </div>
@@ -58,6 +64,18 @@
     <div id="editCoverPreviewWrap" style="display:none; margin-bottom:14px;">
       <img id="editCoverPreview" alt="" style="max-height:140px; border-radius:var(--radius-sm); border:1px solid var(--border);">
     </div>
+    <div class="field">
+      <label for="editInstructorName">اسم المعلم (اختياري)</label>
+      <input type="text" id="editInstructorName" placeholder="مثال: الأستاذ محمد أحمد">
+    </div>
+    <div class="field">
+      <label for="editInstructorPhoto">رابط صورة المعلم (اختياري)</label>
+      <input type="url" id="editInstructorPhoto" placeholder="https://...">
+      <div class="field-hint">اتركه فارغًا لإزالة صورة المعلم الحالية.</div>
+    </div>
+    <div id="editInstructorPreviewWrap" style="display:none; margin-bottom:14px;">
+      <img id="editInstructorPreview" alt="" style="width:56px; height:56px; object-fit:cover; border-radius:50%; border:1px solid var(--border);">
+    </div>
     <div style="display:flex; gap:8px;">
       <button type="button" class="btn btn-gold" id="saveSettingsBtn" style="width:auto;">حفظ التعديلات</button>
       <button type="button" class="btn btn-ghost" id="cancelSettingsBtn" style="width:auto;">إلغاء</button>
@@ -81,7 +99,9 @@
   document.getElementById('editCourseTypeIcon').innerHTML = icon('bookOpen', 'icon-sm');
   document.getElementById('editCompTypeIcon').innerHTML = icon('trophy', 'icon-sm');
   document.getElementById('participantsLink').innerHTML = icon('medal', 'icon-sm') + ' المشتركون والنقاط';
+  document.getElementById('forumLink').innerHTML = icon('commentDots', 'icon-sm') + ' منتدى الأسئلة';
   document.getElementById('addLessonLink').innerHTML = icon('plus') + ' إضافة محاضرة جديدة';
+  document.getElementById('compInstructorIconWrap').innerHTML = icon('graduationCap', 'icon-sm');
 
   const params = new URLSearchParams(window.location.search);
   const compId = params.get('id');
@@ -91,6 +111,7 @@
     renderAdminNav('home');
     document.getElementById('addLessonLink').href = 'lesson.html?comp=' + encodeURIComponent(compId);
     document.getElementById('participantsLink').href = 'participants.html?id=' + encodeURIComponent(compId);
+    document.getElementById('forumLink').href = 'forum.html?id=' + encodeURIComponent(compId);
     loadCompetition();
   });
 
@@ -103,6 +124,22 @@
       currentComp = comp;
       document.getElementById('compTitle').textContent = comp.title || 'بدون عنوان';
       document.getElementById('compDesc').textContent = comp.description || '';
+
+      const instrRow = document.getElementById('compInstructorRow');
+      if (comp.instructorName) {
+        instrRow.style.display = 'flex';
+        document.getElementById('compInstructorName').textContent = comp.instructorName;
+        const img = document.getElementById('compInstructorImg');
+        const iconWrap = document.getElementById('compInstructorIconWrap');
+        if (comp.instructorPhotoUrl) {
+          img.src = comp.instructorPhotoUrl; img.style.display = 'block'; iconWrap.style.display = 'none';
+        } else {
+          img.style.display = 'none'; iconWrap.style.display = 'inline-flex';
+        }
+      } else {
+        instrRow.style.display = 'none';
+      }
+
       if (!settingsPanel.dataset.editing) populateSettingsForm(comp);
       renderLessons(comp.lessons || {});
     });
@@ -114,15 +151,22 @@
   const editCoverInput = document.getElementById('editCover');
   const coverPreviewWrap = document.getElementById('editCoverPreviewWrap');
   const coverPreviewImg = document.getElementById('editCoverPreview');
+  const editInstructorNameInput = document.getElementById('editInstructorName');
+  const editInstructorPhotoInput = document.getElementById('editInstructorPhoto');
+  const instructorPreviewWrap = document.getElementById('editInstructorPreviewWrap');
+  const instructorPreviewImg = document.getElementById('editInstructorPreview');
 
   function populateSettingsForm(comp) {
     editTitleInput.value = comp.title || '';
     editDescInput.value = comp.description || '';
     editCoverInput.value = comp.coverUrl || '';
+    editInstructorNameInput.value = comp.instructorName || '';
+    editInstructorPhotoInput.value = comp.instructorPhotoUrl || '';
     const type = comp.type === 'competition' ? 'competition' : 'course';
     const radio = document.querySelector('input[name="editContentType"][value="' + type + '"]');
     if (radio) radio.checked = true;
     updateCoverPreview();
+    updateInstructorPreview();
   }
 
   function updateCoverPreview() {
@@ -135,6 +179,17 @@
     }
   }
   editCoverInput.addEventListener('input', updateCoverPreview);
+
+  function updateInstructorPreview() {
+    const url = editInstructorPhotoInput.value.trim();
+    if (url) {
+      instructorPreviewImg.src = url;
+      instructorPreviewWrap.style.display = 'block';
+    } else {
+      instructorPreviewWrap.style.display = 'none';
+    }
+  }
+  editInstructorPhotoInput.addEventListener('input', updateInstructorPreview);
 
   document.getElementById('settingsToggleBtn').addEventListener('click', function () {
     const opening = settingsPanel.style.display === 'none';
@@ -154,13 +209,16 @@
     if (!title) { msg.textContent = 'من فضلك اكتب الاسم'; msg.className = 'form-msg show error'; return; }
     const description = editDescInput.value.trim();
     const coverUrl = editCoverInput.value.trim();
+    const instructorName = editInstructorNameInput.value.trim();
+    const instructorPhotoUrl = editInstructorPhotoInput.value.trim();
     const typeEl = document.querySelector('input[name="editContentType"]:checked');
     const type = typeEl ? typeEl.value : 'course';
     const btn = document.getElementById('saveSettingsBtn');
     btn.disabled = true;
     btn.textContent = 'جارٍ الحفظ...';
     db.ref('competitions/' + compId).update({
-      title: title, description: description || '', coverUrl: coverUrl || null, type: type
+      title: title, description: description || '', coverUrl: coverUrl || null, type: type,
+      instructorName: instructorName || null, instructorPhotoUrl: instructorPhotoUrl || null
     }).then(function () {
       msg.textContent = 'تم حفظ التعديلات بنجاح';
       msg.className = 'form-msg show success';

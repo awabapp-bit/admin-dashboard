@@ -47,6 +47,15 @@
         <label for="compCover">رابط صورة الغلاف (اختياري)</label>
         <input type="url" id="compCover" placeholder="https://...">
       </div>
+      <div class="field">
+        <label for="compInstructorName">اسم المعلم (اختياري)</label>
+        <input type="text" id="compInstructorName" placeholder="مثال: الأستاذ محمد أحمد">
+      </div>
+      <div class="field">
+        <label for="compInstructorPhoto">رابط صورة المعلم (اختياري)</label>
+        <input type="url" id="compInstructorPhoto" placeholder="https://...">
+        <div class="field-hint">تظهر بجانب اسم المعلم في صفحة المحتوى عند المستخدم لو مُضافة.</div>
+      </div>
       <button type="submit" class="btn btn-gold" id="saveBtn">حفظ</button>
     </form>
   </div>
@@ -72,6 +81,8 @@
     const title = document.getElementById('compTitle').value.trim();
     const description = document.getElementById('compDesc').value.trim();
     const coverUrl = document.getElementById('compCover').value.trim();
+    const instructorName = document.getElementById('compInstructorName').value.trim();
+    const instructorPhotoUrl = document.getElementById('compInstructorPhoto').value.trim();
     const type = document.querySelector('input[name="contentType"]:checked').value;
     const saveBtn = document.getElementById('saveBtn');
     if (!title) return;
@@ -81,6 +92,7 @@
 
     db.ref('competitions').push({
       title: title, description: description || '', coverUrl: coverUrl || null, type: type,
+      instructorName: instructorName || null, instructorPhotoUrl: instructorPhotoUrl || null,
       createdBy: currentAdmin.uid, createdAt: firebase.database.ServerValue.TIMESTAMP
     }).then(function (ref) {
       window.location.href = 'competition.html?id=' + encodeURIComponent(ref.key);
