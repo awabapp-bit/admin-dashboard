@@ -7,71 +7,174 @@
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="sidebar.css">
+<link rel="stylesheet" href="pages-v2.css">
 <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <style>
-  .fr-list-card {
-    display: flex; align-items: center; gap: 14px;
-    background: var(--glass-bg); border: 1px solid var(--glass-border);
-    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px;
-    text-decoration: none; transition: all .2s var(--ease);
+  /* ============================================================
+     منتدى الأسئلة — تصميم جديد بالكامل (بادئة fm-)
+     يعتمد على متغيرات style.css ومكوّنات pages-v2.css فيدعم الوضع الليلي تلقائيًا
+     ============================================================ */
+  :root { --fm-amber: #B45309; --fm-amber-bg: rgba(245, 158, 11, 0.16); --fm-amber-line: #F59E0B; }
+  :root[data-theme="dark"] { --fm-amber: #F7C948; --fm-amber-bg: rgba(247, 201, 72, 0.14); }
+
+  .fm-spacer { flex: 1; }
+
+  /* ---------- قائمة المنتديات (بطاقة لكل كورس/مسابقة) ---------- */
+  .fm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .fm-card {
+    display: flex; flex-direction: column; gap: 14px; padding: 16px;
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px;
+    box-shadow: var(--shadow-xs); text-decoration: none; color: inherit;
+    transition: border-color .2s var(--ease), box-shadow .2s var(--ease), transform .2s var(--ease);
   }
-  .fr-list-card:hover { box-shadow: var(--shadow-lift); transform: translateY(-2px); }
-  .fr-list-thumb {
-    width: 52px; height: 52px; border-radius: var(--radius-sm); object-fit: cover;
-    flex-shrink: 0; border: 1px solid var(--glass-border);
-  }
-  .fr-list-thumb-placeholder {
-    width: 52px; height: 52px; border-radius: var(--radius-sm); flex-shrink: 0;
+  .fm-card:hover { border-color: var(--primary-light); box-shadow: var(--shadow); transform: translateY(-2px); }
+  .fm-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .fm-card.has-pending { border-color: rgba(var(--danger-rgb), 0.3); }
+  .fm-card-top { display: flex; align-items: center; gap: 14px; }
+  .fm-cover-wrap { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
+  .fm-cover-ph {
+    position: absolute; inset: 0; border-radius: 18px;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(var(--primary-rgb), 0.08); color: var(--primary);
+    background: var(--primary-pale); color: var(--primary);
   }
-  .fr-list-info { flex: 1; min-width: 0; }
-  .fr-list-info h3 { margin: 0 0 3px; font-size: 0.9375rem; font-weight: 700; color: var(--text); }
-  .fr-list-info span { font-size: 0.75rem; color: var(--text-muted); }
-  .fr-pending-badge {
-    background: var(--danger); color: #fff; font-size: 0.6875rem; font-weight: 700;
-    padding: 3px 10px; border-radius: 999px; flex-shrink: 0; white-space: nowrap;
+  .fm-cover-ph.comp { background: rgba(245, 158, 11, 0.14); color: #D97706; }
+  .fm-cover-ph .icon { width: 24px; height: 24px; }
+  .fm-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 18px; border: 1px solid var(--border); background: var(--card-bg); }
+  .fm-card-info { flex: 1; min-width: 0; }
+  .fm-card-title {
+    margin: 0 0 6px; font-size: 0.9375rem; font-weight: 800; color: var(--text); line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .fr-no-pending {
-    font-size: 0.6875rem; font-weight: 600; color: var(--success); flex-shrink: 0; white-space: nowrap;
+  .fm-type {
+    display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px; border-radius: 999px;
+    font-size: 0.6875rem; font-weight: 800; background: var(--primary-pale); color: var(--primary);
   }
+  .fm-type.comp { background: rgba(245, 158, 11, 0.14); color: var(--fm-amber); }
+  .fm-type .icon { width: 12px; height: 12px; }
+  .fm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .fm-stat { background: var(--bg); border-radius: 12px; padding: 9px 8px; text-align: center; }
+  .fm-stat b { display: block; font-size: 1.0625rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .fm-stat small { font-size: 0.6875rem; font-weight: 700; color: var(--text-muted); }
+  .fm-stat.warn b { color: var(--danger); }
+  .fm-stat.ok b { color: var(--success); }
+  .fm-meter-top { display: flex; justify-content: space-between; font-size: 0.6875rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+  .fm-meter-top b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .fm-bar { height: 7px; border-radius: 999px; background: var(--border-soft); overflow: hidden; }
+  .fm-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--accent-light)); transition: width .5s var(--ease); }
+  .fm-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
+  .fm-flag {
+    display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 999px;
+    font-size: 0.6875rem; font-weight: 800; white-space: nowrap;
+  }
+  .fm-flag .icon { width: 13px; height: 13px; }
+  .fm-flag.pending { background: rgba(var(--danger-rgb), 0.12); color: var(--danger); }
+  .fm-flag.ok { background: rgba(var(--success-rgb), 0.13); color: var(--success); }
+  .fm-flag.idle { background: var(--bg); color: var(--text-faint); }
 
-  .fr-post {
-    background: var(--glass-bg); border: 1px solid var(--glass-border);
-    border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+  /* ---------- صفحة منتدى واحد (سلسلة أسئلة) ---------- */
+  .fm-feed { display: flex; flex-direction: column; gap: 12px; }
+  .fm-thread {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px;
+    box-shadow: var(--shadow-xs); overflow: hidden;
+    transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
   }
-  .fr-post.is-pending { border-color: rgba(var(--accent-rgb), 0.4); }
-  .fr-post-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .fr-avatar {
-    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
-    background: rgba(var(--primary-rgb), 0.1); color: var(--primary);
-    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8125rem;
+  .fm-thread.pending { border-inline-start: 4px solid var(--fm-amber-line); }
+  .fm-thread:hover { box-shadow: var(--shadow); }
+  .fm-t-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px 0; }
+  .fm-av { width: 42px; height: 42px; border-radius: 15px; font-size: 1rem; }
+  .fm-t-who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .fm-t-name { font-weight: 800; font-size: 0.9375rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fm-t-time { font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); }
+  .fm-st {
+    display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 11px; border-radius: 999px;
+    font-size: 0.6875rem; font-weight: 800; white-space: nowrap; flex-shrink: 0;
   }
-  .fr-name { font-size: 0.8125rem; font-weight: 700; color: var(--text); }
-  .fr-time { font-size: 0.6875rem; color: var(--text-muted); margin-inline-start: auto; }
-  .fr-text { font-size: 0.875rem; color: var(--text); line-height: 1.75; margin: 0 0 8px; white-space: pre-wrap; word-break: break-word; }
-  .fr-image { max-width: 220px; max-height: 220px; border-radius: var(--radius-sm); display: block; margin-bottom: 8px; border: 1px solid var(--border); }
-  .fr-reply-card {
-    margin-top: 10px; margin-inline-start: 38px; padding: 10px 14px;
-    background: rgba(var(--secondary-rgb), 0.08); border-radius: var(--radius-sm);
-    border-inline-start: 3px solid var(--secondary);
+  .fm-st .icon { width: 13px; height: 13px; }
+  .fm-st.pending { background: var(--fm-amber-bg); color: var(--fm-amber); }
+  .fm-st.done { background: rgba(var(--success-rgb), 0.13); color: var(--success); }
+  .fm-t-body { padding: 12px 18px 14px; }
+  .fm-q { margin: 0; font-size: 0.9375rem; line-height: 1.95; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+  .fm-img-btn {
+    display: inline-block; margin-top: 12px; padding: 0; border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; background: var(--bg); cursor: zoom-in; position: relative;
   }
-  .fr-reply-card .fr-name { color: var(--secondary); }
-  .fr-pending-note {
-    margin-top: 10px; margin-inline-start: 38px; font-size: 0.75rem; font-weight: 600;
-    color: var(--accent); display: flex; align-items: center; gap: 6px;
-  }
-  .fr-reply-form { margin-top: 10px; margin-inline-start: 38px; display: flex; gap: 8px; align-items: flex-start; }
-  .fr-reply-form textarea {
-    flex: 1; min-height: 44px; max-height: 130px; padding: 10px 12px; border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm); font-family: inherit; font-size: 0.8125rem; resize: vertical; background: var(--card-bg); color: var(--text);
-  }
-  .fr-reply-form textarea.shake { border-color: var(--danger); animation: frShake .3s; }
-  @keyframes frShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
-  .fr-reply-form .btn { flex-shrink: 0; margin-top: 0; }
+  .fm-img-btn img { display: block; max-width: 260px; max-height: 190px; width: auto; height: auto; object-fit: cover; }
+  .fm-img-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-  @media (max-width: 640px) {
-    .fr-reply-card, .fr-pending-note, .fr-reply-form { margin-inline-start: 0; }
+  .fm-reply {
+    margin: 0 18px 14px; padding: 12px 14px; border-radius: 14px;
+    background: rgba(var(--accent-rgb), 0.08); border-inline-start: 3px solid var(--accent);
+  }
+  .fm-reply-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .fm-reply-badge { width: 26px; height: 26px; border-radius: 9px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .fm-reply-badge .icon { width: 14px; height: 14px; }
+  .fm-reply-name { font-weight: 800; font-size: 0.8125rem; color: var(--accent); }
+  .fm-reply-time { font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); }
+  .fm-reply-edit { margin-inline-start: auto; }
+  .fm-reply p { margin: 0; font-size: 0.875rem; line-height: 1.85; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+
+  .fm-composer { margin: 0 18px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .fm-input {
+    width: 100%; min-height: 84px; max-height: 260px; padding: 12px 14px; resize: vertical;
+    border-radius: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    font-family: inherit; font-size: 0.875rem; line-height: 1.8;
+    transition: border-color .2s var(--ease), box-shadow .2s var(--ease), background .2s var(--ease);
+  }
+  .fm-input::placeholder { color: var(--text-faint); }
+  .fm-input:focus { outline: none; border-color: var(--primary-light); background: var(--card-bg); box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.14); }
+  .fm-input.shake { border-color: var(--danger); animation: fm-shake .3s; }
+  @keyframes fm-shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+  .fm-comp-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .fm-count { font-size: 0.6875rem; font-weight: 700; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+  .fm-count.near { color: var(--fm-amber); }
+  .fm-check { display: inline-flex; align-items: center; gap: 7px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); cursor: pointer; user-select: none; }
+  .fm-check input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; margin: 0; }
+
+  .fm-t-foot {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 10px 18px; border-top: 1px solid var(--border-soft); background: var(--bg);
+  }
+  .fm-pub { display: inline-flex; align-items: center; gap: 10px; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; }
+  .fm-pub:disabled { opacity: .55; cursor: not-allowed; }
+  .fm-pub:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 999px; }
+  .fm-track { position: relative; width: 38px; height: 22px; border-radius: 999px; background: var(--border); flex-shrink: 0; transition: background .2s var(--ease); }
+  .fm-track::after {
+    content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: inset-inline-start .2s var(--ease);
+  }
+  .fm-pub[aria-checked="true"] .fm-track { background: var(--accent); }
+  .fm-pub[aria-checked="true"] .fm-track::after { inset-inline-start: 19px; }
+  .fm-pub[aria-checked="true"] { color: var(--text); }
+  .fm-pub small { font-size: 0.6875rem; font-weight: 600; color: var(--text-faint); }
+
+  /* ---------- عارض الصورة ---------- */
+  .fm-lightbox {
+    position: fixed; inset: 0; z-index: 1300; display: flex; align-items: center; justify-content: center; padding: 20px;
+    background: rgba(5, 18, 34, 0.82); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    opacity: 0; transition: opacity .2s var(--ease); cursor: zoom-out;
+  }
+  .fm-lightbox.open { opacity: 1; }
+  .fm-lightbox img { max-width: min(94vw, 980px); max-height: 88vh; border-radius: 16px; box-shadow: var(--shadow-lift); background: #fff; }
+  .fm-lightbox button {
+    position: absolute; top: 16px; inset-inline-start: 16px; width: 42px; height: 42px; border-radius: 14px;
+    border: none; background: rgba(255,255,255,.16); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .fm-lightbox button:hover { background: rgba(255,255,255,.28); }
+  .fm-lightbox button .icon { width: 18px; height: 18px; }
+
+  @media (max-width: 900px) { .fm-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 720px) {
+    .pv-kpis { grid-template-columns: repeat(2, 1fr); }
+    .fm-t-head { padding: 14px 14px 0; }
+    .fm-t-body { padding: 10px 14px 12px; }
+    .fm-reply, .fm-composer { margin-inline: 14px; }
+    .fm-t-foot { padding: 10px 14px; }
+    .fm-img-btn img { max-width: 100%; }
+    .fm-st { padding: 0 9px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fm-card, .fm-bar i, .fm-track, .fm-track::after { transition: none; }
+    .fm-card:hover { transform: none; }
   }
 </style>
 </head>
@@ -80,28 +183,10 @@
 <nav class="sb" id="adminNav"></nav>
 
 <main class="admin-page">
-  <a class="back-link" id="backLink" href="home.html">كل المحتوى</a>
-
-  <div id="frListWrap">
-    <h1 class="page-title">منتدى الأسئلة</h1>
-    <p class="page-sub">اختر كورس أو مسابقة عشان تشوف أسئلة المشتركين وترد عليها</p>
-    <div id="frCompsList">
-      <div class="skel skel-row"></div>
-      <div class="skel skel-row"></div>
-      <div class="skel skel-row"></div>
-    </div>
-  </div>
-
-  <div id="frDetailWrap" style="display:none;">
-    <div class="admin-page-head">
-      <div>
-        <h1 class="page-title" id="frCompTitle">منتدى الأسئلة</h1>
-        <p class="page-sub" id="frCompSub"></p>
-      </div>
-    </div>
-    <div id="frFeed">
-      <div class="center-loading"><div class="loader"></div></div>
-    </div>
+  <div class="pv-page" id="app">
+    <div class="pv-skel pv-skel-card" style="height:64px"></div>
+    <section class="pv-kpis"><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div></section>
+    <div class="pv-skel pv-skel-card"></div><div class="pv-skel pv-skel-card"></div><div class="pv-skel pv-skel-card"></div>
   </div>
 </main>
 
@@ -111,220 +196,560 @@
 <script src="firebase-config.js"></script>
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
+<script src="pv-ui.js"></script>
 <script>
-  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل المحتوى';
+(function () {
+  'use strict';
 
-  const params = new URLSearchParams(window.location.search);
-  const compId = params.get('id');
+  var params = new URLSearchParams(window.location.search);
+  var compId = params.get('id');
+  var app = document.getElementById('app');
+  var currentAdmin = null;
+  var PAGE_SIZE = 20;
+  var MAX_REPLY = 1000;
+  var kpiAnimated = false;
 
-  let currentAdmin = null;
+  /* ===================== أدوات مساعدة ===================== */
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function nf(n) { return Number(n || 0).toLocaleString('ar-EG'); }
+  function safeUrl(u) { return /^https?:\/\//i.test(u || '') ? u : ''; }
+  function safeImg(u) { return /^(data:image\/(png|jpe?g|gif|webp);base64,|https?:\/\/)/i.test(u || '') ? u : ''; }
+  function norm(s) { return String(s || '').toLowerCase().trim(); }
+  function isPending(q) { return !q.adminReply; }
+  function forumRef(id) { return db.ref('forumQuestions/' + id); }
+  function ago(ts) { return typeof pvTimeAgo === 'function' ? pvTimeAgo(ts) : formatArabicDate(ts); }
+  function toast(msg, type) { if (typeof showToast === 'function') showToast(msg, type); }
+
+  function avatar(name) {
+    var a = pvAvatar(name);
+    return '<span class="pv-avatar fm-av" style="background:' + a.bg + ';color:' + a.fg + '">' + esc(a.initial) + '</span>';
+  }
+
+  function kpi(o) {
+    return '<div class="pv-kpi ' + (o.cls || '') + '">' +
+      '<div class="pv-kpi-top"><span class="pv-kpi-label">' + o.label + '</span><span class="pv-kpi-ico">' + icon(o.icon) + '</span></div>' +
+      '<div class="pv-kpi-value" data-to="' + o.value + '">' + nf(o.value) + '</div>' +
+      '<div class="pv-kpi-foot">' + (o.foot || '') + '</div></div>';
+  }
+  function paintKpis(el, items) {
+    el.innerHTML = items.map(kpi).join('');
+    if (!kpiAnimated) {
+      kpiAnimated = true;
+      el.querySelectorAll('[data-to]').forEach(function (n) { pvAnimateNumber(n, Number(n.dataset.to)); });
+    }
+  }
+  function chip(key, label, count, active) {
+    return '<button type="button" class="pv-chip' + (active ? ' active' : '') + '" data-filter="' + key + '">' + label + ' <b>' + nf(count) + '</b></button>';
+  }
+  function emptyBox(iconName, title, text, tone) {
+    return '<div class="pv-empty"><div class="pv-empty-ico ' + (tone || '') + '">' + icon(iconName) + '</div><h3>' + esc(title) + '</h3><p>' + esc(text) + '</p></div>';
+  }
+  function showError(el, err) {
+    el.innerHTML = emptyBox('lAlert', 'تعذر تحميل البيانات', (err && err.message) ? err.message : 'حصلت مشكلة أثناء الاتصال بقاعدة البيانات. جرّب تحديث الصفحة.', 'err');
+  }
+  function searchBox(placeholder, label) {
+    return '<label class="pv-search" id="searchBox"><span>' + icon('lSearch') + '</span>' +
+      '<input type="search" id="searchInput" placeholder="' + placeholder + '" autocomplete="off" aria-label="' + label + '">' +
+      '<button type="button" class="pv-search-clear" id="searchClear" aria-label="مسح البحث">' + icon('lX') + '</button></label>';
+  }
+  function wireSearch(onChange) {
+    var input = document.getElementById('searchInput');
+    var box = document.getElementById('searchBox');
+    var clear = document.getElementById('searchClear');
+    var fire = pvDebounce(function () { onChange(input.value); }, 160);
+    input.addEventListener('input', function () { box.classList.toggle('has-value', !!input.value); fire(); });
+    clear.addEventListener('click', function () { input.value = ''; box.classList.remove('has-value'); onChange(''); input.focus(); });
+  }
 
   requireAdminAuth(function (user) {
     currentAdmin = user;
     renderAdminNav('forum');
-    if (compId) {
-      document.getElementById('backLink').href = 'competition.html?id=' + encodeURIComponent(compId);
-      document.getElementById('frListWrap').style.display = 'none';
-      document.getElementById('frDetailWrap').style.display = 'block';
-      loadCompAndQuestions(compId);
-    } else {
-      document.getElementById('frListWrap').style.display = 'block';
-      document.getElementById('frDetailWrap').style.display = 'none';
-      loadCompsList();
-    }
+    if (compId) initDetail(compId); else initList();
   });
 
-  /* ===================== وضع القائمة: كل الكورسات/المسابقات وعدد أسئلتها المعلّقة ===================== */
-  function loadCompsList() {
-    Promise.all([
-      db.ref('competitions').once('value'),
-      db.ref('forumQuestions').once('value')
-    ]).then(function (results) {
-      const comps = results[0].val() || {};
-      const allQuestions = results[1].val() || {};
-      const ids = Object.keys(comps);
-      const wrap = document.getElementById('frCompsList');
+  /* ============================================================
+     الوضع الأول: قائمة المنتديات — بطاقة لكل كورس/مسابقة
+     ============================================================ */
+  function initList() {
+    var comps = {}, allQ = {};
+    var state = { q: '', filter: 'all' };
 
-      if (ids.length === 0) {
-        wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon('commentDots', 'icon-xl') + '</div><p>لا يوجد محتوى بعد.</p></div>';
-        return;
-      }
+    app.innerHTML =
+      '<a class="pv-back" href="home.html">' + icon('arrowRight') + ' كل المحتوى</a>' +
+      '<header class="pv-head"><div class="pv-head-main">' +
+        '<div class="pv-head-ico">' + icon('lMessage') + '</div>' +
+        '<div><h1 class="pv-title">منتدى الأسئلة</h1>' +
+        '<p class="pv-subtitle">اختر كورس أو مسابقة عشان تشوف أسئلة المشتركين وترد عليها.</p></div>' +
+      '</div></header>' +
+      '<section class="pv-kpis" id="kpis" aria-label="ملخص المنتديات"><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div></section>' +
+      '<section class="pv-toolbar" id="toolbar" hidden>' +
+        searchBox('ابحث باسم الكورس أو المسابقة…', 'بحث في المنتديات') +
+        '<div class="pv-chips" id="chips"></div>' +
+      '</section>' +
+      '<div class="pv-result-line" id="resultLine" hidden></div>' +
+      '<div id="grid"><div class="pv-skel pv-skel-card"></div><div class="pv-skel pv-skel-card"></div><div class="pv-skel pv-skel-card"></div></div>';
 
-      // رتّب: الأكتر عدد أسئلة معلّقة أولاً
-      const rows = ids.map(function (id) {
-        const c = comps[id];
-        const questions = allQuestions[id] || {};
-        const total = Object.keys(questions).length;
-        const pending = Object.keys(questions).filter(function (qid) { return !questions[qid].adminReply; }).length;
-        return { id: id, c: c, total: total, pending: pending };
-      }).sort(function (a, b) { return b.pending - a.pending; });
+    var kpisEl = document.getElementById('kpis');
+    var toolbar = document.getElementById('toolbar');
+    var chipsEl = document.getElementById('chips');
+    var resultLine = document.getElementById('resultLine');
+    var grid = document.getElementById('grid');
 
-      wrap.innerHTML = rows.map(function (r) {
-        const c = r.c;
-        const isCourse = c.type !== 'competition';
-        return (
-          '<a class="fr-list-card" href="forum.html?id=' + encodeURIComponent(r.id) + '">' +
-            (c.coverUrl
-              ? '<img class="fr-list-thumb" src="' + escapeHtml(c.coverUrl) + '" alt="" onerror="this.style.display=\'none\'">'
-              : '<span class="fr-list-thumb-placeholder">' + icon(isCourse ? 'bookOpen' : 'trophy', 'icon-md') + '</span>') +
-            '<div class="fr-list-info">' +
-              '<h3>' + escapeHtml(c.title || 'بدون عنوان') + '</h3>' +
-              '<span>' + (isCourse ? 'كورس' : 'مسابقة') + ' — ' + r.total + ' سؤال إجمالًا</span>' +
-            '</div>' +
-            (r.pending > 0
-              ? '<span class="fr-pending-badge">' + r.pending + ' بانتظار الرد</span>'
-              : '<span class="fr-no-pending">' + icon('circleCheck', 'icon-sm') + ' لا يوجد أسئلة معلّقة</span>') +
-          '</a>'
-        );
-      }).join('');
-    }).catch(function (err) {
-      document.getElementById('frCompsList').innerHTML =
-        '<p style="color:var(--danger); font-size:0.8125rem;">تعذر تحميل المحتوى: ' + escapeHtml(err.message || '') + '</p>';
+    wireSearch(function (v) { state.q = v; renderList(); });
+    chipsEl.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-filter]');
+      if (!b) return;
+      state.filter = b.dataset.filter;
+      renderList();
     });
-  }
 
-  /* ===================== وضع التفاصيل: أسئلة كورس/مسابقة واحدة ===================== */
-  function loadCompAndQuestions(id) {
-    db.ref('competitions/' + id).once('value').then(function (snap) {
-      if (!snap.exists()) { window.location.href = 'forum.html'; return; }
-      const c = snap.val();
-      const isCourse = c.type !== 'competition';
-      document.getElementById('frCompTitle').textContent = c.title || 'بدون عنوان';
-      document.getElementById('frCompSub').textContent = (isCourse ? 'أسئلة الطلاب المشتركين في هذا الكورس' : 'أسئلة المشتركين في هذه المسابقة');
-      listenQuestions(id);
-    }).catch(function (err) {
-      document.getElementById('frFeed').innerHTML =
-        '<p style="color:var(--danger); font-size:0.8125rem;">تعذر تحميل المحتوى: ' + escapeHtml(err.message || '') + '</p>';
-    });
-  }
-
-  function forumRef(id) { return db.ref('forumQuestions/' + id); }
-
-  function listenQuestions(id) {
-    forumRef(id).on('value', function (snap) {
-      const data = snap.val() || {};
-      const ids = Object.keys(data).sort(function (a, b) { return (data[b].createdAt || 0) - (data[a].createdAt || 0); });
-      const feed = document.getElementById('frFeed');
-
-      if (ids.length === 0) {
-        feed.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon('commentDots', 'icon-xl') + '</div><p>لا توجد أسئلة بعد في هذا المنتدى.</p></div>';
-        return;
-      }
-
-      feed.innerHTML = ids.map(function (qid) {
-        const q = data[qid];
-        const initial = (q.name || '؟').trim().charAt(0);
-        const reply = q.adminReply;
-
-        let statusHtml;
-        if (reply) {
-          statusHtml =
-            '<div class="fr-reply-card">' +
-              '<div class="fr-post-head"><span class="fr-avatar">' + icon('shield', 'icon-sm') + '</span>' +
-              '<span class="fr-name">إدارة أواب</span>' +
-              '<span class="fr-time">' + formatArabicDate(reply.createdAt) + '</span></div>' +
-              '<p class="fr-text">' + escapeHtml(reply.text) + '</p>' +
-            '</div>';
-        } else {
-          statusHtml =
-            '<div class="fr-pending-note">' + icon('hourglass', 'icon-sm') + ' بانتظار الرد</div>' +
-            '<div class="fr-reply-form">' +
-              '<textarea class="fr-reply-input" data-question="' + qid + '" placeholder="اكتب ردًا كإدارة المنصة..." rows="2"></textarea>' +
-              '<button type="button" class="btn btn-gold btn-sm fr-reply-send-btn" data-question="' + qid + '" style="width:auto;">' + icon('reply', 'icon-sm') + ' رد</button>' +
-            '</div>';
-        }
-
-        const published = q.published === true;
-        const pubHtml =
-          '<div class="fr-pub-row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 2px;">' +
-            '<span class="status-pill" style="' + (published ? 'background:var(--teal-pale);color:var(--teal-dark);' : 'background:rgba(var(--danger-rgb),0.1);color:var(--danger);') + '">' + (published ? 'منشور للجميع' : 'غير منشور — ظاهر لصاحبه فقط') + '</span>' +
-            '<button type="button" class="btn btn-outline btn-xs fr-pub-btn" data-question="' + qid + '" data-publish="' + (published ? 'false' : 'true') + '" style="width:auto;">' + (published ? 'إلغاء النشر' : 'نشر للجميع') + '</button>' +
-          '</div>';
-
-        return (
-          '<div class="fr-post ' + (reply ? '' : 'is-pending') + '">' +
-            '<div class="fr-post-head"><span class="fr-avatar">' + escapeHtml(initial) + '</span>' +
-            '<span class="fr-name">' + escapeHtml(q.name || 'مستخدم') + '</span>' +
-            '<span class="fr-time">' + formatArabicDate(q.createdAt) + '</span></div>' +
-            '<p class="fr-text">' + escapeHtml(q.text) + '</p>' +
-            (q.imageData ? '<a href="' + q.imageData + '" target="_blank" rel="noopener"><img class="fr-image" src="' + q.imageData + '" alt="" loading="lazy"></a>' : '') +
-            pubHtml +
-            statusHtml +
-          '</div>'
-        );
-      }).join('');
-
-      feed.querySelectorAll('.fr-reply-send-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () { sendAdminReply(id, btn.dataset.question); });
+    function buildRows() {
+      return Object.keys(comps).map(function (id) {
+        var c = comps[id] || {};
+        var qs = allQ[id] || {};
+        var qids = Object.keys(qs);
+        var pending = 0, unpub = 0, last = 0;
+        qids.forEach(function (k) {
+          var q = qs[k] || {};
+          if (isPending(q)) pending++;
+          if (q.published !== true) unpub++;
+          if ((q.createdAt || 0) > last) last = q.createdAt || 0;
+        });
+        return { id: id, c: c, total: qids.length, pending: pending, answered: qids.length - pending, unpub: unpub, last: last };
+      }).sort(function (a, b) {
+        return (b.pending - a.pending) || (b.last - a.last) ||
+          String(a.c.title || '').localeCompare(String(b.c.title || ''), 'ar');
       });
-      feed.querySelectorAll('.fr-pub-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () { setPublished(id, btn.dataset.question, btn.dataset.publish === 'true', btn, data[btn.dataset.question]); });
-      });
-    });
-  }
-
-  /* نشر السؤال للجميع / إلغاء النشر (حقل published يقرأه موقع الطالب) */
-  function setPublished(compIdForPub, questionId, value, btn, q) {
-    btn.disabled = true;
-    forumRef(compIdForPub).child(questionId).child('published').set(value).then(function () {
-      showToast(value ? 'تم نشر السؤال للجميع' : 'تم إلغاء النشر، والسؤال الآن ظاهر لصاحبه فقط', 'success');
-      if (value && q && q.uid && q.uid !== currentAdmin.uid) {
-        return db.ref('notifications/' + q.uid).push({
-          type: 'reply', title: 'تم نشر سؤالك في المنتدى',
-          body: q.text && q.text.length > 60 ? q.text.slice(0, 60) + '…' : (q.text || ''),
-          link: 'forum.html?id=' + compIdForPub, read: false, createdAt: firebase.database.ServerValue.TIMESTAMP
-        }).catch(function () {});
-      }
-    }).catch(function (err) {
-      showToast('تعذر تنفيذ الإجراء' + (err && err.message ? ': ' + err.message : ''), 'error');
-      btn.disabled = false;
-    });
-  }
-
-  function sendAdminReply(compIdForReply, questionId) {
-    const input = document.querySelector('.fr-reply-input[data-question="' + questionId + '"]');
-    const btn = document.querySelector('.fr-reply-send-btn[data-question="' + questionId + '"]');
-    const text = input.value.trim();
-
-    if (!text) {
-      input.classList.remove('shake');
-      void input.offsetWidth;
-      input.classList.add('shake');
-      input.focus();
-      return;
     }
 
-    input.disabled = true;
-    btn.disabled = true;
-    btn.classList.add('is-loading');
+    function cardHtml(r) {
+      var c = r.c, isCourse = c.type !== 'competition';
+      var cover = safeUrl(c.coverUrl);
+      var rate = r.total ? Math.round(r.answered / r.total * 100) : 0;
+      var flag = r.total === 0
+        ? '<span class="fm-flag idle">' + icon('commentDots') + ' لا أسئلة بعد</span>'
+        : (r.pending > 0
+          ? '<span class="fm-flag pending">' + icon('hourglass') + ' ' + nf(r.pending) + ' بانتظار الرد</span>'
+          : '<span class="fm-flag ok">' + icon('circleCheck') + ' تم الرد على الكل</span>');
+      return '<a class="fm-card' + (r.pending > 0 ? ' has-pending' : '') + '" href="forum.html?id=' + encodeURIComponent(r.id) + '">' +
+        '<div class="fm-card-top">' +
+          '<span class="fm-cover-wrap"><span class="fm-cover-ph' + (isCourse ? '' : ' comp') + '">' + icon(isCourse ? 'bookOpen' : 'trophy') + '</span>' +
+          (cover ? '<img class="fm-cover" src="' + esc(cover) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') + '</span>' +
+          '<div class="fm-card-info"><h3 class="fm-card-title">' + esc(c.title || 'بدون عنوان') + '</h3>' +
+          '<span class="fm-type' + (isCourse ? '' : ' comp') + '">' + icon(isCourse ? 'bookOpen' : 'trophy') + (isCourse ? 'كورس' : 'مسابقة') + '</span></div>' +
+        '</div>' +
+        '<div class="fm-stats">' +
+          '<div class="fm-stat"><b>' + nf(r.total) + '</b><small>إجمالي الأسئلة</small></div>' +
+          '<div class="fm-stat' + (r.pending > 0 ? ' warn' : '') + '"><b>' + nf(r.pending) + '</b><small>بانتظار الرد</small></div>' +
+          '<div class="fm-stat ok"><b>' + nf(r.answered) + '</b><small>تم الرد</small></div>' +
+        '</div>' +
+        '<div><div class="fm-meter-top"><span>نسبة الرد</span><b>' + nf(rate) + '٪</b></div><div class="fm-bar"><i style="width:' + rate + '%"></i></div></div>' +
+        '<div class="fm-card-foot"><span>' + (r.total ? 'آخر سؤال ' + ago(r.last) : 'ابدأ بانتظار أول سؤال') + '</span>' + flag + '</div>' +
+      '</a>';
+    }
 
-    const qRef = forumRef(compIdForReply).child(questionId);
-    qRef.once('value').then(function (snap) {
-      const q = snap.val();
-      return qRef.child('adminReply').set({
-        text: text,
-        createdAt: firebase.database.ServerValue.TIMESTAMP
-      }).then(function () {
-        if (q && q.uid && q.uid !== currentAdmin.uid) {
-          return db.ref('notifications/' + q.uid).push({
-            type: 'reply',
-            title: 'تم الرد على سؤالك في المنتدى',
-            body: text.length > 60 ? text.slice(0, 60) + '…' : text,
-            link: 'forum.html?id=' + compIdForReply,
-            read: false,
-            createdAt: firebase.database.ServerValue.TIMESTAMP
-          }).catch(function () {});
-        }
+    function renderList() {
+      var rows = buildRows();
+      var sum = rows.reduce(function (a, r) {
+        a.total += r.total; a.pending += r.pending; a.answered += r.answered; a.unpub += r.unpub;
+        if (r.pending > 0) a.compsPending++;
+        return a;
+      }, { total: 0, pending: 0, answered: 0, unpub: 0, compsPending: 0 });
+
+      paintKpis(kpisEl, [
+        { label: 'بانتظار الرد', value: sum.pending, icon: 'hourglass', cls: sum.pending ? 'danger' : 'teal', foot: sum.pending ? 'في ' + nf(sum.compsPending) + ' منتدى' : 'مفيش أسئلة معلّقة' },
+        { label: 'إجمالي الأسئلة', value: sum.total, icon: 'lMessage', foot: 'في ' + nf(rows.length) + ' منتدى' },
+        { label: 'تم الرد عليها', value: sum.answered, icon: 'lCheckCircle', cls: 'teal', foot: sum.total ? nf(Math.round(sum.answered / sum.total * 100)) + '٪ من الأسئلة' : '—' },
+        { label: 'غير منشورة', value: sum.unpub, icon: 'eyeSlash', cls: 'amber', foot: 'ظاهرة لأصحابها فقط' }
+      ]);
+
+      if (rows.length === 0) {
+        toolbar.hidden = true; resultLine.hidden = true;
+        grid.innerHTML = emptyBox('lInbox', 'لا يوجد محتوى بعد', 'أضف كورس أو مسابقة وهتظهر هنا منتدياتها تلقائيًا.');
+        return;
+      }
+      toolbar.hidden = false;
+
+      var counts = {
+        all: rows.length,
+        pending: rows.filter(function (r) { return r.pending > 0; }).length,
+        course: rows.filter(function (r) { return r.c.type !== 'competition'; }).length,
+        competition: rows.filter(function (r) { return r.c.type === 'competition'; }).length
+      };
+      chipsEl.innerHTML =
+        chip('all', 'الكل', counts.all, state.filter === 'all') +
+        chip('pending', 'بها أسئلة معلّقة', counts.pending, state.filter === 'pending') +
+        chip('course', 'كورسات', counts.course, state.filter === 'course') +
+        chip('competition', 'مسابقات', counts.competition, state.filter === 'competition');
+
+      var q = norm(state.q);
+      var shown = rows.filter(function (r) {
+        if (state.filter === 'pending' && r.pending === 0) return false;
+        if (state.filter === 'course' && r.c.type === 'competition') return false;
+        if (state.filter === 'competition' && r.c.type !== 'competition') return false;
+        return !q || norm(r.c.title).indexOf(q) !== -1;
       });
-    }).then(function () {
-      showToast('تم إرسال الرد بنجاح', 'success');
-    }).catch(function (err) {
-      showToast('تعذر إرسال الرد' + (err && err.message ? ': ' + err.message : ''), 'error');
-      input.disabled = false;
-      btn.disabled = false;
-      btn.classList.remove('is-loading');
-    });
+
+      resultLine.hidden = false;
+      resultLine.innerHTML = '<span>عرض ' + nf(shown.length) + ' من ' + nf(rows.length) + ' منتدى</span><span>الأكثر أسئلة معلّقة أولًا</span>';
+
+      if (shown.length === 0) {
+        grid.innerHTML = state.filter === 'pending' && !q
+          ? emptyBox('lCheckCircle', 'كل الأسئلة اتردّ عليها', 'مفيش أي سؤال بانتظار ردك دلوقتي.', 'ok')
+          : emptyBox('lSearch', 'مفيش نتائج مطابقة', 'جرّب كلمة بحث تانية أو غيّر الفلتر.');
+        return;
+      }
+      grid.innerHTML = '<div class="fm-grid">' + shown.map(cardHtml).join('') + '</div>';
+    }
+
+    db.ref('competitions').once('value').then(function (snap) {
+      comps = snap.val() || {};
+      forumRefAll().on('value', function (s) { allQ = s.val() || {}; renderList(); }, function (err) { showError(grid, err); });
+    }).catch(function (err) { showError(grid, err); });
+
+    function forumRefAll() { return db.ref('forumQuestions'); }
+    window.addEventListener('pagehide', function () { forumRefAll().off(); });
   }
+
+  /* ============================================================
+     الوضع الثاني: منتدى كورس/مسابقة واحدة — صندوق وارد للأسئلة
+     ============================================================ */
+  function initDetail(id) {
+    var comp = null, data = {};
+    var state = { q: '', filter: 'all', sort: 'pending', limit: PAGE_SIZE };
+    var drafts = {}, editing = {}, pubWith = {};
+
+    app.innerHTML =
+      '<a class="pv-back" href="forum.html">' + icon('arrowRight') + ' كل المنتديات</a>' +
+      '<header class="pv-head"><div class="pv-head-main">' +
+        '<div class="pv-head-ico" id="headIco">' + icon('lMessage') + '</div>' +
+        '<div><h1 class="pv-title" id="compTitle">منتدى الأسئلة</h1><p class="pv-subtitle" id="compSub">جارٍ التحميل…</p></div>' +
+      '</div><div class="pv-head-actions">' +
+        '<a class="pv-btn" id="openComp" href="competition.html?id=' + encodeURIComponent(id) + '">' + icon('arrowUpRightFromSquare') + ' فتح المحتوى</a>' +
+      '</div></header>' +
+      '<section class="pv-kpis" id="kpis" aria-label="ملخص أسئلة المنتدى"><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div></section>' +
+      '<section class="pv-toolbar" id="toolbar" hidden>' +
+        searchBox('ابحث في الأسئلة أو أسماء الطلاب…', 'بحث في الأسئلة') +
+        '<select class="pv-select" id="sortSelect" aria-label="ترتيب الأسئلة">' +
+          '<option value="pending">بانتظار الرد أولًا</option><option value="newest">الأحدث</option><option value="oldest">الأقدم</option>' +
+        '</select>' +
+        '<div class="pv-chips" id="chips"></div>' +
+      '</section>' +
+      '<div class="pv-result-line" id="resultLine" hidden></div>' +
+      '<div class="fm-feed" id="feed"><div class="pv-skel pv-skel-card" style="height:150px"></div><div class="pv-skel pv-skel-card" style="height:150px"></div></div>' +
+      '<div class="vl-more" id="moreWrap" hidden><button type="button" class="pv-btn" data-act="more">عرض المزيد</button></div>';
+
+    var kpisEl = document.getElementById('kpis');
+    var toolbar = document.getElementById('toolbar');
+    var chipsEl = document.getElementById('chips');
+    var resultLine = document.getElementById('resultLine');
+    var feed = document.getElementById('feed');
+    var moreWrap = document.getElementById('moreWrap');
+    var sortSel = document.getElementById('sortSelect');
+
+    wireSearch(function (v) { state.q = v; state.limit = PAGE_SIZE; renderDetail(); });
+    sortSel.addEventListener('change', function () { state.sort = sortSel.value; state.limit = PAGE_SIZE; renderDetail(); });
+    chipsEl.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-filter]');
+      if (!b) return;
+      state.filter = b.dataset.filter; state.limit = PAGE_SIZE; renderDetail();
+    });
+
+    /* ---------- مكوّن السؤال الواحد ---------- */
+    function threadHtml(qid, q) {
+      var reply = q.adminReply;
+      var published = q.published === true;
+      var name = q.name || 'مستخدم';
+      var isEditing = !!editing[qid];
+      var img = safeImg(q.imageData);
+      var draft = drafts[qid] != null ? drafts[qid] : '';
+
+      var replyHtml = '';
+      if (reply) {
+        replyHtml =
+          '<div class="fm-reply"><div class="fm-reply-head">' +
+            '<span class="fm-reply-badge">' + icon('shield') + '</span>' +
+            '<span class="fm-reply-name">إدارة أواب</span>' +
+            '<span class="fm-reply-time" title="' + esc(formatArabicDate(reply.createdAt)) + '">' + ago(reply.createdAt) + (reply.editedAt ? ' · تم التعديل' : '') + '</span>' +
+            (isEditing ? '' : '<button type="button" class="pv-btn sm fm-reply-edit" data-act="edit" data-q="' + qid + '">' + icon('pen') + ' تعديل الرد</button>') +
+          '</div><p>' + esc(reply.text) + '</p></div>';
+      }
+
+      var composerHtml = '';
+      if (!reply || isEditing) {
+        composerHtml =
+          '<div class="fm-composer">' +
+            '<textarea class="fm-input" data-q="' + qid + '" maxlength="' + MAX_REPLY + '" rows="3" placeholder="' + (isEditing ? 'عدّل نص الردّ…' : 'اكتب ردًا كإدارة المنصة…') + '" aria-label="نص الرد">' + esc(draft) + '</textarea>' +
+            '<div class="fm-comp-row">' +
+              '<span class="fm-count" data-count="' + qid + '">' + nf(draft.length) + ' / ' + nf(MAX_REPLY) + '</span>' +
+              ((!reply && !published) ? '<label class="fm-check"><input type="checkbox" class="fm-pubwith" data-q="' + qid + '"' + (pubWith[qid] ? ' checked' : '') + '> انشر السؤال للجميع مع الرد</label>' : '') +
+              '<span class="fm-spacer"></span>' +
+              (isEditing ? '<button type="button" class="pv-btn sm" data-act="cancel" data-q="' + qid + '">إلغاء</button>' : '') +
+              '<button type="button" class="pv-btn primary sm" data-act="send" data-q="' + qid + '">' + icon('paperPlane') + (isEditing ? ' حفظ التعديل' : ' إرسال الرد') + '</button>' +
+            '</div>' +
+          '</div>';
+      }
+
+      return '<article class="fm-thread' + (reply ? '' : ' pending') + '" data-qid="' + qid + '">' +
+        '<div class="fm-t-head">' + avatar(name) +
+          '<div class="fm-t-who"><span class="fm-t-name">' + esc(name) + '</span>' +
+          '<span class="fm-t-time" title="' + esc(formatArabicDate(q.createdAt)) + '">' + ago(q.createdAt) + '</span></div>' +
+          (reply ? '<span class="fm-st done">' + icon('circleCheck') + ' تم الرد</span>' : '<span class="fm-st pending">' + icon('hourglass') + ' بانتظار الرد</span>') +
+        '</div>' +
+        '<div class="fm-t-body"><p class="fm-q">' + esc(q.text) + '</p>' +
+          (img ? '<button type="button" class="fm-img-btn" data-act="img" data-q="' + qid + '" aria-label="تكبير الصورة"><img src="' + esc(img) + '" alt="" loading="lazy"></button>' : '') +
+        '</div>' +
+        replyHtml + composerHtml +
+        '<div class="fm-t-foot">' +
+          '<button type="button" class="fm-pub" role="switch" aria-checked="' + published + '" data-act="toggle-pub" data-q="' + qid + '">' +
+            '<span class="fm-track"></span><span>' + (published ? 'منشور للجميع' : 'غير منشور') + '</span>' +
+            '<small>' + (published ? '' : '— ظاهر لصاحبه فقط') + '</small></button>' +
+          '<span class="fm-spacer"></span>' +
+          '<button type="button" class="pv-btn sm soft-danger" data-act="delete" data-q="' + qid + '" aria-label="حذف السؤال">' + icon('lTrash') + ' حذف</button>' +
+        '</div>' +
+      '</article>';
+    }
+
+    /* ---------- رسم الصفحة (يحافظ على المسودّات والتركيز) ---------- */
+    function renderDetail() {
+      var ids = Object.keys(data);
+      var items = ids.map(function (k) { return { id: k, q: data[k] || {} }; });
+      var cnt = { all: items.length, pending: 0, done: 0, pub: 0, unpub: 0 };
+      items.forEach(function (it) {
+        if (isPending(it.q)) cnt.pending++; else cnt.done++;
+        if (it.q.published === true) cnt.pub++; else cnt.unpub++;
+      });
+
+      paintKpis(kpisEl, [
+        { label: 'إجمالي الأسئلة', value: cnt.all, icon: 'lMessage', foot: comp && comp.type === 'competition' ? 'من مشتركي المسابقة' : 'من طلاب الكورس' },
+        { label: 'بانتظار الرد', value: cnt.pending, icon: 'hourglass', cls: cnt.pending ? 'danger' : 'teal', foot: cnt.pending ? 'محتاجة ردّك' : 'مفيش أسئلة معلّقة' },
+        { label: 'تم الرد عليها', value: cnt.done, icon: 'lCheckCircle', cls: 'teal', foot: cnt.all ? nf(Math.round(cnt.done / cnt.all * 100)) + '٪ نسبة الرد' : '—' },
+        { label: 'منشورة للجميع', value: cnt.pub, icon: 'eye', cls: 'violet', foot: nf(cnt.unpub) + ' غير منشورة' }
+      ]);
+
+      if (items.length === 0) {
+        toolbar.hidden = true; resultLine.hidden = true; moreWrap.hidden = true;
+        feed.innerHTML = emptyBox('lInbox', 'لا توجد أسئلة بعد', 'لما أي مشترك يسأل في المنتدى ده هيظهر سؤاله هنا فورًا.');
+        return;
+      }
+      toolbar.hidden = false;
+
+      chipsEl.innerHTML =
+        chip('all', 'الكل', cnt.all, state.filter === 'all') +
+        chip('pending', 'بانتظار الرد', cnt.pending, state.filter === 'pending') +
+        chip('done', 'تم الرد', cnt.done, state.filter === 'done') +
+        chip('pub', 'منشور', cnt.pub, state.filter === 'pub') +
+        chip('unpub', 'غير منشور', cnt.unpub, state.filter === 'unpub');
+
+      var q = norm(state.q);
+      var shown = items.filter(function (it) {
+        var x = it.q;
+        if (state.filter === 'pending' && !isPending(x)) return false;
+        if (state.filter === 'done' && isPending(x)) return false;
+        if (state.filter === 'pub' && x.published !== true) return false;
+        if (state.filter === 'unpub' && x.published === true) return false;
+        if (!q) return true;
+        return norm(x.text).indexOf(q) !== -1 || norm(x.name).indexOf(q) !== -1 ||
+          norm(x.adminReply && x.adminReply.text).indexOf(q) !== -1;
+      });
+      shown.sort(function (a, b) {
+        var ta = a.q.createdAt || 0, tb = b.q.createdAt || 0;
+        if (state.sort === 'oldest') return ta - tb;
+        if (state.sort === 'pending') {
+          var pa = isPending(a.q) ? 1 : 0, pb = isPending(b.q) ? 1 : 0;
+          if (pa !== pb) return pb - pa;
+        }
+        return tb - ta;
+      });
+
+      resultLine.hidden = false;
+      resultLine.innerHTML = '<span>عرض ' + nf(Math.min(shown.length, state.limit)) + ' من ' + nf(shown.length) + ' سؤال</span><span>اضغط Ctrl + Enter لإرسال الرد بسرعة</span>';
+
+      var ae = document.activeElement, keep = null;
+      if (ae && ae.classList && ae.classList.contains('fm-input')) {
+        keep = { q: ae.dataset.q, s: ae.selectionStart, e: ae.selectionEnd };
+      }
+
+      if (shown.length === 0) {
+        moreWrap.hidden = true;
+        feed.innerHTML = state.filter === 'pending' && !q
+          ? emptyBox('lCheckCircle', 'كل الأسئلة اتردّ عليها', 'مفيش أي سؤال بانتظار ردك في المنتدى ده.', 'ok')
+          : emptyBox('lSearch', 'مفيش نتائج مطابقة', 'جرّب كلمة بحث تانية أو غيّر الفلتر.');
+        return;
+      }
+
+      feed.innerHTML = shown.slice(0, state.limit).map(function (it) { return threadHtml(it.id, it.q); }).join('');
+      moreWrap.hidden = shown.length <= state.limit;
+      feed.querySelectorAll('.fm-input').forEach(autosize);
+
+      if (keep) {
+        var t = feed.querySelector('.fm-input[data-q="' + (window.CSS && CSS.escape ? CSS.escape(keep.q) : keep.q) + '"]');
+        if (t) { t.focus(); try { t.setSelectionRange(keep.s, keep.e); } catch (e) {} }
+      }
+    }
+
+    function autosize(t) {
+      t.style.height = 'auto';
+      t.style.height = Math.min(260, Math.max(84, t.scrollHeight + 2)) + 'px';
+    }
+
+    /* ---------- التفاعلات (event delegation) ---------- */
+    app.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-act]');
+      if (!btn || !app.contains(btn)) return;
+      var act = btn.dataset.act, qid = btn.dataset.q;
+      if (act === 'more') { state.limit += PAGE_SIZE; renderDetail(); }
+      else if (act === 'send') sendReply(qid, btn);
+      else if (act === 'edit') {
+        var cur = data[qid] && data[qid].adminReply;
+        editing[qid] = true; drafts[qid] = cur ? cur.text : '';
+        renderDetail();
+        var t = feed.querySelector('.fm-input[data-q="' + qid + '"]');
+        if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); }
+      }
+      else if (act === 'cancel') { delete editing[qid]; delete drafts[qid]; renderDetail(); }
+      else if (act === 'toggle-pub') setPublished(qid, !(data[qid] && data[qid].published === true), btn);
+      else if (act === 'delete') deleteQuestion(qid);
+      else if (act === 'img') openLightbox(safeImg(data[qid] && data[qid].imageData));
+    });
+
+    app.addEventListener('input', function (e) {
+      var t = e.target;
+      if (!t.classList || !t.classList.contains('fm-input')) return;
+      var qid = t.dataset.q;
+      drafts[qid] = t.value;
+      autosize(t);
+      var c = feed.querySelector('[data-count="' + qid + '"]');
+      if (c) {
+        c.textContent = nf(t.value.length) + ' / ' + nf(MAX_REPLY);
+        c.classList.toggle('near', t.value.length > MAX_REPLY * 0.9);
+      }
+    });
+    app.addEventListener('change', function (e) {
+      var t = e.target;
+      if (t.classList && t.classList.contains('fm-pubwith')) pubWith[t.dataset.q] = t.checked;
+    });
+    app.addEventListener('keydown', function (e) {
+      var t = e.target;
+      if (t.classList && t.classList.contains('fm-input') && e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        var b = feed.querySelector('[data-act="send"][data-q="' + t.dataset.q + '"]');
+        if (b) sendReply(t.dataset.q, b);
+      }
+    });
+
+    /* ---------- الإجراءات ---------- */
+    function notify(uid, title, body) {
+      if (!uid || uid === currentAdmin.uid) return Promise.resolve();
+      return db.ref('notifications/' + uid).push({
+        type: 'reply', title: title,
+        body: body && body.length > 60 ? body.slice(0, 60) + '…' : (body || ''),
+        link: 'forum.html?id=' + id, read: false,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      }).catch(function () {});
+    }
+
+    function sendReply(qid, btn) {
+      var input = feed.querySelector('.fm-input[data-q="' + qid + '"]');
+      if (!input) return;
+      var text = input.value.trim();
+      if (!text) {
+        input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake'); input.focus();
+        return;
+      }
+      var q = data[qid] || {};
+      var wasEdit = !!q.adminReply;
+      var TS = firebase.database.ServerValue.TIMESTAMP;
+      var updates = {
+        adminReply: wasEdit
+          ? { text: text, createdAt: q.adminReply.createdAt || TS, editedAt: TS }
+          : { text: text, createdAt: TS }
+      };
+      var alsoPublish = !wasEdit && pubWith[qid] && q.published !== true;
+      if (alsoPublish) updates.published = true;
+
+      input.disabled = true; btn.disabled = true; btn.classList.add('spin');
+      forumRef(id).child(qid).update(updates).then(function () {
+        return wasEdit ? null : notify(q.uid, 'تم الرد على سؤالك في المنتدى', text);
+      }).then(function () {
+        delete drafts[qid]; delete editing[qid]; delete pubWith[qid];
+        toast(wasEdit ? 'تم حفظ تعديل الرد' : (alsoPublish ? 'تم إرسال الرد ونشر السؤال للجميع' : 'تم إرسال الرد بنجاح'), 'success');
+        renderDetail();
+      }).catch(function (err) {
+        toast('تعذر إرسال الرد' + (err && err.message ? ': ' + err.message : ''), 'error');
+        input.disabled = false; btn.disabled = false; btn.classList.remove('spin');
+      });
+    }
+
+    function setPublished(qid, value, btn) {
+      var q = data[qid] || {};
+      btn.disabled = true;
+      forumRef(id).child(qid).child('published').set(value).then(function () {
+        toast(value ? 'تم نشر السؤال للجميع' : 'تم إلغاء النشر، والسؤال الآن ظاهر لصاحبه فقط', 'success');
+        return value ? notify(q.uid, 'تم نشر سؤالك في المنتدى', q.text) : null;
+      }).catch(function (err) {
+        toast('تعذر تنفيذ الإجراء' + (err && err.message ? ': ' + err.message : ''), 'error');
+        btn.disabled = false;
+      });
+    }
+
+    function deleteQuestion(qid) {
+      var q = data[qid] || {};
+      pvConfirm({
+        title: 'حذف هذا السؤال؟',
+        message: 'سيُحذف سؤال "' + (q.name || 'مستخدم') + '" وردّ الإدارة عليه (لو موجود) نهائيًا ولا يمكن التراجع.',
+        confirmText: 'نعم، احذف', tone: 'danger'
+      }).then(function (ok) {
+        if (!ok) return;
+        forumRef(id).child(qid).remove().then(function () {
+          delete drafts[qid]; delete editing[qid]; delete pubWith[qid];
+          toast('تم حذف السؤال', 'success');
+        }).catch(function (err) {
+          toast('تعذر حذف السؤال' + (err && err.message ? ': ' + err.message : ''), 'error');
+        });
+      });
+    }
+
+    function openLightbox(src) {
+      if (!src) return;
+      var box = document.createElement('div');
+      box.className = 'fm-lightbox';
+      box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+      box.innerHTML = '<button type="button" aria-label="إغلاق">' + icon('lX') + '</button><img alt="">';
+      box.querySelector('img').src = src;
+      document.body.appendChild(box);
+      if (typeof lockBodyScroll === 'function') lockBodyScroll();
+      requestAnimationFrame(function () { box.classList.add('open'); });
+      function close() {
+        document.removeEventListener('keydown', onKey);
+        box.classList.remove('open');
+        if (typeof unlockBodyScroll === 'function') unlockBodyScroll();
+        setTimeout(function () { box.remove(); }, 200);
+      }
+      function onKey(ev) { if (ev.key === 'Escape') close(); }
+      document.addEventListener('keydown', onKey);
+      box.addEventListener('click', close);
+    }
+
+    /* ---------- تحميل البيانات ---------- */
+    db.ref('competitions/' + id).once('value').then(function (snap) {
+      if (!snap.exists()) { window.location.href = 'forum.html'; return; }
+      comp = snap.val();
+      var isCourse = comp.type !== 'competition';
+      document.getElementById('compTitle').textContent = comp.title || 'بدون عنوان';
+      document.getElementById('compSub').textContent = isCourse ? 'أسئلة الطلاب المشتركين في هذا الكورس.' : 'أسئلة المشتركين في هذه المسابقة.';
+      document.getElementById('headIco').innerHTML = icon(isCourse ? 'bookOpen' : 'trophy');
+      document.title = (comp.title || 'منتدى الأسئلة') + ' — منتدى أواب';
+      forumRef(id).on('value', function (s) { data = s.val() || {}; renderDetail(); }, function (err) { showError(feed, err); });
+    }).catch(function (err) { showError(feed, err); });
+
+    window.addEventListener('pagehide', function () { forumRef(id).off(); });
+  }
+})();
 </script>
 </body>
 </html>
