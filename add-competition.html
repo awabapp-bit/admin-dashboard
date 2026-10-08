@@ -6,58 +6,59 @@
 <title>إضافة محتوى جديد — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
+<link rel="stylesheet" href="content-pages.css">
+<link rel="stylesheet" href="form-pages.css">
 <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 </head>
 <body>
 
-<nav class="admin-nav" id="adminNav"></nav>
+<nav class="sb" id="adminNav"></nav>
 
-<main class="admin-page" style="max-width:600px;">
-  <a class="back-link" href="home.html" id="backLink">كل المحتوى</a>
-  <h1 class="page-title">إضافة محتوى جديد</h1>
-  <p class="page-sub">يظهر فور الحفظ مباشرة على الموقع للمستخدمين</p>
+<main class="admin-page">
+  <div class="cc-wrap lf">
+    <a class="back-link" href="home.html" id="backLink">كل المحتوى</a>
 
-  <div class="info-card">
-    <div class="form-msg" id="formMsg"></div>
-    <form id="addCompForm">
-      <div class="field">
-        <label>نوع المحتوى</label>
-        <div style="display:flex; gap:10px;">
-          <label style="flex:1; display:flex; align-items:center; gap:8px; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); cursor:pointer;" id="courseTypeLabel">
-            <input type="radio" name="contentType" value="course" checked style="accent-color:var(--primary);">
-            <span id="courseTypeIcon"></span> كورس
-          </label>
-          <label style="flex:1; display:flex; align-items:center; gap:8px; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); cursor:pointer;" id="compTypeLabel">
-            <input type="radio" name="contentType" value="competition" style="accent-color:var(--gold);">
-            <span id="compTypeIcon"></span> مسابقة
-          </label>
+    <header class="lf-head">
+      <div>
+        <span class="lf-eyebrow" id="modeChip"></span>
+        <h1>إضافة محتوى جديد</h1>
+        <p>أنشئ كورسًا أو مسابقة من الصفر: اختر النوع، اكتب البيانات، وتابع المعاينة الحيّة. تضيف المحاضرات في الخطوة التالية بعد الحفظ.</p>
+      </div>
+    </header>
+
+    <div class="cc-add">
+      <form class="cc-panel" id="addForm" novalidate>
+        <div class="cc-formmsg" id="formMsg" role="alert"></div>
+        <div id="formRoot"></div>
+        <div class="cc-panel-foot">
+          <button type="submit" class="btn btn-gold" id="saveBtn">حفظ المحتوى</button>
+          <a class="btn btn-outline" href="home.html">إلغاء</a>
         </div>
-        <div class="field-hint">هيظهر للمستخدم زر "اشتراك في الكورس" لو كورس، أو "انضمام للمسابقة" لو مسابقة</div>
-      </div>
+      </form>
 
-      <div class="field">
-        <label for="compTitle">الاسم</label>
-        <input type="text" id="compTitle" placeholder="مثال: كورس التجويد الأساسي" required>
-      </div>
-      <div class="field">
-        <label for="compDesc">الوصف (اختياري)</label>
-        <textarea id="compDesc" rows="4" placeholder="وصف كامل يظهر في صفحة المحتوى" style="width:100%; padding:13px 15px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; font-size:0.9375rem; resize:vertical;"></textarea>
-      </div>
-      <div class="field">
-        <label for="compCover">رابط صورة الغلاف (اختياري)</label>
-        <input type="url" id="compCover" placeholder="https://...">
-      </div>
-      <div class="field">
-        <label for="compInstructorName">اسم المعلم (اختياري)</label>
-        <input type="text" id="compInstructorName" placeholder="مثال: الأستاذ محمد أحمد">
-      </div>
-      <div class="field">
-        <label for="compInstructorPhoto">رابط صورة المعلم (اختياري)</label>
-        <input type="url" id="compInstructorPhoto" placeholder="https://...">
-        <div class="field-hint">تظهر بجانب اسم المعلم في صفحة المحتوى عند المستخدم لو مُضافة.</div>
-      </div>
-      <button type="submit" class="btn btn-gold" id="saveBtn">حفظ</button>
-    </form>
+      <aside class="cc-pv-wrap" aria-label="معاينة البطاقة">
+        <div class="cc-pv-side">
+          <div>
+            <p class="cc-pv-label">هكذا يظهر المحتوى في لوحة التحكم</p>
+            <div class="cc-pv" id="preview">
+              <figure class="cc-arch" id="pvArch"></figure>
+              <div>
+                <div class="cc-chips" id="pvChips"></div>
+                <h2 id="pvTitle" class="is-empty">اسم المحتوى</h2>
+                <p id="pvDesc"></p>
+                <div class="cc-instructor" id="pvInstructor" hidden></div>
+              </div>
+            </div>
+          </div>
+          <div class="cc-ready">
+            <h3>جاهزية المحتوى</h3>
+            <ul id="readyList"></ul>
+            <p class="cc-next">بعد الحفظ تنتقل مباشرة لصفحة المحتوى لإضافة أول محاضرة.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
   </div>
 </main>
 
@@ -67,39 +68,96 @@
 <script src="firebase-config.js"></script>
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
+<script src="content-form.js"></script>
 <script>
   document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل المحتوى';
-  document.getElementById('courseTypeIcon').innerHTML = icon('bookOpen', 'icon-sm');
-  document.getElementById('compTypeIcon').innerHTML = icon('trophy', 'icon-sm');
+  document.getElementById('modeChip').innerHTML = icon('plus', 'icon-sm') + ' جديد';
 
   let currentAdmin = null;
   requireAdminAuth(function (user) { currentAdmin = user; renderAdminNav('home'); });
 
-  document.getElementById('addCompForm').addEventListener('submit', function (e) {
+  /* ---------- المعاينة الحية ---------- */
+  const pvArch = document.getElementById('pvArch');
+  const pvChips = document.getElementById('pvChips');
+  const pvTitle = document.getElementById('pvTitle');
+  const pvDesc = document.getElementById('pvDesc');
+  const pvInstructor = document.getElementById('pvInstructor');
+  let lastCover = null, lastType = null, lastPhoto = null, lastName = null;
+
+  const readyList = document.getElementById('readyList');
+  function renderReady(v) {
+    const rows = [
+      { ok: !!v.title, text: 'الاسم', note: 'مطلوب' },
+      { ok: !!v.description, text: 'الوصف', note: 'اختياري' },
+      { ok: !!v.coverUrl, text: 'صورة الغلاف', note: 'اختياري' },
+      { ok: !!v.instructorName, text: 'المعلم', note: 'اختياري' }
+    ];
+    readyList.innerHTML = rows.map(function (r) {
+      return '<li class="' + (r.ok ? 'is-ok' : '') + '"><span class="lf-dot">' + icon('check') + '</span>' + r.text + '<small>' + r.note + '</small></li>';
+    }).join('');
+  }
+
+  function renderPreview(v) {
+    renderReady(v);
+    const isComp = v.type === 'competition';
+
+    if (v.coverUrl !== lastCover || v.type !== lastType) {
+      pvArch.innerHTML = icon(isComp ? 'trophy' : 'bookOpen', 'icon-xl') +
+        (v.coverUrl ? '<img src="' + escapeHtml(v.coverUrl) + '" alt="" onerror="this.remove()">' : '');
+      lastCover = v.coverUrl;
+    }
+    if (v.type !== lastType) {
+      pvChips.innerHTML = '<span class="cc-chip' + (isComp ? ' comp' : '') + '">' + icon(isComp ? 'trophy' : 'bookOpen', 'icon-sm') + ' ' + (isComp ? 'مسابقة' : 'كورس') + '</span>';
+      lastType = v.type;
+    }
+
+    pvTitle.textContent = v.title || 'اسم المحتوى';
+    pvTitle.classList.toggle('is-empty', !v.title);
+    pvDesc.textContent = v.description;
+
+    if (v.instructorName !== lastName || v.instructorPhotoUrl !== lastPhoto) {
+      if (v.instructorName) {
+        pvInstructor.hidden = false;
+        pvInstructor.innerHTML =
+          '<span class="cc-avatar">' + (v.instructorPhotoUrl ? '<img src="' + escapeHtml(v.instructorPhotoUrl) + '" alt="" onerror="this.remove()">' : icon('graduationCap', 'icon-sm')) + '</span>' +
+          '<span>المعلم: <strong>' + escapeHtml(v.instructorName) + '</strong></span>';
+      } else {
+        pvInstructor.hidden = true;
+        pvInstructor.innerHTML = '';
+      }
+      lastName = v.instructorName; lastPhoto = v.instructorPhotoUrl;
+    }
+  }
+
+  const form = ContentForm.mount(document.getElementById('formRoot'), {
+    values: { type: 'course' },
+    onChange: renderPreview
+  });
+  renderPreview(form.get());
+
+  /* ---------- الحفظ ---------- */
+  document.getElementById('addForm').addEventListener('submit', function (e) {
     e.preventDefault();
     const msg = document.getElementById('formMsg');
-    const title = document.getElementById('compTitle').value.trim();
-    const description = document.getElementById('compDesc').value.trim();
-    const coverUrl = document.getElementById('compCover').value.trim();
-    const instructorName = document.getElementById('compInstructorName').value.trim();
-    const instructorPhotoUrl = document.getElementById('compInstructorPhoto').value.trim();
-    const type = document.querySelector('input[name="contentType"]:checked').value;
     const saveBtn = document.getElementById('saveBtn');
-    if (!title) return;
+    msg.classList.remove('show');
+    if (!form.validate() || !currentAdmin) return;
 
+    const v = form.get();
     saveBtn.disabled = true;
-    saveBtn.textContent = 'جارٍ الحفظ...';
+    saveBtn.classList.add('is-loading');
 
     db.ref('competitions').push({
-      title: title, description: description || '', coverUrl: coverUrl || null, type: type,
-      instructorName: instructorName || null, instructorPhotoUrl: instructorPhotoUrl || null,
+      title: v.title, description: v.description || '', coverUrl: v.coverUrl || null, type: v.type,
+      instructorName: v.instructorName || null, instructorPhotoUrl: v.instructorPhotoUrl || null,
       createdBy: currentAdmin.uid, createdAt: firebase.database.ServerValue.TIMESTAMP
     }).then(function (ref) {
       window.location.href = 'competition.html?id=' + encodeURIComponent(ref.key);
     }).catch(function (err) {
-      msg.textContent = 'تعذر الحفظ: ' + err.message;
-      msg.className = 'form-msg show error';
-      saveBtn.disabled = false; saveBtn.textContent = 'حفظ';
+      msg.textContent = 'تعذّر حفظ المحتوى: ' + explainDbError(err);
+      msg.classList.add('show');
+      saveBtn.disabled = false;
+      saveBtn.classList.remove('is-loading');
     });
   });
 </script>

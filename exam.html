@@ -6,51 +6,97 @@
 <title>أسئلة الاختبار — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
+<link rel="stylesheet" href="content-pages.css">
+<link rel="stylesheet" href="form-pages.css">
 <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
-<style>
-  .exam-summary-bar{
-    display:flex; gap:24px; flex-wrap:wrap; align-items:center;
-    background: var(--gold-pale); border: 1px solid var(--gold-light);
-    border-radius: var(--radius); padding: 14px 20px; margin: 18px 0 26px;
-  }
-  .exam-summary-item{ display:flex; align-items:center; gap:8px; font-size:0.875rem; color: var(--primary-dark); font-weight:700; }
-  .exam-summary-item .icon{ color: var(--gold); }
-  .exam-summary-item span.num{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-weight:700; font-size:1.125rem; }
-</style>
 </head>
 <body>
 
-<nav class="admin-nav" id="adminNav"></nav>
+<nav class="sb" id="adminNav"></nav>
 
-<main class="admin-page" style="max-width:760px;">
-  <a class="back-link" id="backLink" href="lesson.html">إلغاء والرجوع لبيانات المحاضرة</a>
-  <h1 class="page-title">أسئلة الاختبار</h1>
-  <p class="page-sub">أضف عنوان الاختبار ثم أسئلته؛ يظهر عدد الأسئلة ومجموع النقاط تلقائيًا أدناه</p>
+<main class="admin-page">
+  <div class="cc-wrap lf">
+    <a class="back-link" id="backLink" href="lesson.html">إلغاء والرجوع لبيانات المحاضرة</a>
 
-  <div class="form-msg" id="formMsg"></div>
+    <header class="lf-head">
+      <div>
+        <span class="lf-eyebrow" id="modeChip"></span>
+        <h1>أسئلة الاختبار</h1>
+        <p>اكتب عنوان الاختبار وإعداداته، ثم أضف أسئلته. تُحفظ تلقائيًا كمسودة، وتُحفظ نهائيًا مع المحاضرة.</p>
+      </div>
+      <span class="lf-draft" id="draftStat" hidden></span>
+    </header>
 
-  <div class="info-card">
-    <div class="field">
-      <label for="examTitle">عنوان الاختبار</label>
-      <input type="text" id="examTitle" placeholder="مثال: اختبار الدرس الأول" required>
-    </div>
-    <div class="field">
-      <label for="examRelease">معاد نزول الاختبار</label>
-      <input type="datetime-local" id="examRelease" required>
-      <div class="field-hint">لن يظهر هذا الاختبار للطلاب ولن يقدروا يفتحوه قبل هذا الموعد.</div>
+    <div class="lf-msg" id="formMsg" role="alert"></div>
+
+    <div class="lf-layout">
+      <div class="lf-main">
+
+        <section class="lf-sec" id="secSettings" aria-labelledby="hSettings">
+          <div class="lf-sec-head">
+            <span class="lf-oct" id="octSettings">1</span>
+            <div class="lf-sec-title"><h2 id="hSettings">إعدادات الاختبار</h2><p>العنوان والموعد والمدة وعدد الأسئلة لكل طالب.</p></div>
+          </div>
+          <div class="lf-sec-body">
+            <div class="field" id="titleField">
+              <label for="examTitle">عنوان الاختبار</label>
+              <input type="text" id="examTitle" placeholder="مثال: اختبار الدرس الأول" maxlength="150" autocomplete="off">
+            </div>
+            <div class="field" id="releaseField">
+              <label for="examRelease">معاد نزول الاختبار</label>
+              <input type="datetime-local" id="examRelease">
+              <div class="field-hint">لن يظهر للطلاب ولن يقدروا يفتحوه قبل هذا الموعد.</div>
+            </div>
+            <div class="lf-pair">
+              <div class="field">
+                <label for="examDuration">مدة الاختبار (بالدقائق)</label>
+                <input type="number" id="examDuration" min="1" max="600" value="10">
+              </div>
+              <div class="field">
+                <label for="examQuestionCount">عدد الأسئلة لكل طالب</label>
+                <input type="number" id="examQuestionCount" min="1" max="500" value="10">
+              </div>
+            </div>
+            <div class="lf-hint-live" id="poolHint" hidden></div>
+            <div class="field-hint" style="margin-top:10px;">يسحب النظام هذا العدد عشوائيًا من الأسئلة أدناه (بنك الأسئلة)، وبترتيب اختيارات مختلف لكل طالب.</div>
+          </div>
+        </section>
+
+        <section class="lf-sec" id="secQuestions" aria-labelledby="hQuestions">
+          <div class="lf-sec-head">
+            <span class="lf-oct" id="octQuestions">2</span>
+            <div class="lf-sec-title"><h2 id="hQuestions">بنك الأسئلة <span class="lf-count" id="cntQ" hidden></span></h2><p>لكل سؤال أربع إجابات؛ اضغط الدائرة بجانب الإجابة الصحيحة.</p></div>
+          </div>
+          <div class="lf-sec-body">
+            <div class="lf-list" id="questionsWrap"></div>
+            <div class="lf-empty" id="qEmpty">
+              <span class="lf-empty-ico" id="icoQEmpty"></span>
+              <div><b>لا توجد أسئلة بعد</b>أضف سؤالًا واحدًا على الأقل ليُحفظ الاختبار.</div>
+            </div>
+            <button type="button" class="btn btn-outline lf-addq" id="addQuestionBtn" style="margin-top:14px;">إضافة سؤال</button>
+          </div>
+        </section>
+
+      </div>
+
+      <aside class="lf-rail" aria-label="ملخص الاختبار">
+        <div class="lf-card">
+          <h2>ملخص الاختبار</h2>
+          <dl class="lf-tiles" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+            <div><dd id="qCountNum">0</dd><dt>سؤال</dt></div>
+            <div><dd id="pointsNum">0</dd><dt>إجمالي النقاط</dt></div>
+          </dl>
+          <ul class="lf-check" id="checkList"></ul>
+          <div class="lf-rail-actions">
+            <button type="button" class="btn btn-gold" id="saveExamBtn">حفظ والعودة لبيانات المحاضرة</button>
+            <a class="btn btn-outline" id="cancelBtn" href="lesson.html">رجوع</a>
+          </div>
+          <p class="lf-rail-note">الرجوع لا يحذف شيئًا: ما كتبته يبقى في المسودة.</p>
+        </div>
+      </aside>
     </div>
   </div>
-
-  <div class="exam-summary-bar">
-    <div class="exam-summary-item" id="qCountItem">عدد الأسئلة: <span class="num" id="qCountNum">0</span></div>
-    <div class="exam-summary-item" id="pointsItem">إجمالي النقاط: <span class="num" id="pointsNum">0</span></div>
-  </div>
-
-  <div id="questionsWrap"></div>
-
-  <button type="button" class="btn btn-outline btn-sm" id="addQuestionBtn" style="width:auto;">إضافة سؤال</button>
-
-  <button type="button" class="btn btn-primary" id="saveExamBtn" style="margin-top:22px;">حفظ والعودة لبيانات المحاضرة</button>
 </main>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -60,11 +106,13 @@
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
 <script>
-  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' إلغاء والرجوع لبيانات المحاضرة';
-  document.getElementById('addQuestionBtn').innerHTML = icon('plus') + ' إضافة سؤال';
-  document.getElementById('saveExamBtn').innerHTML = icon('floppyDisk') + ' حفظ والعودة لبيانات المحاضرة';
-  document.getElementById('qCountItem').innerHTML = icon('listCheck', 'icon-sm') + ' عدد الأسئلة: <span class="num" id="qCountNum">0</span>';
-  document.getElementById('pointsItem').innerHTML = icon('medal', 'icon-sm') + ' إجمالي النقاط: <span class="num" id="pointsNum">0</span>';
+  const $ = function (id) { return document.getElementById(id); };
+  $('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' إلغاء والرجوع لبيانات المحاضرة';
+  $('cancelBtn').innerHTML = icon('arrowRight', 'icon-sm') + ' رجوع';
+  $('addQuestionBtn').innerHTML = icon('plus', 'icon-sm') + ' إضافة سؤال';
+  $('saveExamBtn').innerHTML = icon('floppyDisk') + ' حفظ والعودة لبيانات المحاضرة';
+  $('modeChip').innerHTML = icon('listCheck', 'icon-sm') + ' اختبار';
+  $('icoQEmpty').innerHTML = icon('listCheck', 'icon-md');
 
   const params   = new URLSearchParams(window.location.search);
   const compId   = params.get('comp');
@@ -74,17 +122,15 @@
   if (!compId || !examLocalId) window.location.href = 'home.html';
 
   const draftKey = 'awab_lesson_draft::' + compId + '::' + lessonId;
-  const questionsWrap = document.getElementById('questionsWrap');
-  const examTitleInput = document.getElementById('examTitle');
-  const examReleaseInput = document.getElementById('examRelease');
+  const questionsWrap = $('questionsWrap');
+  const examTitleInput = $('examTitle');
+  const examReleaseInput = $('examRelease');
+  const examDurationInput = $('examDuration');
+  const examQuestionCountInput = $('examQuestionCount');
 
-  function toDatetimeLocalValue(ts) {
-    const d = new Date(ts);
-    const pad = function (n) { return String(n).padStart(2, '0'); };
-    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-  }
-
-  document.getElementById('backLink').href = 'lesson.html?comp=' + encodeURIComponent(compId) + (lessonId !== 'new' ? '&lesson=' + encodeURIComponent(lessonId) : '');
+  const backHref = 'lesson.html?comp=' + encodeURIComponent(compId) + (lessonId !== 'new' ? '&lesson=' + encodeURIComponent(lessonId) : '');
+  $('backLink').href = backHref;
+  $('cancelBtn').href = backHref;
 
   let draft = null;
   let examEntry = null;
@@ -94,8 +140,8 @@
     renderAdminNav('home');
 
     const raw = localStorage.getItem(draftKey);
-    if (!raw) { window.location.href = document.getElementById('backLink').href; return; }
-    try { draft = JSON.parse(raw); } catch (e) { window.location.href = document.getElementById('backLink').href; return; }
+    if (!raw) { window.location.href = backHref; return; }
+    try { draft = JSON.parse(raw); } catch (e) { window.location.href = backHref; return; }
 
     draft.exams = draft.exams || [];
     examEntry = draft.exams.find(function (e) { return e.localId === examLocalId; });
@@ -106,37 +152,57 @@
 
     examTitleInput.value = examEntry.title || '';
     examReleaseInput.value = examEntry.releaseAt || draft.releaseAt || '';
+    examDurationInput.value = examEntry.duration || 10;
+    examQuestionCountInput.value = examEntry.questionCount || 10;
     (examEntry.questions || []).forEach(function (q) { addQuestionBlock(q, q.key); });
     updateSummary();
   });
+
+  function syncCorrectStyle(qBlock) {
+    qBlock.querySelectorAll('.lf-optrow').forEach(function (row) {
+      row.classList.toggle('is-correct', row.querySelector('.qq-correct').checked);
+    });
+  }
 
   function addQuestionBlock(existingQ, existingQKey) {
     qCounter++;
     const qNum = qCounter;
     const uid = 'q' + qNum + '_' + Date.now();
     const qBlock = document.createElement('div');
-    qBlock.className = 'question-builder';
+    qBlock.className = 'lf-item lf-question';
     qBlock.dataset.key = existingQKey || '';
 
     const opts = (existingQ && existingQ.options) || ['', '', '', ''];
     const correct = existingQ && existingQ.correct != null ? existingQ.correct : 0;
-    const points = existingQ ? existingQ.points : 1;
-    const text = existingQ ? existingQ.text : '';
+    const points = existingQ && existingQ.points ? existingQ.points : 1;
 
     qBlock.innerHTML =
-      '<div class="q-header"><h4>سؤال #<span class="qi-index">' + qNum + '</span></h4>' +
-        '<button type="button" class="q-remove-btn qq-remove">' + icon('trash', 'icon-sm') + ' حذف السؤال</button></div>' +
-      '<div class="field"><label>نص السؤال</label><input type="text" class="qq-text" value="' + escapeHtml(text) + '" required></div>' +
-      [0, 1, 2, 3].map(function (i) {
-        return '<div class="option-row">' +
-          '<input type="radio" name="correct-' + uid + '" class="qq-correct" value="' + i + '" ' + (correct === i ? 'checked' : '') + '>' +
-          '<span class="option-label">' + (i + 1) + '</span>' +
-          '<input type="text" class="qq-option" placeholder="نص الإجابة ' + (i + 1) + '" value="' + escapeHtml(opts[i] || '') + '" required>' +
-        '</div>';
-      }).join('') +
-      '<div class="field" style="margin:10px 0 0;"><label>نقاط الإجابة الصحيحة</label><input type="number" class="qq-points" min="1" value="' + (points || 1) + '" required style="max-width:120px;"></div>';
+      '<div class="lf-item-head">' +
+        '<span class="lf-idx qi-index">' + (questionsWrap.children.length + 1) + '</span>' +
+        '<strong class="lf-item-title qq-head">سؤال بلا نص</strong>' +
+        '<button type="button" class="lf-x qq-remove" aria-label="حذف السؤال">' + icon('trash', 'icon-sm') + '<span>حذف</span></button>' +
+      '</div>' +
+      '<div class="lf-q-body">' +
+        '<div class="field"><label for="' + uid + 't">نص السؤال</label><textarea id="' + uid + 't" class="qq-text lf-q-text" rows="2" placeholder="اكتب السؤال هنا"></textarea></div>' +
+        '<div class="lf-opts-label">الإجابات <small>اضغط الدائرة لتحديد الصحيحة</small></div>' +
+        [0, 1, 2, 3].map(function (i) {
+          return '<div class="lf-optrow">' +
+            '<label class="lf-mark" title="الإجابة الصحيحة"><input type="radio" name="correct-' + uid + '" class="qq-correct" value="' + i + '" aria-label="الإجابة ' + (i + 1) + ' هي الصحيحة"><span><b>' + (i + 1) + '</b>' + icon('check') + '</span></label>' +
+            '<input type="text" class="qq-option" placeholder="نص الإجابة ' + (i + 1) + '" aria-label="نص الإجابة ' + (i + 1) + '" autocomplete="off">' +
+          '</div>';
+        }).join('') +
+        '<div class="lf-q-foot"><div class="field"><label for="' + uid + 'p">نقاط الإجابة الصحيحة</label><input type="number" id="' + uid + 'p" class="qq-points" min="1"></div></div>' +
+      '</div>';
+
+    // القيم تُكتب كخصائص DOM حتى لا تنكسر بعلامات التنصيص
+    qBlock.querySelector('.qq-text').value = existingQ && existingQ.text ? existingQ.text : '';
+    qBlock.querySelectorAll('.qq-option').forEach(function (inp, i) { inp.value = opts[i] || ''; });
+    qBlock.querySelectorAll('.qq-correct').forEach(function (r) { r.checked = parseInt(r.value, 10) === correct; });
+    qBlock.querySelector('.qq-points').value = points;
 
     questionsWrap.appendChild(qBlock);
+    syncCorrectStyle(qBlock);
+    updateQHead(qBlock);
 
     qBlock.querySelector('.qq-remove').addEventListener('click', function () {
       qBlock.remove();
@@ -144,17 +210,28 @@
       updateSummary();
       autosaveDraft();
     });
-    qBlock.querySelectorAll('.qq-points, .qq-correct').forEach(function (inp) {
-      inp.addEventListener('input', updateSummary);
-      inp.addEventListener('change', updateSummary);
-    });
+    qBlock.addEventListener('input', function () { updateQHead(qBlock); updateSummary(); });
+    qBlock.addEventListener('change', function () { syncCorrectStyle(qBlock); updateSummary(); });
+    return qBlock;
   }
-  document.getElementById('addQuestionBtn').addEventListener('click', function () { addQuestionBlock(); updateSummary(); autosaveDraft(); });
+
+  function updateQHead(qBlock) {
+    const t = qBlock.querySelector('.qq-text').value.trim();
+    qBlock.querySelector('.qq-head').textContent = t || 'سؤال بلا نص';
+  }
+
+  $('addQuestionBtn').addEventListener('click', function () {
+    const b = addQuestionBlock();
+    updateSummary();
+    autosaveDraft();
+    b.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    b.querySelector('.qq-text').focus({ preventScroll: true });
+  });
 
   /* ---------------- حفظ تلقائي فوري في localStorage أثناء الكتابة ----------------
-     كده لو حصل ريفريش للصفحة أو المستخدم قفل المتصفح/التطبيق قبل ما يضغط "حفظ"،
-     الأسئلة اللي كتبها لسه محفوظة ومش هتتشال. localStorage (مش sessionStorage)
-     عشان يفضل موجود حتى لو الموبايل قفل التبويب أو اتفصل ورجع تاني على نفس الجهاز. */
+     لو حصل ريفريش للصفحة أو المستخدم قفل المتصفح/التطبيق قبل ما يضغط "حفظ"،
+     الأسئلة اللي كتبها لسه محفوظة. localStorage (مش sessionStorage) عشان يفضل موجود
+     حتى لو الموبايل قفل التبويب أو اتفصل ورجع تاني على نفس الجهاز. */
   function collectExamStateLenient() {
     const qBlocks = Array.from(questionsWrap.children);
     const questions = qBlocks.map(function (qb) {
@@ -167,7 +244,7 @@
         points: parseInt(qb.querySelector('.qq-points').value, 10) || 1
       };
     });
-    return { title: examTitleInput.value, releaseAt: examReleaseInput.value, questions: questions };
+    return { title: examTitleInput.value, releaseAt: examReleaseInput.value, duration: parseInt(examDurationInput.value, 10) || 10, questionCount: parseInt(examQuestionCountInput.value, 10) || 10, questions: questions };
   }
 
   function autosaveDraft() {
@@ -175,10 +252,17 @@
     const state = collectExamStateLenient();
     examEntry.title = state.title;
     examEntry.releaseAt = state.releaseAt;
+    examEntry.duration = state.duration;
+    examEntry.questionCount = state.questionCount;
     examEntry.questions = state.questions;
     const idx = draft.exams.findIndex(function (e) { return e.localId === examLocalId; });
     if (idx >= 0) draft.exams[idx] = examEntry; else draft.exams.push(examEntry);
-    try { localStorage.setItem(draftKey, JSON.stringify(draft)); } catch (e) { /* تجاهل خطأ تخزين مؤقت */ }
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(draft));
+      const st = $('draftStat');
+      st.hidden = false; st.classList.add('is-saved');
+      st.textContent = 'حُفظت مسودة تلقائيًا · ' + new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { /* تجاهل خطأ تخزين مؤقت */ }
   }
 
   let autosaveTimer = null;
@@ -186,50 +270,93 @@
     clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(autosaveDraft, 300);
   }
-  document.addEventListener('input', scheduleAutosave);
-  document.addEventListener('change', scheduleAutosave);
+  document.addEventListener('input', function () { scheduleAutosave(); updateSummary(); });
+  document.addEventListener('change', function () { scheduleAutosave(); updateSummary(); });
   window.addEventListener('beforeunload', autosaveDraft);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') autosaveDraft(); });
 
   function updateSummary() {
     const blocks = Array.from(questionsWrap.children);
-    document.getElementById('qCountNum').textContent = blocks.length;
-    const total = blocks.reduce(function (sum, b) {
-      return sum + (parseInt(b.querySelector('.qq-points').value, 10) || 0);
-    }, 0);
-    document.getElementById('pointsNum').textContent = total;
+    const n = blocks.length;
+    const total = blocks.reduce(function (sum, b) { return sum + (parseInt(b.querySelector('.qq-points').value, 10) || 0); }, 0);
+    $('qCountNum').textContent = n;
+    $('pointsNum').textContent = total;
+    $('qEmpty').hidden = n > 0;
+    const c = $('cntQ'); c.hidden = n === 0; c.textContent = n;
+
+    const titleOk = !!examTitleInput.value.trim();
+    const releaseOk = !!examReleaseInput.value;
+    const incomplete = blocks.filter(function (qb) {
+      return !qb.querySelector('.qq-text').value.trim() ||
+        Array.from(qb.querySelectorAll('.qq-option')).some(function (i) { return !i.value.trim(); }) ||
+        !qb.querySelector('.qq-correct:checked');
+    }).length;
+    $('octSettings').classList.toggle('is-done', titleOk && releaseOk);
+    $('octQuestions').classList.toggle('is-done', n > 0 && incomplete === 0);
+
+    const items = [
+      { ok: titleOk, text: 'عنوان الاختبار' },
+      { ok: releaseOk, text: 'موعد النزول' },
+      { ok: n > 0, text: 'سؤال واحد على الأقل' }
+    ];
+    if (n > 0) items.push({ ok: incomplete === 0, bad: incomplete > 0, text: incomplete === 0 ? 'كل الأسئلة مكتملة' : (incomplete + ' سؤال ناقص (نص / إجابات / صحيحة)') });
+    $('checkList').innerHTML = items.map(function (it) {
+      return '<li class="' + (it.ok ? 'is-ok' : (it.bad ? 'is-bad' : '')) + '"><span class="lf-dot">' + icon('check') + '</span>' + escapeHtml(it.text) + '</li>';
+    }).join('');
+
+    const per = parseInt(examQuestionCountInput.value, 10) || 0;
+    const hint = $('poolHint');
+    if (n > 0 && per > n) {
+      hint.hidden = false; hint.className = 'lf-hint-live is-warn';
+      hint.textContent = 'عدد الأسئلة لكل طالب (' + per + ') أكبر من الأسئلة المضافة (' + n + ')، فسيظهر ' + n + ' فقط.';
+    } else if (n > 0 && per > 0) {
+      hint.hidden = false; hint.className = 'lf-hint-live';
+      hint.textContent = 'سيحصل كل طالب على ' + per + ' سؤال مختار عشوائيًا من ' + n + ' سؤال في البنك.';
+    } else { hint.hidden = true; }
   }
 
-  document.getElementById('saveExamBtn').addEventListener('click', function () {
-    const msg = document.getElementById('formMsg');
-    msg.classList.remove('show');
+  const formMsg = $('formMsg');
+  function fail(message, el) {
+    formMsg.textContent = message;
+    formMsg.classList.add('show');
+    const f = el && el.closest ? el.closest('.field') : null;
+    if (f) f.classList.add('has-error');
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); if (el.focus) el.focus({ preventScroll: true }); }
+    else formMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  $('saveExamBtn').addEventListener('click', function () {
+    formMsg.classList.remove('show');
+    document.querySelectorAll('.field.has-error').forEach(function (f) { f.classList.remove('has-error'); });
 
     const title = examTitleInput.value.trim();
-    if (!title) { msg.textContent = 'من فضلك اكتب عنوان الاختبار'; msg.className = 'form-msg show error'; return; }
+    if (!title) { fail('من فضلك اكتب عنوان الاختبار.', examTitleInput); return; }
 
     const releaseVal = examReleaseInput.value;
-    if (!releaseVal) { msg.textContent = 'من فضلك حدد معاد نزول الاختبار'; msg.className = 'form-msg show error'; return; }
+    if (!releaseVal) { fail('من فضلك حدد معاد نزول الاختبار.', examReleaseInput); return; }
 
     const qBlocks = Array.from(questionsWrap.children);
-    if (qBlocks.length === 0) { msg.textContent = 'أضف سؤالاً واحدًا على الأقل'; msg.className = 'form-msg show error'; return; }
+    if (qBlocks.length === 0) { fail('أضف سؤالًا واحدًا على الأقل.', $('addQuestionBtn')); return; }
 
     const questions = [];
     for (let i = 0; i < qBlocks.length; i++) {
       const qb = qBlocks[i];
       const text = qb.querySelector('.qq-text').value.trim();
-      const options = Array.from(qb.querySelectorAll('.qq-option')).map(function (inp) { return inp.value.trim(); });
+      const optInputs = Array.from(qb.querySelectorAll('.qq-option'));
+      const options = optInputs.map(function (inp) { return inp.value.trim(); });
       const correctRadio = qb.querySelector('.qq-correct:checked');
       const points = parseInt(qb.querySelector('.qq-points').value, 10) || 1;
-      if (!text || options.some(function (o) { return !o; }) || !correctRadio) {
-        msg.textContent = 'تأكد من إكمال كل حقول السؤال #' + (i + 1);
-        msg.className = 'form-msg show error';
-        return;
-      }
+      if (!text) { fail('اكتب نص السؤال #' + (i + 1) + '.', qb.querySelector('.qq-text')); return; }
+      const emptyIdx = options.findIndex(function (o) { return !o; });
+      if (emptyIdx >= 0) { fail('أكمل الإجابات الأربع في السؤال #' + (i + 1) + '.', optInputs[emptyIdx]); return; }
+      if (!correctRadio) { fail('حدد الإجابة الصحيحة في السؤال #' + (i + 1) + '.', qb.querySelector('.qq-correct')); return; }
       questions.push({ key: qb.dataset.key || '', text: text, options: options, correct: parseInt(correctRadio.value, 10), points: points });
     }
 
     examEntry.title = title;
     examEntry.releaseAt = releaseVal;
+    examEntry.duration = Math.max(1, parseInt(examDurationInput.value, 10) || 10);
+    examEntry.questionCount = Math.max(1, parseInt(examQuestionCountInput.value, 10) || 10);
     examEntry.questions = questions;
 
     const idx = draft.exams.findIndex(function (e) { return e.localId === examLocalId; });
@@ -238,12 +365,11 @@
     try {
       localStorage.setItem(draftKey, JSON.stringify(draft));
     } catch (e) {
-      msg.textContent = 'تعذر حفظ التغييرات مؤقتًا: ' + e.message;
-      msg.className = 'form-msg show error';
+      fail('تعذر حفظ التغييرات مؤقتًا: ' + e.message);
       return;
     }
 
-    window.location.href = document.getElementById('backLink').href;
+    window.location.href = backHref;
   });
 </script>
 </body>

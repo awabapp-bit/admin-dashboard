@@ -7,16 +7,17 @@
   <link rel="icon" href="logo.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
   <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
   <style>
     /* ===== متغيرات خاصة بالدعم الفني ===== */
     :root {
-      --sup-bg-gradient: linear-gradient(135deg, var(--bg) 0%, #eef1f6 50%, #e4e8f0 100%);
+      --sup-bg-gradient: linear-gradient(135deg, var(--bg) 0%, #EAF1F7 50%, #E3E9F0 100%);
       --sup-card-bg: rgba(255,255,255,0.7);
       --sup-card-border: var(--border);
       --sup-primary: var(--primary);
       --sup-primary-hover: var(--primary-dark);
-      --sup-primary-glow: rgba(15,42,74,0.15);
+      --sup-primary-glow: rgba(18,58,99,0.15);
       --sup-accent: var(--gold);
       --sup-text: var(--text);
       --sup-text-muted: var(--text-muted);
@@ -27,7 +28,7 @@
       --sup-input-bg: #ffffff;
       --sup-input-border: var(--border);
       --sup-dropdown-bg: rgba(255,255,255,0.97);
-      --sup-hover-bg: rgba(15,42,74,0.06);
+      --sup-hover-bg: rgba(18,58,99,0.06);
       --sup-chat-messages-bg: rgba(243,245,249,0.6);
       --sup-recording-bg: rgba(255,255,255,0.98);
       --sup-sidebar-bg: rgba(243,245,249,0.92);
@@ -39,32 +40,32 @@
       --sup-user-avatar-bg: rgba(0,0,0,0.04);
       --sup-user-avatar-border: rgba(0,0,0,0.06);
       --sup-scrollbar-thumb: rgba(0,0,0,0.08);
-      --sup-active-tint-bg: rgba(15,42,74,0.1);
-      --sup-active-tint-border: rgba(15,42,74,0.2);
-      --sup-delete-btn-bg: rgba(166,51,43,0.08);
-      --sup-delete-btn-hover: rgba(166,51,43,0.18);
+      --sup-active-tint-bg: rgba(18,58,99,0.1);
+      --sup-active-tint-border: rgba(18,58,99,0.2);
+      --sup-delete-btn-bg: rgba(214,69,91,0.08);
+      --sup-delete-btn-hover: rgba(214,69,91,0.18);
     }
     :root[data-theme="dark"] {
-      --sup-bg-gradient: linear-gradient(135deg, var(--bg) 0%, #0d1426 50%, #0a0f1f 100%);
-      --sup-card-bg: rgba(19,27,48,0.7);
-      --sup-primary-glow: rgba(199,158,68,0.2);
+      --sup-bg-gradient: linear-gradient(135deg, var(--bg) 0%, #0B1626 50%, #08111F 100%);
+      --sup-card-bg: rgba(17,35,58,0.7);
+      --sup-primary-glow: rgba(45,212,191,0.2);
       --sup-message-user: var(--border-soft);
-      --sup-input-bg: #0F1728;
-      --sup-dropdown-bg: rgba(19,27,48,0.97);
-      --sup-hover-bg: rgba(199,158,68,0.12);
-      --sup-chat-messages-bg: rgba(6,10,20,0.6);
-      --sup-recording-bg: rgba(19,27,48,0.98);
-      --sup-sidebar-bg: rgba(16,23,42,0.92);
-      --sup-offline-bg: rgba(6,10,20,0.92);
-      --sup-offline-card-bg: rgba(19,27,48,0.85);
+      --sup-input-bg: #0E1D30;
+      --sup-dropdown-bg: rgba(17,35,58,0.97);
+      --sup-hover-bg: rgba(45,212,191,0.12);
+      --sup-chat-messages-bg: rgba(6,14,26,0.6);
+      --sup-recording-bg: rgba(17,35,58,0.98);
+      --sup-sidebar-bg: rgba(15,31,52,0.92);
+      --sup-offline-bg: rgba(6,14,26,0.92);
+      --sup-offline-card-bg: rgba(17,35,58,0.85);
       --sup-chatpane-bg: rgba(255,255,255,0.03);
-      --sup-placeholder-bg: rgba(6,10,20,0.95);
-      --sup-bar-bg: rgba(19,27,48,0.45);
+      --sup-placeholder-bg: rgba(6,14,26,0.95);
+      --sup-bar-bg: rgba(17,35,58,0.45);
       --sup-user-avatar-bg: rgba(255,255,255,0.06);
       --sup-user-avatar-border: rgba(255,255,255,0.1);
       --sup-scrollbar-thumb: rgba(255,255,255,0.14);
-      --sup-active-tint-bg: rgba(199,158,68,0.14);
-      --sup-active-tint-border: rgba(199,158,68,0.28);
+      --sup-active-tint-bg: rgba(45,212,191,0.14);
+      --sup-active-tint-border: rgba(45,212,191,0.28);
       --sup-delete-btn-bg: rgba(240,100,90,0.15);
       --sup-delete-btn-hover: rgba(240,100,90,0.3);
     }
@@ -105,13 +106,13 @@
     }
     .offline-icon-wrapper {
       width:100px; height:100px; border-radius:50%;
-      background:rgba(166,51,43,0.1);
+      background:rgba(214,69,91,0.1);
       display:flex; justify-content:center; align-items:center;
       margin:0 auto 25px; position:relative;
     }
     .offline-icon-wrapper::after {
       content:''; position:absolute; width:100%; height:100%;
-      border-radius:50%; border:2px solid rgba(166,51,43,0.3);
+      border-radius:50%; border:2px solid rgba(214,69,91,0.3);
       animation: supPulseGlow 2s infinite;
     }
     @keyframes supPulseGlow { 0%{transform:scale(1);opacity:1} 100%{transform:scale(1.4);opacity:0} }
@@ -783,6 +784,318 @@
     @media (max-width: 860px) {
       .sidebar-overlay.active { display: block; }
     }
+
+    /* ============================================================
+       ✨ تحسينات الاحترافية — الدعم الفني
+       (بادئة #support-root لضمان الأولوية على تنسيقات style.css)
+       ============================================================ */
+    [hidden] { display: none !important; }
+
+    /* ----- القائمة الجانبية: بحث + فلاتر ----- */
+    #support-root .sidebar-tools {
+      padding: 12px 12px 10px;
+      display: flex; flex-direction: column; gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    #support-root .conv-search { position: relative; }
+    #support-root .conv-search i {
+      position: absolute; inset-inline-start: 13px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted); font-size: .8125rem; pointer-events: none;
+    }
+    #support-root .conv-search input {
+      width: 100%; height: 40px; border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--card-bg); color: var(--text);
+      padding-inline-start: 36px; padding-inline-end: 12px;
+      font: inherit; font-size: .875rem; outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    #support-root .conv-search input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .12);
+    }
+    #support-root .conv-filters { display: flex; gap: 6px; }
+    #support-root .conv-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 999px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-muted); font: inherit; font-size: .75rem; font-weight: 700;
+      cursor: pointer; transition: all .15s;
+    }
+    #support-root .conv-chip .cnt {
+      min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+      background: var(--border-soft); color: var(--text-muted);
+      font-size: .625rem; display: inline-flex; align-items: center; justify-content: center;
+    }
+    #support-root .conv-chip.active {
+      background: var(--primary); border-color: var(--primary); color: #fff;
+    }
+    #support-root .conv-chip.active .cnt { background: rgba(255,255,255,.22); color: #fff; }
+
+    /* ----- عنصر المحادثة ----- */
+    #support-root .conv-item {
+      padding: 10px 12px; border-radius: 14px;
+      border: 1px solid transparent;
+      transition: background .15s, border-color .15s;
+    }
+    #support-root .conv-item.active {
+      background: var(--primary-pale);
+      border-color: rgba(var(--primary-rgb), .25);
+      box-shadow: inset -3px 0 0 var(--primary);
+    }
+    #support-root .conv-item .user-avatar {
+      font-weight: 800; border-width: 1px; border-style: solid;
+    }
+    #support-root .conv-item.unread .conv-name { font-weight: 800; }
+    #support-root .conv-item.unread .conv-last-msg { color: var(--text); font-weight: 600; }
+    #support-root .conv-item.unread .conv-time { color: var(--primary); font-weight: 700; }
+    #support-root .unread-badge {
+      background: var(--primary); color: #fff;
+      min-width: 20px; height: 20px; border-radius: 999px;
+      font-size: .6875rem; padding: 0 6px;
+    }
+    @media (hover: hover) {
+      #support-root .conv-delete-btn { opacity: 0; }
+      #support-root .conv-item:hover .conv-delete-btn { opacity: 1; }
+    }
+
+    /* ----- رأس المحادثة ----- */
+    #support-root .chat-header { min-height: 60px; box-shadow: var(--shadow-xs); position: relative; z-index: 2; }
+    #support-root .header-avatar { position: relative; font-weight: 800; }
+    #support-root .header-avatar.online::after {
+      content: ""; position: absolute; bottom: -1px; inset-inline-end: -1px;
+      width: 11px; height: 11px; border-radius: 50%;
+      background: var(--success); border: 2px solid var(--card-bg);
+    }
+
+    /* ----- منطقة الرسائل ----- */
+    #support-root .chat-messages-wrap {
+      position: relative; flex: 1; min-height: 0;
+      display: flex; flex-direction: column;
+    }
+    #support-root .chat-messages {
+      flex: 1; min-height: 0; gap: 0;
+      padding: 14px 18px 12px;
+      background: var(--bg);
+      overscroll-behavior: contain;
+    }
+    #support-root .day-sep {
+      align-self: center; margin: 14px 0 6px; padding: 4px 14px;
+      font-size: .6875rem; font-weight: 700; color: var(--text-muted);
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 999px; box-shadow: var(--shadow-xs);
+    }
+    #support-root .chat-empty {
+      margin: auto; text-align: center; color: var(--text-muted);
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 30px 20px;
+    }
+    #support-root .chat-empty i { font-size: 2.25rem; opacity: .35; }
+    #support-root .chat-empty p { font-size: .8125rem; margin: 0; }
+
+    #support-root .msg-group {
+      position: relative; max-width: min(78%, 520px); margin-top: 10px;
+    }
+    #support-root .msg-group.joined-prev { margin-top: 2px; }
+    #support-root .msg-group .message {
+      padding: 8px 12px 5px; border-radius: 16px;
+      font-size: .875rem; line-height: 1.7;
+      transition: transform .15s var(--ease), box-shadow .15s var(--ease);
+    }
+    #support-root .msg-group.admin .message {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff; box-shadow: 0 2px 8px rgba(var(--primary-rgb), .18);
+    }
+    #support-root .msg-group.user .message {
+      background: var(--card-bg); color: var(--text);
+      border: 1px solid var(--border); box-shadow: var(--shadow-xs);
+    }
+    #support-root .msg-group.admin.run-end .message { border-bottom-right-radius: 4px; }
+    #support-root .msg-group.user.run-end  .message { border-bottom-left-radius: 4px; }
+    #support-root .msg-group.pressing .message { transform: scale(.965); }
+    #support-root .msg-text { white-space: pre-wrap; word-break: break-word; }
+    #support-root .msg-meta {
+      display: flex; align-items: center; justify-content: flex-end; gap: 6px;
+      margin-top: 3px; font-size: .625rem; line-height: 1;
+      color: var(--text-muted);
+    }
+    #support-root .msg-group.admin .msg-meta { color: rgba(255,255,255,.72); }
+    #support-root .msg-meta .msg-edited { font-style: italic; }
+    #support-root .msg-img { max-height: 240px; border-radius: 12px; }
+
+    /* زر ⋮ يظهر على الماوس فقط (للدسكتوب) */
+    #support-root .msg-more {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--card-bg); color: var(--text-muted);
+      display: none; align-items: center; justify-content: center;
+      font-size: .75rem; cursor: pointer; box-shadow: var(--shadow-xs); padding: 0;
+    }
+    #support-root .msg-group.admin .msg-more { right: 100%; margin-right: 6px; }
+    #support-root .msg-group.user  .msg-more { left: 100%;  margin-left: 6px; }
+    #support-root .msg-more:hover { color: var(--primary); border-color: var(--primary); }
+    @media (hover: hover) {
+      #support-root .msg-group:hover .msg-more { display: flex; }
+    }
+    @media (pointer: coarse) {
+      #support-root .msg-group .message {
+        -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+      }
+    }
+
+    /* زر النزول لآخر رسالة */
+    #support-root .scroll-bottom-btn {
+      position: absolute; left: 16px; bottom: 14px; z-index: 3;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--card-bg); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow); cursor: pointer;
+      opacity: 0; transform: translateY(8px); pointer-events: none;
+      transition: opacity .2s, transform .2s;
+    }
+    #support-root .scroll-bottom-btn.show { opacity: 1; transform: none; pointer-events: auto; }
+
+    /* ----- شريط التعديل ----- */
+    #support-root .edit-banner {
+      display: none; align-items: center; gap: 10px;
+      padding: 8px 14px; background: var(--primary-pale);
+      border-top: 1px solid var(--border);
+    }
+    #support-root .edit-banner.active { display: flex; animation: supSlideUp .18s var(--ease); }
+    @keyframes supSlideUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    #support-root .edit-banner .eb-icon { color: var(--primary); font-size: .9375rem; }
+    #support-root .edit-banner .eb-body {
+      flex: 1; min-width: 0; padding-inline-start: 10px;
+      border-inline-start: 3px solid var(--primary);
+    }
+    #support-root .eb-title { font-size: .6875rem; font-weight: 800; color: var(--primary); }
+    #support-root .eb-text {
+      font-size: .8125rem; color: var(--text-muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #support-root .eb-close {
+      width: 32px; height: 32px; border-radius: 50%; border: none;
+      background: rgba(var(--primary-rgb), .1); color: var(--primary);
+      cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    /* ----- شريط الإدخال ----- */
+    #support-root .chat-input-bar { padding: 10px 14px; background: var(--card-bg); }
+    #support-root .chat-input-wrapper {
+      border-radius: 22px; background: var(--bg); padding: 2px 14px;
+    }
+    #support-root .chat-input-wrapper textarea {
+      height: 38px; min-height: 38px; max-height: 120px;
+      padding: 8px 0; line-height: 22px; font-size: .875rem; overflow-y: auto;
+    }
+    #support-root .send-msg-btn { width: 42px; height: 42px; border-radius: 50%; }
+    #support-root .chat-input-bar.editing .input-attachment-btn { display: none; }
+    #support-root .chat-input-bar.editing .send-msg-btn {
+      background: var(--success); box-shadow: 0 4px 14px rgba(var(--success-rgb), .35);
+    }
+
+    /* ----- قائمة خيارات الرسالة (Bottom sheet) ----- */
+    #support-root .msg-sheet-backdrop {
+      position: fixed; inset: 0; z-index: 3000;
+      background: rgba(10, 20, 35, .5); backdrop-filter: blur(2px);
+      display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; visibility: hidden; touch-action: none;
+      transition: opacity .2s var(--ease), visibility 0s linear .2s;
+    }
+    #support-root .msg-sheet-backdrop.open {
+      opacity: 1; visibility: visible; transition-delay: 0s;
+    }
+    #support-root .msg-sheet {
+      width: 100%; max-width: 440px;
+      background: var(--card-bg); color: var(--text);
+      border-radius: 22px 22px 0 0;
+      padding: 8px 14px calc(14px + env(safe-area-inset-bottom));
+      box-shadow: var(--shadow-lift);
+      transform: translateY(100%); transition: transform .26s var(--ease);
+    }
+    #support-root .msg-sheet-backdrop.open .msg-sheet { transform: translateY(0); }
+    #support-root .msg-sheet-grab {
+      width: 38px; height: 4px; border-radius: 4px;
+      background: var(--border); margin: 4px auto 12px;
+    }
+    #support-root .msg-sheet-preview {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 14px; padding: 10px 12px; margin-bottom: 10px;
+    }
+    #support-root .msp-who { font-size: .6875rem; font-weight: 800; color: var(--primary); margin-bottom: 2px; }
+    #support-root .msp-text {
+      font-size: .8125rem; color: var(--text-muted); line-height: 1.6;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      word-break: break-word;
+    }
+    #support-root .msg-sheet-actions {
+      display: flex; flex-direction: column;
+      border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+    }
+    #support-root .msg-act {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%; padding: 14px 16px; background: transparent; border: none;
+      color: var(--text); font: inherit; font-size: .9375rem; font-weight: 700;
+      cursor: pointer; text-align: start; transition: background .15s;
+    }
+    #support-root .msg-act + .msg-act { border-top: 1px solid var(--border); }
+    #support-root .msg-act:hover, #support-root .msg-act:active { background: var(--border-soft); }
+    #support-root .msg-act .ai {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(var(--primary-rgb), .1); color: var(--primary);
+      display: flex; align-items: center; justify-content: center; font-size: .875rem;
+    }
+    #support-root .msg-act.danger { color: var(--danger); }
+    #support-root .msg-act.danger .ai { background: rgba(var(--danger-rgb), .1); color: var(--danger); }
+    #support-root .msg-sheet-cancel {
+      width: 100%; margin-top: 10px; padding: 13px;
+      border-radius: 16px; border: none; background: var(--border-soft);
+      color: var(--text); font: inherit; font-size: .9375rem; font-weight: 700; cursor: pointer;
+    }
+    #support-root .msg-sheet-confirm { text-align: center; padding: 6px 4px 2px; }
+    #support-root .msg-sheet-confirm .cf-icon {
+      width: 52px; height: 52px; margin: 2px auto 10px; border-radius: 50%;
+      background: rgba(var(--danger-rgb), .1); color: var(--danger);
+      display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+    }
+    #support-root .msg-sheet-confirm h3 { margin: 0 0 4px; font-size: 1rem; font-weight: 800; }
+    #support-root .msg-sheet-confirm p { margin: 0 0 14px; font-size: .8125rem; color: var(--text-muted); }
+    #support-root .cf-row { display: flex; gap: 10px; }
+    #support-root .cf-row button {
+      flex: 1; padding: 13px; border-radius: 14px; border: none;
+      font: inherit; font-size: .9375rem; font-weight: 800; cursor: pointer;
+    }
+    #support-root .cf-cancel { background: var(--border-soft); color: var(--text); }
+    #support-root .cf-delete { background: var(--danger); color: #fff; }
+
+    @media (min-width: 861px) {
+      #support-root .msg-sheet-backdrop { align-items: center; }
+      #support-root .msg-sheet {
+        border-radius: 20px; padding-bottom: 14px; width: 380px;
+        transform: translateY(14px) scale(.97); opacity: 0;
+        transition: transform .22s var(--ease), opacity .2s;
+      }
+      #support-root .msg-sheet-backdrop.open .msg-sheet { transform: none; opacity: 1; }
+      #support-root .msg-sheet-grab { display: none; }
+    }
+
+    /* ----- الموبايل: إحساس تطبيق ----- */
+    @media (max-width: 860px) {
+      #support-root .conv-list { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
+      #support-root .chat-messages { padding: 12px 12px 10px; }
+      #support-root .msg-group { max-width: 86%; }
+      #support-root .chat-input-bar { padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); }
+      #support-root .chat-input-wrapper textarea { font-size: 16px; }
+      #support-root .conv-search input { font-size: 16px; }
+      body.support-chat-open #adminBottomNav { display: none !important; }
+    }
+    @media (max-width: 420px) {
+      #support-root .msg-group { max-width: 90%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #support-root .msg-sheet, #support-root .msg-sheet-backdrop, #support-root .message { transition: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -793,7 +1106,7 @@
   <div class="offline-screen" id="offline-screen">
     <div class="offline-content">
       <div class="offline-icon-wrapper">
-        <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#B3432B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#D6455B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
           <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.56 9"></path>
           <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
@@ -810,7 +1123,7 @@
 
   <!-- DASHBOARD -->
   <div class="support-shell" id="support-shell" style="display:none;">
-    <nav class="admin-nav" id="adminNav"></nav>
+    <nav class="sb" id="adminNav"></nav>
 
     <div class="dashboard-container" id="admin-dashboard-div">
 
@@ -830,6 +1143,16 @@
           <button class="sidebar-close-mobile" id="sidebar-close-mobile" aria-label="إغلاق القائمة">
             <i class="fa-solid fa-xmark"></i>
           </button>
+        </div>
+        <div class="sidebar-tools">
+          <div class="conv-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" id="conv-search-input" placeholder="ابحث باسم المستخدم أو آخر رسالة" autocomplete="off">
+          </div>
+          <div class="conv-filters" id="conv-filters">
+            <button type="button" class="conv-chip active" data-filter="all">الكل <span class="cnt" id="cnt-all">0</span></button>
+            <button type="button" class="conv-chip" data-filter="unread">غير مقروءة <span class="cnt" id="cnt-unread">0</span></button>
+          </div>
         </div>
         <div class="conv-list" id="conversations-list-container"></div>
       </div>
@@ -861,9 +1184,25 @@
           </button>
         </div>
 
-        <div class="chat-messages" id="chat-messages-container"></div>
+        <div class="chat-messages-wrap">
+          <div class="chat-messages" id="chat-messages-container"></div>
+          <button type="button" class="scroll-bottom-btn" id="scroll-bottom-btn" aria-label="الانتقال لآخر رسالة">
+            <i class="fa-solid fa-arrow-down"></i>
+          </button>
+        </div>
 
-        <div class="chat-input-bar">
+        <div class="edit-banner" id="edit-banner">
+          <i class="fa-solid fa-pen eb-icon"></i>
+          <div class="eb-body">
+            <div class="eb-title">تعديل الرسالة</div>
+            <div class="eb-text" id="edit-banner-text"></div>
+          </div>
+          <button type="button" class="eb-close" id="edit-banner-close" aria-label="إلغاء التعديل">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="chat-input-bar" id="chat-input-bar">
           <div class="recording-overlay" id="voice-rec-overlay">
             <div class="rec-status">
               <div class="rec-dot"></div>
@@ -897,6 +1236,37 @@
           <button class="send-msg-btn" id="voice-record-trigger">
             <i class="fa-solid fa-microphone" id="mic-icon"></i>
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- قائمة خيارات الرسالة (ضغطة مطوّلة) -->
+  <div class="msg-sheet-backdrop" id="msg-sheet-backdrop" aria-hidden="true">
+    <div class="msg-sheet" role="dialog" aria-modal="true" aria-label="خيارات الرسالة">
+      <div class="msg-sheet-grab"></div>
+      <div id="msg-sheet-main">
+        <div class="msg-sheet-preview">
+          <div class="msp-who" id="msp-who"></div>
+          <div class="msp-text" id="msp-text"></div>
+        </div>
+        <div class="msg-sheet-actions">
+          <button type="button" class="msg-act" id="act-edit">
+            <span class="ai"><i class="fa-solid fa-pen"></i></span><span>تعديل الرسالة</span>
+          </button>
+          <button type="button" class="msg-act danger" id="act-delete">
+            <span class="ai"><i class="fa-solid fa-trash-can"></i></span><span>حذف الرسالة</span>
+          </button>
+        </div>
+        <button type="button" class="msg-sheet-cancel" id="act-cancel">إلغاء</button>
+      </div>
+      <div class="msg-sheet-confirm" id="msg-sheet-confirm" hidden>
+        <div class="cf-icon"><i class="fa-solid fa-trash-can"></i></div>
+        <h3>حذف هذه الرسالة؟</h3>
+        <p>سيتم حذفها نهائيًا من المحادثة ولا يمكن التراجع.</p>
+        <div class="cf-row">
+          <button type="button" class="cf-cancel" id="cf-cancel">إلغاء</button>
+          <button type="button" class="cf-delete" id="cf-delete">حذف</button>
         </div>
       </div>
     </div>
@@ -973,6 +1343,16 @@
     const lightboxImgEl             = $('lightbox-img-el');
     const deleteChatBtn             = $('delete-chat-btn');
     const backToListBtn             = $('back-to-list-btn');
+    const convSearchInput           = $('conv-search-input');
+    const convFilters               = $('conv-filters');
+    const scrollBtn                 = $('scroll-bottom-btn');
+    const editBanner                = $('edit-banner');
+    const editBannerText            = $('edit-banner-text');
+    const inputBar                  = $('chat-input-bar');
+    const sheetBackdrop             = $('msg-sheet-backdrop');
+    const sheetMain                 = $('msg-sheet-main');
+    const sheetConfirm              = $('msg-sheet-confirm');
+    const actEdit                   = $('act-edit');
 
     // ============================================================
     // State
@@ -989,6 +1369,15 @@
     let usersStatusUnsub = null;
     let chatMsgsUnsub    = null;
     let conversationsListener = null;
+    let allConvs     = [];
+    let convFilter   = 'all';
+    let convQuery    = '';
+    let editingMsg   = null;   // الرسالة اللي بتتعدّل حاليًا
+    let menuMsg      = null;   // الرسالة المفتوح لها قائمة الخيارات
+    let lastMsgKey   = null;
+    let firstMsgLoad = true;
+    let stickUntil   = 0;      // يثبّت التمرير لأسفل لحد ما الصور تخلّص تحميل
+    const SNIPPETS = { image:'📷 صورة', voice:'🎤 رسالة صوتية', audio:'🎵 ملف صوتي', file:'📁 ملف مرفق' };
 
     // ============================================================
     // Offline
@@ -1056,38 +1445,46 @@
     // ============================================================
     // Conversations List
     // ============================================================
+    function fmtConvTime(ts) {
+      if (!ts) return '';
+      const d = new Date(ts), now = new Date();
+      const sod = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+      const diff = Math.round((sod(now) - sod(d)) / 86400000);
+      if (diff === 0) return d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+      if (diff === 1) return 'أمس';
+      return d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' });
+    }
+
+    // لون ثابت لكل مستخدم حسب اسمه
+    function avatarStyle(name) {
+      let h = 0;
+      for (const ch of String(name || '')) h = (h * 31 + ch.charCodeAt(0)) % 360;
+      return `background:hsl(${h} 65% 52% / .16);color:hsl(${h} 62% 48%);border-color:hsl(${h} 65% 52% / .3)`;
+    }
+
     function listenConversations() {
       if (conversationsListener) {
         db.ref('conversations').off('value', conversationsListener);
       }
       conversationsListener = snap => {
-        conversationsListContainer.innerHTML = '';
-        if (!snap.exists()) {
-          conversationsListContainer.innerHTML = `
-            <div class="no-conv-msg">
-              <i class="fa-solid fa-inbox" style="font-size:1.875rem;margin-bottom:10px;display:block;opacity:0.5"></i>
-              لا توجد رسائل واردة حالياً.
-            </div>`;
-          return;
-        }
-
         const list = [];
-        snap.forEach(child => {
-          const data = child.val() || {};
-          const userId = child.key;
-          list.push({
-            userId: userId,
-            userName: data.userName || data.name || 'مستخدم',
-            lastMessage: data.lastMessage || '...',
-            lastMessageTimestamp: data.lastMessageTimestamp || 0,
-            unreadCountByAdmin: data.unreadCountByAdmin || 0,
-            unreadCountByUser: data.unreadCountByUser || 0,
-            ...data
+        if (snap.exists()) {
+          snap.forEach(child => {
+            const data = child.val() || {};
+            list.push({
+              userId: child.key,
+              userName: data.userName || data.name || 'مستخدم',
+              lastMessage: data.lastMessage || '...',
+              lastMessageTimestamp: data.lastMessageTimestamp || 0,
+              unreadCountByAdmin: data.unreadCountByAdmin || 0,
+              unreadCountByUser: data.unreadCountByUser || 0,
+              ...data
+            });
           });
-        });
-
+        }
         list.sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
-        list.forEach(conv => renderConvItem(conv));
+        allConvs = list;
+        renderConversations();
       };
       db.ref('conversations').on('value', conversationsListener, err => {
         conversationsListContainer.innerHTML = `
@@ -1098,28 +1495,65 @@
       });
     }
 
+    function renderConversations() {
+      const box = conversationsListContainer;
+      const prevScroll = box.scrollTop;
+      box.innerHTML = '';
+
+      const unreadCount = allConvs.filter(c => c.unreadCountByAdmin > 0).length;
+      $('cnt-all').textContent = allConvs.length;
+      $('cnt-unread').textContent = unreadCount;
+
+      const q = convQuery.trim().toLowerCase();
+      const list = allConvs.filter(c =>
+        (convFilter !== 'unread' || c.unreadCountByAdmin > 0) &&
+        (!q || String(c.userName).toLowerCase().includes(q) || String(c.lastMessage).toLowerCase().includes(q))
+      );
+
+      if (!list.length) {
+        let icon = 'fa-inbox', text = 'لا توجد رسائل واردة حالياً.';
+        if (q) { icon = 'fa-magnifying-glass'; text = 'لا توجد نتائج مطابقة لبحثك.'; }
+        else if (convFilter === 'unread' && allConvs.length) { icon = 'fa-circle-check'; text = 'لا توجد محادثات غير مقروءة.'; }
+        box.innerHTML = `
+          <div class="no-conv-msg">
+            <i class="fa-solid ${icon}" style="font-size:1.875rem;margin-bottom:10px;display:block;opacity:0.5"></i>
+            ${text}
+          </div>`;
+        return;
+      }
+      list.forEach(conv => renderConvItem(conv));
+      box.scrollTop = prevScroll;
+    }
+
+    convSearchInput.addEventListener('input', () => { convQuery = convSearchInput.value; renderConversations(); });
+    convFilters.addEventListener('click', e => {
+      const chip = e.target.closest('.conv-chip');
+      if (!chip) return;
+      convFilter = chip.dataset.filter;
+      convFilters.querySelectorAll('.conv-chip').forEach(c => c.classList.toggle('active', c === chip));
+      renderConversations();
+    });
+
     function renderConvItem(conv) {
       const item = document.createElement('div');
-      item.className = `conv-item ${selectedUserId === conv.userId ? 'active' : ''}`;
+      const unread = conv.unreadCountByAdmin > 0;
+      item.className = `conv-item${selectedUserId === conv.userId ? ' active' : ''}${unread ? ' unread' : ''}`;
       const initial = (conv.userName || 'U').trim()[0] || 'U';
-      const badge = conv.unreadCountByAdmin > 0 ? `<span class="unread-badge">${conv.unreadCountByAdmin}</span>` : '';
-      const time = conv.lastMessageTimestamp
-        ? new Date(conv.lastMessageTimestamp).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
-        : '';
+      const badge = unread ? `<span class="unread-badge">${conv.unreadCountByAdmin > 99 ? '99+' : conv.unreadCountByAdmin}</span>` : '';
 
       item.innerHTML = `
-        <div class="user-avatar">${initial}</div>
+        <div class="user-avatar" style="${avatarStyle(conv.userName)}">${escapeHtml(initial)}</div>
         <div class="conv-details">
           <div class="conv-row">
             <span class="conv-name">${escapeHtml(conv.userName)}</span>
-            <span class="conv-time">${time}</span>
+            <span class="conv-time">${fmtConvTime(conv.lastMessageTimestamp)}</span>
           </div>
           <div class="conv-row">
             <span class="conv-last-msg">${escapeHtml(conv.lastMessage || '...')}</span>
             ${badge}
           </div>
         </div>
-        <button class="conv-delete-btn" data-userid="${conv.userId}" title="مسح المحادثة" aria-label="مسح المحادثة">
+        <button class="conv-delete-btn" data-userid="${escapeHtml(conv.userId)}" title="مسح المحادثة" aria-label="مسح المحادثة">
           <i class="fa-solid fa-trash-can"></i>
         </button>
       `;
@@ -1137,8 +1571,7 @@
       const deleteBtn = item.querySelector('.conv-delete-btn');
       deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const userId = deleteBtn.dataset.userid;
-        deleteConversation(userId);
+        deleteConversation(deleteBtn.dataset.userid);
       });
 
       conversationsListContainer.appendChild(item);
@@ -1173,6 +1606,11 @@
       if (usersStatusUnsub) usersStatusUnsub();
       selectedUserId = null;
       selectedUserName = '';
+      cancelEdit();
+      closeMsgMenu();
+      lastMsgKey = null;
+      document.body.classList.remove('support-chat-open');
+      chatHeaderAvatar.classList.remove('online');
       chatPlaceholderEl.style.display = 'flex';
       chatMessagesContainer.innerHTML = '';
       chatHeaderName.textContent = 'اسم المستخدم';
@@ -1195,9 +1633,12 @@
       if (chatMsgsUnsub) chatMsgsUnsub();
       if (usersStatusUnsub) usersStatusUnsub();
 
+      cancelEdit();
+      closeMsgMenu();
       selectedUserId   = userId;
       selectedUserName = userName;
       chatPlaceholderEl.style.display = 'none';
+      document.body.classList.add('support-chat-open');
 
       chatHeaderName.textContent   = userName;
       chatHeaderAvatar.textContent = userName.trim()[0] || 'U';
@@ -1211,6 +1652,7 @@
             const s = snap.val().status === 'online';
             chatHeaderStatus.textContent = s ? 'نشط الآن' : 'غير متصل';
             chatHeaderStatus.classList.toggle('online', s);
+            chatHeaderAvatar.classList.toggle('online', s);
           }
         };
         userStatusRef.on('value', userStatusCb);
@@ -1224,33 +1666,112 @@
     // ============================================================
     // Messages
     // ============================================================
+    function dayKey(ts) {
+      const d = new Date(ts);
+      return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+    }
+    function dayLabel(ts) {
+      const d = new Date(ts), now = new Date();
+      const sod = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+      const diff = Math.round((sod(now) - sod(d)) / 86400000);
+      if (diff === 0) return 'اليوم';
+      if (diff === 1) return 'أمس';
+      const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+      if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
+      return d.toLocaleDateString('ar-EG', opts);
+    }
+    function sameRun(a, b) {
+      return !!(a && b && a.sender === b.sender &&
+        dayKey(a.timestamp) === dayKey(b.timestamp) &&
+        Math.abs((b.timestamp || 0) - (a.timestamp || 0)) < 5 * 60 * 1000);
+    }
+
+    function isNearBottom() {
+      const el = chatMessagesContainer;
+      return el.scrollHeight - el.scrollTop - el.clientHeight < 140;
+    }
+    function updateScrollBtn() {
+      const el = chatMessagesContainer;
+      scrollBtn.classList.toggle('show', el.scrollHeight - el.scrollTop - el.clientHeight > 320);
+    }
+    chatMessagesContainer.addEventListener('scroll', updateScrollBtn, { passive: true });
+    scrollBtn.addEventListener('click', () => {
+      chatMessagesContainer.scrollTo({ top: chatMessagesContainer.scrollHeight, behavior: 'smooth' });
+    });
+
     function listenMessages(userId) {
       if (chatMsgsUnsub) chatMsgsUnsub();
+      firstMsgLoad = true;
+      lastMsgKey = null;
       const msgsRef = db.ref(`messages/${userId}`);
       const msgsCb = snap => {
-        chatMessagesContainer.innerHTML = '';
-        if (snap.exists()) {
-          snap.forEach(c => renderMsg(c.val()));
-          chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        const el = chatMessagesContainer;
+        const stick = firstMsgLoad || isNearBottom();
+        const prevTop = el.scrollTop;
+        el.innerHTML = '';
+
+        const arr = [];
+        snap.forEach(c => {
+          const v = c.val();
+          if (v) { v.id = v.id || c.key; v._key = c.key; arr.push(v); }
+        });
+
+        if (!arr.length) {
+          lastMsgKey = null;
+          el.innerHTML = '<div class="chat-empty"><i class="fa-regular fa-comment-dots"></i><p>لا توجد رسائل في هذه المحادثة بعد</p></div>';
+          firstMsgLoad = false;
+          updateScrollBtn();
+          return;
         }
+
+        arr.forEach((m, i) => renderMsg(m, arr[i - 1], arr[i + 1]));
+
+        const newLast = arr[arr.length - 1];
+        const ownNew = !firstMsgLoad && newLast._key !== lastMsgKey && newLast.sender === 'admin';
+        if (stick || ownNew) {
+          el.scrollTop = el.scrollHeight;
+          stickUntil = Date.now() + 1500;
+        } else {
+          el.scrollTop = prevTop;
+        }
+        lastMsgKey = newLast._key;
+        firstMsgLoad = false;
+        updateScrollBtn();
       };
       msgsRef.on('value', msgsCb);
       chatMsgsUnsub = () => msgsRef.off('value', msgsCb);
     }
 
-    function renderMsg(msg) {
+    function renderMsg(msg, prev, next) {
       const isUser = msg.sender === 'user';
-      const group  = document.createElement('div');
-      group.className = `msg-group ${isUser ? 'user' : 'admin'}`;
+
+      if (!prev || dayKey(prev.timestamp) !== dayKey(msg.timestamp)) {
+        const sep = document.createElement('div');
+        sep.className = 'day-sep';
+        sep.textContent = msg.timestamp ? dayLabel(msg.timestamp) : '';
+        if (msg.timestamp) chatMessagesContainer.appendChild(sep);
+      }
+
+      const group = document.createElement('div');
+      group.className = 'msg-group ' + (isUser ? 'user' : 'admin') +
+        (sameRun(prev, msg) ? ' joined-prev' : '') + (sameRun(msg, next) ? '' : ' run-end');
+      group.dataset.key = msg._key || '';
+
       const msgDiv = document.createElement('div');
       msgDiv.className = 'message';
 
       if (msg.type === 'text') {
-        msgDiv.innerText = msg.text;
+        const t = document.createElement('div');
+        t.className = 'msg-text';
+        t.textContent = msg.text || '';
+        msgDiv.appendChild(t);
       } else if (msg.type === 'image') {
         const img = document.createElement('img');
         img.src = msg.fileUrl; img.className = 'msg-img'; img.loading = 'lazy'; img.alt = 'صورة';
         img.addEventListener('click', () => openLightbox(msg.fileUrl));
+        img.addEventListener('load', () => {
+          if (Date.now() < stickUntil) chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        });
         msgDiv.appendChild(img);
       } else if (msg.type === 'voice' || msg.type === 'audio') {
         msgDiv.appendChild(buildPlayer(msg.fileUrl, msg.id));
@@ -1259,17 +1780,211 @@
         a.href = msg.fileUrl; a.download = msg.fileName||'file'; a.target = '_blank';
         a.className = 'msg-file-download';
         a.innerHTML = `<i class="fa-solid fa-file-arrow-down"></i>
-          <div><div class="file-name-txt">${msg.fileName||'ملف مرفق'}</div>
+          <div><div class="file-name-txt">${escapeHtml(msg.fileName || 'ملف مرفق')}</div>
           <span style="font-size:0.625rem;opacity:0.6">اضغط للتحميل</span></div>`;
         msgDiv.appendChild(a);
       }
 
-      const time = document.createElement('span');
-      time.className = 'msg-time';
-      time.textContent = new Date(msg.timestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+      const meta = document.createElement('div');
+      meta.className = 'msg-meta';
+      if (msg.edited) {
+        const ed = document.createElement('span');
+        ed.className = 'msg-edited';
+        ed.textContent = 'معدّلة';
+        meta.appendChild(ed);
+      }
+      if (msg.timestamp) {
+        const time = document.createElement('span');
+        time.textContent = new Date(msg.timestamp).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+        meta.appendChild(time);
+      }
+      msgDiv.appendChild(meta);
       group.appendChild(msgDiv);
-      group.appendChild(time);
+
+      // زر ⋮ (يظهر عند تمرير الماوس على الدسكتوب)
+      const more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'msg-more';
+      more.setAttribute('aria-label', 'خيارات الرسالة');
+      more.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>';
+      more.addEventListener('click', e => { e.stopPropagation(); openMsgMenu(msg); });
+      group.appendChild(more);
+
+      bindLongPress(group, msg);
       chatMessagesContainer.appendChild(group);
+    }
+
+    // ============================================================
+    // ضغطة مطوّلة على الرسالة → قائمة (تعديل / حذف)
+    // لمس: ضغطة مطوّلة | ماوس: كليك يمين أو زر ⋮
+    // ============================================================
+    function bindLongPress(el, msg) {
+      let timer = null, pressTimer = null, sx = 0, sy = 0, fired = false;
+      const clear = () => {
+        clearTimeout(timer); clearTimeout(pressTimer);
+        timer = pressTimer = null;
+        el.classList.remove('pressing');
+      };
+
+      el.addEventListener('pointerdown', e => {
+        if (e.pointerType === 'mouse') return;
+        if (e.target.closest('.msg-more')) return;
+        fired = false; sx = e.clientX; sy = e.clientY;
+        pressTimer = setTimeout(() => el.classList.add('pressing'), 140);
+        timer = setTimeout(() => {
+          fired = true;
+          el._lp = true;
+          setTimeout(() => { el._lp = false; }, 700);
+          clear();
+          if (navigator.vibrate) { try { navigator.vibrate(14); } catch (_) {} }
+          openMsgMenu(msg);
+        }, 420);
+      });
+      el.addEventListener('pointermove', e => {
+        if (timer && (Math.abs(e.clientX - sx) > 10 || Math.abs(e.clientY - sy) > 10)) clear();
+      });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => el.addEventListener(t, clear));
+
+      el.addEventListener('contextmenu', e => {
+        e.preventDefault();
+        clear();
+        if (!fired) openMsgMenu(msg);
+        fired = false;
+      });
+
+      // بعد الضغطة المطوّلة نمنع الكليك (عشان ما تتفتحش الصورة/الملف بالغلط)
+      el.addEventListener('click', e => {
+        if (el._lp) { e.preventDefault(); e.stopPropagation(); el._lp = false; }
+      }, true);
+    }
+
+    function openMsgMenu(msg) {
+      if (sheetBackdrop.classList.contains('open') && menuMsg && menuMsg._key === msg._key) return;
+      menuMsg = msg;
+      const canEdit = msg.sender === 'admin' && msg.type === 'text' && !!msg.text;
+      actEdit.hidden = !canEdit;
+      sheetMain.hidden = false;
+      sheetConfirm.hidden = true;
+      $('msp-who').textContent = msg.sender === 'admin' ? 'رسالتك' : (selectedUserName || 'المستخدم');
+      $('msp-text').textContent = msg.type === 'text' ? (msg.text || '') : (SNIPPETS[msg.type] || 'رسالة');
+      sheetBackdrop.classList.add('open');
+      sheetBackdrop.setAttribute('aria-hidden', 'false');
+    }
+    function closeMsgMenu() {
+      sheetBackdrop.classList.remove('open');
+      sheetBackdrop.setAttribute('aria-hidden', 'true');
+      menuMsg = null;
+    }
+    sheetBackdrop.addEventListener('click', e => { if (e.target === sheetBackdrop) closeMsgMenu(); });
+    $('act-cancel').addEventListener('click', closeMsgMenu);
+    $('cf-cancel').addEventListener('click', closeMsgMenu);
+    actEdit.addEventListener('click', () => {
+      const m = menuMsg; closeMsgMenu();
+      if (m) startEdit(m);
+    });
+    $('act-delete').addEventListener('click', () => {
+      sheetMain.hidden = true;
+      sheetConfirm.hidden = false;
+    });
+    $('cf-delete').addEventListener('click', () => {
+      const m = menuMsg; closeMsgMenu();
+      if (m) deleteMessage(m);
+    });
+
+    // ============================================================
+    // تعديل رسالة
+    // ============================================================
+    function autosizeInput() {
+      chatTextInput.style.height = '';
+      if (chatTextInput.value) chatTextInput.style.height = Math.min(chatTextInput.scrollHeight, 120) + 'px';
+    }
+    function updateSendIcon() {
+      micIcon.className = editingMsg
+        ? 'fa-solid fa-check'
+        : (chatTextInput.value.trim() ? 'fa-solid fa-paper-plane' : 'fa-solid fa-microphone');
+    }
+
+    function startEdit(m) {
+      if (!selectedUserId) return;
+      editingMsg = { key: m._key, text: m.text, userId: selectedUserId };
+      editBannerText.textContent = m.text;
+      editBanner.classList.add('active');
+      inputBar.classList.add('editing');
+      chatTextInput.value = m.text;
+      autosizeInput();
+      updateSendIcon();
+      chatTextInput.focus();
+      const len = chatTextInput.value.length;
+      try { chatTextInput.setSelectionRange(len, len); } catch (_) {}
+    }
+
+    function cancelEdit() {
+      if (!editingMsg) return;
+      editingMsg = null;
+      editBanner.classList.remove('active');
+      inputBar.classList.remove('editing');
+      chatTextInput.value = '';
+      autosizeInput();
+      updateSendIcon();
+    }
+    $('edit-banner-close').addEventListener('click', cancelEdit);
+
+    async function submitEdit(txt) {
+      const ed = editingMsg;
+      if (!ed) return;
+      if (!txt) { showToast('لا يمكن ترك الرسالة فارغة — اكتب نصًا أو اضغط × للإلغاء', 'warning'); return; }
+      if (txt === ed.text) { cancelEdit(); return; }
+      if (!navigator.onLine) { showToast('لا يوجد اتصال بالإنترنت', 'error'); return; }
+      try {
+        const ref = db.ref(`messages/${ed.userId}/${ed.key}`);
+        const cur = await ref.once('value');
+        if (!cur.exists()) { showToast('الرسالة لم تعد موجودة', 'warning'); cancelEdit(); return; }
+        await ref.update({ text: txt, edited: true, editedAt: Date.now() });
+        // لو دي آخر رسالة، نحدّث المعاينة في قائمة المحادثات
+        if (ed.key === lastMsgKey) {
+          await db.ref(`conversations/${ed.userId}`).update({ lastMessage: txt });
+        }
+        cancelEdit();
+        showToast('تم تعديل الرسالة', 'success');
+      } catch (err) {
+        showToast('تعذر تعديل الرسالة: ' + (err.message || err), 'error');
+      }
+    }
+
+    // ============================================================
+    // حذف رسالة
+    // ============================================================
+    async function deleteMessage(m) {
+      if (!selectedUserId || !m || !m._key) return;
+      if (!navigator.onLine) { showToast('لا يوجد اتصال بالإنترنت', 'error'); return; }
+      const uid = selectedUserId;
+      const wasLast = m._key === lastMsgKey;
+      try {
+        await db.ref(`messages/${uid}/${m._key}`).remove();
+        if (editingMsg && editingMsg.key === m._key) cancelEdit();
+
+        // لو اللي اتحذفت هي آخر رسالة، نرجّع معاينة المحادثة لآخر رسالة متبقية
+        if (wasLast) {
+          const convRef = db.ref(`conversations/${uid}`);
+          const convSnap = await convRef.once('value');
+          if (convSnap.exists()) {
+            const lastSnap = await db.ref(`messages/${uid}`).limitToLast(1).once('value');
+            let lm = null;
+            lastSnap.forEach(c => { lm = c.val() || {}; });
+            if (lm) {
+              await convRef.update({
+                lastMessage: lm.type === 'text' ? (lm.text || '') : (SNIPPETS[lm.type] || lm.text || ''),
+                lastMessageTimestamp: lm.timestamp || Date.now()
+              });
+            } else {
+              await convRef.update({ lastMessage: '', lastMessageTimestamp: 0 });
+            }
+          }
+        }
+        showToast('تم حذف الرسالة', 'success');
+      } catch (err) {
+        showToast('تعذر حذف الرسالة: ' + (err.message || err), 'error');
+      }
     }
 
     function buildPlayer(url, msgId) {
@@ -1337,20 +2052,26 @@
     // ============================================================
     // Textarea & Send
     // ============================================================
-    chatTextInput.addEventListener('input', function() {
-      this.style.height = 'auto';
-      this.style.height = (this.scrollHeight-10)+'px';
-      micIcon.className = this.value.trim() ? 'fa-solid fa-paper-plane' : 'fa-solid fa-microphone';
-    });
+    chatTextInput.addEventListener('input', () => { autosizeInput(); updateSendIcon(); });
 
     $('voice-record-trigger').addEventListener('click', () => {
       const txt = chatTextInput.value.trim();
+      if (editingMsg) { submitEdit(txt); return; }
       if (txt) {
         sendMessage('text', txt);
-        chatTextInput.value = ''; chatTextInput.style.height = 'auto';
-        micIcon.className = 'fa-solid fa-microphone';
+        chatTextInput.value = '';
+        autosizeInput();
+        updateSendIcon();
       } else {
         startRecording();
+      }
+    });
+
+    // Enter للإرسال على الكمبيوتر (Shift+Enter سطر جديد) — على الموبايل Enter سطر جديد
+    chatTextInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && window.matchMedia('(pointer: fine)').matches) {
+        e.preventDefault();
+        if (chatTextInput.value.trim()) $('voice-record-trigger').click();
       }
     });
 
@@ -1495,6 +2216,8 @@
     // ============================================================
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        if (sheetBackdrop.classList.contains('open')) { closeMsgMenu(); return; }
+        if (editingMsg) { cancelEdit(); return; }
         imageLightbox.classList.remove('active');
         if (window.innerWidth <= 860 && dashboardSidebar.classList.contains('open')) {
           closeSidebarMobile();

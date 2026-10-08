@@ -6,44 +6,56 @@
 <title>المخالفات — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
+<link rel="stylesheet" href="pages-v2.css">
 <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
-<nav class="admin-nav" id="adminNav"></nav>
+<nav class="sb" id="adminNav"></nav>
 
 <main class="admin-page">
-  <h1 class="page-title"><i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i> المخالفات</h1>
-  <p class="page-sub">سجل جميع المخالفات التي تم تسجيلها أثناء الاختبارات</p>
+<div class="pv-page">
 
-  <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
-    <div class="stat-card"><div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div><div><div class="stat-value" id="totalViolations">0</div><div class="stat-label">إجمالي المخالفات</div></div></div>
-    <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div><div class="stat-value" id="usersWithViolations">0</div><div class="stat-label">مستخدمون لديهم مخالفات</div></div></div>
-    <div style="flex:1; display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap;">
-      <button class="btn btn-outline btn-sm" id="refreshBtn" style="width:auto;"><i class="fas fa-sync"></i> تحديث</button>
-      <button class="btn btn-gold btn-sm" id="setMaxViolationsBtn" style="width:auto;"><i class="fas fa-edit"></i> تعديل الحد الأقصى</button>
+  <header class="pv-head">
+    <div class="pv-head-main">
+      <div class="pv-head-ico danger" id="headIco"></div>
+      <div>
+        <h1 class="pv-title">المخالفات</h1>
+        <p class="pv-subtitle">كل ما سُجّل أثناء الاختبارات، مجمّعًا لكل طالب مع قربه من الحد الأقصى.</p>
+      </div>
     </div>
-  </div>
+    <div class="pv-head-actions">
+      <button type="button" class="pv-btn" id="refreshBtn"></button>
+      <button type="button" class="pv-btn primary" id="setMaxViolationsBtn"></button>
+    </div>
+  </header>
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>المستخدم</th>
-          <th>نوع المخالفة</th>
-          <th>الامتحان</th>
-          <th>التاريخ والوقت</th>
-          <th>التفاصيل</th>
-          <th>إجراءات</th>
-        </tr>
-      </thead>
-      <tbody id="violationsTableBody">
-        <tr><td colspan="6"><div class="center-loading" style="min-height:120px;"><div class="loader"></div></div></td></tr>
-      </tbody>
-    </table>
+  <section class="pv-kpis" id="kpis" aria-label="ملخص المخالفات">
+    <div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div>
+  </section>
+
+  <section class="pv-toolbar" id="toolbar" hidden>
+    <label class="pv-search" id="searchBox">
+      <span id="searchIco"></span>
+      <input type="search" id="searchInput" placeholder="ابحث باسم الطالب أو بريده أو الاختبار…" autocomplete="off" aria-label="بحث في المخالفات">
+      <button type="button" class="pv-search-clear" id="searchClear" aria-label="مسح البحث"></button>
+    </label>
+    <select class="pv-select" id="sortSelect" aria-label="ترتيب">
+      <option value="count">الأكثر مخالفات</option>
+      <option value="recent">الأحدث نشاطًا</option>
+      <option value="name">الاسم (أ–ي)</option>
+    </select>
+    <div class="pv-chips" id="chips" role="group" aria-label="تصفية حسب النوع"></div>
+  </section>
+
+  <div class="pv-result-line" id="resultLine" hidden></div>
+  <div id="list" aria-live="polite">
+    <div class="pv-skel pv-skel-card"></div><div class="pv-skel pv-skel-card"></div><div class="pv-skel pv-skel-card"></div>
   </div>
+  <div class="vl-more" id="moreWrap" hidden><button type="button" class="pv-btn" id="moreBtn">عرض المزيد</button></div>
+
+</div>
 </main>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -52,117 +64,337 @@
 <script src="firebase-config.js"></script>
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
+<script src="pv-ui.js"></script>
 <script>
+  const PAGE_SIZE = 12;
+  const state = {
+    students: [],          // [{uid,name,email,items:[...],count,last}]
+    comps: {},
+    max: 3,
+    query: '',
+    type: 'all',           // 'all' | 'limit' | 'type:<نوع المخالفة>'
+    sort: 'count',
+    shown: PAGE_SIZE,
+    open: new Set()
+  };
+
+  /* أيقونات ثابتة في الصفحة */
+  document.getElementById('headIco').innerHTML = icon('lAlert');
+  document.getElementById('refreshBtn').innerHTML = icon('lRefresh') + '<span>تحديث</span>';
+  document.getElementById('setMaxViolationsBtn').innerHTML = icon('lSliders') + '<span>الحد الأقصى</span>';
+  document.getElementById('searchIco').innerHTML = icon('lSearch');
+  document.getElementById('searchClear').innerHTML = icon('lX');
+
   requireAdminAuth(function () {
     renderAdminNav('violations');
     loadViolations();
   });
 
-  function loadViolations() {
-    const tbody = document.getElementById('violationsTableBody');
-    tbody.innerHTML = '<tr><td colspan="6"><div class="center-loading" style="min-height:120px;"><div class="loader"></div></div></td></tr>';
-    
-    getAllViolations().then(function(violations) {
-      let total = 0;
-      let users = Object.keys(violations).length;
-      let rows = [];
-      Object.keys(violations).forEach(function(uid) {
-        const userViolations = violations[uid];
-        Object.keys(userViolations).forEach(function(vid) {
-          const v = userViolations[vid];
-          total++;
-          rows.push({
-            uid: uid,
-            vid: vid,
-            type: v.type || 'غير معروف',
-            examRef: v.examRef || '',
-            timestamp: v.timestamp || 0,
-            details: v.details || ''
-          });
-        });
-      });
-      document.getElementById('totalViolations').textContent = total;
-      document.getElementById('usersWithViolations').textContent = users;
-
-      if (rows.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">لا توجد مخالفات مسجلة.</td></tr>';
-        return;
+  /* ---------- تحليل مرجع الامتحان compId_lessonId_examId (المعرّفات قد تحتوي _) ---------- */
+  function resolveExam(ref) {
+    if (!ref) return null;
+    const comps = state.comps;
+    for (const cid of Object.keys(comps)) {
+      if (ref.indexOf(cid + '_') !== 0) continue;
+      const rest = ref.slice(cid.length + 1);
+      const lessons = (comps[cid] && comps[cid].lessons) || {};
+      for (const lid of Object.keys(lessons)) {
+        if (rest.indexOf(lid + '_') !== 0) continue;
+        const eid = rest.slice(lid.length + 1);
+        const lesson = lessons[lid] || {};
+        const exam = (lesson.exams && lesson.exams[eid]) || {};
+        return {
+          compId: cid, lessonId: lid, examId: eid,
+          compTitle: comps[cid].title || '', lessonTitle: lesson.title || '', examTitle: exam.title || ''
+        };
       }
-
-      // ترتيب تنازلي حسب التاريخ
-      rows.sort(function(a,b) { return b.timestamp - a.timestamp; });
-
-      // بناء الصفوف مع جلب أسماء المستخدمين
-      let html = '';
-      let pending = rows.length;
-      let resolved = 0;
-
-      rows.forEach(function(row, index) {
-        db.ref('users/' + row.uid + '/name').once('value').then(function(snap) {
-          const name = snap.val() || row.uid;
-          html += `<tr>
-            <td><a href="user-detail.html?uid=${row.uid}" style="font-weight:700;color:var(--primary);">${escapeHtml(name)}</a></td>
-            <td><span class="status-pill" style="background:#FBEAE6;color:var(--danger);">${escapeHtml(row.type)}</span></td>
-            <td><code style="font-size:0.6875rem;background:var(--bg);padding:2px 8px;border-radius:4px;">${escapeHtml(row.examRef)}</code></td>
-            <td>${formatArabicDate(row.timestamp)}</td>
-            <td>${escapeHtml(row.details)}</td>
-            <td>
-              <button class="btn btn-outline btn-xs reset-exam-btn" data-uid="${row.uid}" data-examref="${row.examRef}" style="width:auto;"><i class="fas fa-undo"></i> إلغاء النتيجة</button>
-              <button class="btn btn-ghost btn-xs clear-violations-btn" data-uid="${row.uid}" style="width:auto;"><i class="fas fa-eraser"></i> مسح المخالفات</button>
-            </td>
-          </tr>`;
-          resolved++;
-          if (resolved === pending) {
-            tbody.innerHTML = html;
-            attachEvents();
-          }
-        });
-      });
-
-      function attachEvents() {
-        tbody.querySelectorAll('.reset-exam-btn').forEach(function(btn) {
-          btn.addEventListener('click', function() {
-            const uid = btn.dataset.uid;
-            const examRef = btn.dataset.examref;
-            if (!examRef) { showToast('مرجع الامتحان غير موجود', 'warning'); return; }
-            const parts = examRef.split('_');
-            if (parts.length !== 3) { showToast('مرجع غير صحيح', 'warning'); return; }
-            if (!confirm('هل تريد إلغاء نتيجة هذا المستخدم وإعادة الاختبار؟')) return;
-            resetExamAttempt(parts[0], parts[1], parts[2], uid).then(function() {
-              showToast('✅ تم إلغاء النتيجة. يمكن للمستخدم إعادة الاختبار.', 'success');
-              loadViolations();
-            }).catch(function(err) { showToast('❌ فشل: ' + err.message, 'error'); });
-          });
-        });
-        tbody.querySelectorAll('.clear-violations-btn').forEach(function(btn) {
-          btn.addEventListener('click', function() {
-            const uid = btn.dataset.uid;
-            if (!confirm('هل تريد مسح جميع مخالفات هذا المستخدم؟')) return;
-            clearUserViolations(uid).then(function() {
-              showToast('✅ تم مسح المخالفات.', 'success');
-              loadViolations();
-            }).catch(function(err) { showToast('❌ فشل: ' + err.message, 'error'); });
-          });
-        });
-      }
-    });
+    }
+    const parts = ref.split('_');
+    if (parts.length === 3) return { compId: parts[0], lessonId: parts[1], examId: parts[2], compTitle: '', lessonTitle: '', examTitle: '' };
+    return null;
   }
 
+  function loadViolations() {
+    const btn = document.getElementById('refreshBtn');
+    btn.classList.add('spin'); btn.disabled = true;
+
+    Promise.all([getAllViolations(), safeRead('users'), safeRead('competitions'), getMaxViolations().catch(function () { return 3; })])
+      .then(function (res) {
+        const violations = res[0] || {}, usersObj = res[1] || {};
+        state.comps = res[2] || {};
+        state.max = Number(res[3]) || 3;
+
+        const students = [];
+        Object.keys(violations).forEach(function (uid) {
+          const bucket = violations[uid];
+          if (!bucket || typeof bucket !== 'object') return;
+          const items = [];
+          Object.keys(bucket).forEach(function (vid) {
+            const v = bucket[vid];
+            if (!v || typeof v !== 'object') return;
+            items.push({
+              vid: vid,
+              type: v.type || 'غير معروف',
+              examRef: v.examRef || '',
+              timestamp: Number(v.timestamp) || 0,
+              details: v.details || ''
+            });
+          });
+          if (!items.length) return;
+          items.sort(function (a, b) { return b.timestamp - a.timestamp; });
+          const u = usersObj[uid] || {};
+          students.push({
+            uid: uid,
+            name: u.name || u.email || 'مستخدم محذوف',
+            email: u.email || '',
+            items: items,
+            count: items.length,
+            last: items[0].timestamp
+          });
+        });
+        state.students = students;
+        renderKpis();
+        document.getElementById('toolbar').hidden = students.length === 0;
+        renderChips();
+        render();
+      })
+      .catch(function (err) {
+        document.getElementById('kpis').innerHTML = '';
+        document.getElementById('list').innerHTML = emptyBlock('err', 'lAlert', 'تعذّر تحميل المخالفات', explainDbError(err), true);
+        bindRetry();
+      })
+      .then(function () { btn.classList.remove('spin'); btn.disabled = false; });
+  }
+
+  /* ---------- مؤشرات ---------- */
+  function renderKpis() {
+    const total = state.students.reduce(function (s, st) { return s + st.count; }, 0);
+    const dayAgo = Date.now() - 86400000;
+    const recent = state.students.reduce(function (s, st) {
+      return s + st.items.filter(function (i) { return i.timestamp >= dayAgo; }).length;
+    }, 0);
+    const atLimit = state.students.filter(function (st) { return st.count >= state.max; }).length;
+
+    function kpi(cls, ico, label, id, foot) {
+      return '<div class="pv-kpi ' + cls + '"><div class="pv-kpi-top"><span class="pv-kpi-label">' + label + '</span><span class="pv-kpi-ico">' + icon(ico) + '</span></div>' +
+        '<div class="pv-kpi-value" id="' + id + '">0</div><div class="pv-kpi-foot">' + foot + '</div></div>';
+    }
+    document.getElementById('kpis').innerHTML =
+      kpi('danger', 'lAlert', 'إجمالي المخالفات', 'kTotal', 'منذ بداية التسجيل') +
+      kpi('', 'lUsers', 'طلاب لديهم مخالفات', 'kStudents', 'طالب مختلف') +
+      kpi('amber', 'lClock', 'آخر ٢٤ ساعة', 'kRecent', 'مخالفات جديدة') +
+      kpi('violet', 'lBan', 'وصلوا للحد الأقصى', 'kLimit', 'الحد الحالي: ' + state.max.toLocaleString('ar-EG') + ' مخالفات');
+    pvAnimateNumber(document.getElementById('kTotal'), total);
+    pvAnimateNumber(document.getElementById('kStudents'), state.students.length);
+    pvAnimateNumber(document.getElementById('kRecent'), recent);
+    pvAnimateNumber(document.getElementById('kLimit'), atLimit);
+  }
+
+  /* ---------- شرائح التصفية ---------- */
+  function renderChips() {
+    const counts = {};
+    state.students.forEach(function (st) {
+      st.items.forEach(function (i) { counts[i.type] = (counts[i.type] || 0) + 1; });
+    });
+    const atLimit = state.students.filter(function (st) { return st.count >= state.max; }).length;
+    const chips = [{ key: 'all', label: 'الكل', n: state.students.length }];
+    if (atLimit) chips.push({ key: 'limit', label: 'وصلوا للحد الأقصى', n: atLimit });
+    Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; }).forEach(function (t) {
+      chips.push({ key: 'type:' + t, label: t, n: counts[t] });
+    });
+    document.getElementById('chips').innerHTML = chips.map(function (c) {
+      return '<button type="button" class="pv-chip' + (state.type === c.key ? ' active' : '') + '" data-type="' + escapeHtml(c.key) + '">' +
+        escapeHtml(c.label) + '<b>' + c.n.toLocaleString('ar-EG') + '</b></button>';
+    }).join('');
+  }
+
+  /* ---------- التصفية والترتيب ---------- */
+  function filtered() {
+    const q = state.query.trim().toLowerCase();
+    const list = state.students.filter(function (st) {
+      if (state.type === 'limit' && st.count < state.max) return false;
+      if (state.type.indexOf('type:') === 0) {
+        const t = state.type.slice(5);
+        if (!st.items.some(function (i) { return i.type === t; })) return false;
+      }
+      if (!q) return true;
+      if ((st.name + ' ' + st.email).toLowerCase().indexOf(q) !== -1) return true;
+      return st.items.some(function (i) {
+        const ex = resolveExam(i.examRef);
+        const hay = (i.type + ' ' + i.details + ' ' + (ex ? ex.examTitle + ' ' + ex.lessonTitle + ' ' + ex.compTitle : i.examRef)).toLowerCase();
+        return hay.indexOf(q) !== -1;
+      });
+    });
+    list.sort(function (a, b) {
+      if (state.sort === 'recent') return b.last - a.last;
+      if (state.sort === 'name') return a.name.localeCompare(b.name, 'ar');
+      return b.count - a.count || b.last - a.last;
+    });
+    return list;
+  }
+
+  function emptyBlock(kind, ico, title, text, retry) {
+    return '<div class="pv-empty"><div class="pv-empty-ico ' + kind + '">' + icon(ico) + '</div><h3>' + escapeHtml(title) + '</h3><p>' + escapeHtml(text) + '</p>' +
+      (retry ? '<button type="button" class="pv-btn primary" id="retryBtn">' + icon('lRefresh') + '<span>إعادة المحاولة</span></button>' : '') + '</div>';
+  }
+  function bindRetry() {
+    const r = document.getElementById('retryBtn');
+    if (r) r.addEventListener('click', loadViolations);
+  }
+
+  /* ---------- الرسم ---------- */
+  function render() {
+    const list = document.getElementById('list');
+    const line = document.getElementById('resultLine');
+    const moreWrap = document.getElementById('moreWrap');
+
+    if (state.students.length === 0) {
+      line.hidden = true; moreWrap.hidden = true;
+      list.innerHTML = emptyBlock('ok', 'lShieldCheck', 'لا توجد مخالفات مسجّلة', 'كل الاختبارات تمر بسلام حتى الآن. ستظهر هنا أي مخالفة تُسجَّل تلقائيًا.', false);
+      return;
+    }
+
+    const rows = filtered();
+    if (rows.length === 0) {
+      line.hidden = true; moreWrap.hidden = true;
+      list.innerHTML = emptyBlock('', 'lSearch', 'لا نتائج مطابقة', 'جرّب تغيير كلمة البحث أو إزالة التصفية.', false);
+      return;
+    }
+
+    const visible = rows.slice(0, state.shown);
+    line.hidden = false;
+    line.textContent = 'عرض ' + visible.length.toLocaleString('ar-EG') + ' من ' + rows.length.toLocaleString('ar-EG') + ' طالب';
+    moreWrap.hidden = rows.length <= state.shown;
+
+    list.innerHTML = '<div class="vl-list">' + visible.map(cardHtml).join('') + '</div>';
+  }
+
+  function cardHtml(st) {
+    const av = pvAvatar(st.name);
+    const pct = Math.min(100, Math.round(st.count / state.max * 100));
+    const tone = st.count >= state.max ? 'high' : (st.count >= state.max - 1 && state.max > 1 ? 'mid' : '');
+    const open = state.open.has(st.uid);
+    return '<article class="vl-card' + (open ? ' open' : '') + '" data-uid="' + escapeHtml(st.uid) + '">' +
+      '<button type="button" class="vl-head" data-toggle aria-expanded="' + open + '">' +
+        '<span class="pv-avatar" style="background:' + av.bg + ';color:' + av.fg + ';">' + escapeHtml(av.initial) + '</span>' +
+        '<span class="vl-who"><span class="vl-name">' + escapeHtml(st.name) + '</span>' + (st.email ? '<span class="vl-mail">' + escapeHtml(st.email) + '</span>' : '') + '</span>' +
+        '<span class="vl-meter"><span class="vl-meter-top"><span>المخالفات</span><span><b>' + st.count.toLocaleString('ar-EG') + '</b> / ' + state.max.toLocaleString('ar-EG') + '</span></span>' +
+          '<span class="vl-bar ' + tone + '"><i style="width:' + pct + '%"></i></span></span>' +
+        '<span class="vl-last"><b>' + pvTimeAgo(st.last) + '</b>آخر مخالفة</span>' +
+        '<span class="vl-chev">' + icon('lChevronDown') + '</span>' +
+      '</button>' +
+      '<div class="vl-body">' + (open ? bodyHtml(st) : '') + '</div>' +
+    '</article>';
+  }
+
+  function bodyHtml(st) {
+    return '<div class="vl-body-actions">' +
+        '<a class="pv-btn sm" href="user-detail.html?uid=' + encodeURIComponent(st.uid) + '">' + icon('lUser') + '<span>فتح الحساب</span></a>' +
+        '<button type="button" class="pv-btn sm soft-danger" data-clear>' + icon('lTrash') + '<span>مسح كل مخالفاته</span></button>' +
+      '</div>' +
+      '<ol class="vl-timeline">' + st.items.map(function (i) {
+        const ex = resolveExam(i.examRef);
+        let examHtml = '';
+        if (i.examRef) {
+          if (ex && (ex.examTitle || ex.lessonTitle || ex.compTitle)) {
+            examHtml = '<div class="vl-exam">' + icon('lBook') + '<span>' + escapeHtml(ex.examTitle || 'اختبار') + '</span>' +
+              '<small>' + escapeHtml([ex.lessonTitle, ex.compTitle].filter(Boolean).join(' • ')) + '</small></div>';
+          } else {
+            examHtml = '<div class="vl-exam">' + icon('lBook') + '<small dir="ltr">' + escapeHtml(i.examRef) + '</small></div>';
+          }
+        }
+        return '<li class="vl-event" data-vid="' + escapeHtml(i.vid) + '">' +
+          '<div class="vl-event-main">' +
+            '<div class="vl-event-row"><span class="vl-type">' + icon('lFlag') + escapeHtml(i.type) + '</span><span class="vl-time">' + (i.timestamp ? formatArabicDate(i.timestamp) : '—') + '</span></div>' +
+            examHtml +
+            (i.details ? '<div class="vl-detail">' + escapeHtml(i.details) + '</div>' : '') +
+          '</div>' +
+          (ex ? '<div class="vl-event-act"><button type="button" class="pv-btn sm" data-reset data-ref="' + escapeHtml(i.examRef) + '">' + icon('lUndo') + '<span>إلغاء النتيجة</span></button></div>' : '') +
+        '</li>';
+      }).join('') + '</ol>';
+  }
+
+  /* ---------- التفاعلات ---------- */
+  document.getElementById('list').addEventListener('click', function (e) {
+    const card = e.target.closest('.vl-card');
+    if (!card) return;
+    const uid = card.dataset.uid;
+    const st = state.students.find(function (s) { return s.uid === uid; });
+    if (!st) return;
+
+    const resetBtn = e.target.closest('[data-reset]');
+    if (resetBtn) {
+      const ex = resolveExam(resetBtn.dataset.ref);
+      if (!ex) { showToast('مرجع الامتحان غير صالح', 'warning'); return; }
+      pvConfirm({
+        title: 'إلغاء نتيجة الاختبار؟',
+        message: 'سيُفتح الاختبار لـ ' + st.name + ' لإعادة المحاولة، مع الاحتفاظ بأفضل درجة سابقة.',
+        confirmText: 'إلغاء النتيجة', tone: 'danger', icon: 'lUndo'
+      }).then(function (ok) {
+        if (!ok) return;
+        resetExamAttempt(ex.compId, ex.lessonId, ex.examId, uid)
+          .then(function () { showToast('تم إلغاء النتيجة — يمكن للطالب إعادة الاختبار.', 'success'); })
+          .catch(function (err) { showToast('فشل: ' + explainDbError(err), 'error'); });
+      });
+      return;
+    }
+    if (e.target.closest('[data-clear]')) {
+      pvConfirm({
+        title: 'مسح كل المخالفات؟',
+        message: 'سيتم حذف ' + st.count.toLocaleString('ar-EG') + ' مخالفة مسجّلة على ' + st.name + ' نهائيًا ولا يمكن التراجع.',
+        confirmText: 'نعم، امسحها', tone: 'danger', icon: 'lTrash'
+      }).then(function (ok) {
+        if (!ok) return;
+        clearUserViolations(uid)
+          .then(function () { state.open.delete(uid); showToast('تم مسح المخالفات.', 'success'); loadViolations(); })
+          .catch(function (err) { showToast('فشل: ' + explainDbError(err), 'error'); });
+      });
+      return;
+    }
+    if (e.target.closest('[data-toggle]')) {
+      const open = !state.open.has(uid);
+      if (open) state.open.add(uid); else state.open.delete(uid);
+      card.classList.toggle('open', open);
+      card.querySelector('[data-toggle]').setAttribute('aria-expanded', open);
+      card.querySelector('.vl-body').innerHTML = open ? bodyHtml(st) : '';
+    }
+  });
+
+  document.getElementById('chips').addEventListener('click', function (e) {
+    const b = e.target.closest('.pv-chip');
+    if (!b) return;
+    state.type = b.dataset.type; state.shown = PAGE_SIZE;
+    renderChips(); render();
+  });
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', pvDebounce(function () {
+    state.query = searchInput.value; state.shown = PAGE_SIZE;
+    document.getElementById('searchBox').classList.toggle('has-value', !!searchInput.value);
+    render();
+  }, 160));
+  document.getElementById('searchClear').addEventListener('click', function () {
+    searchInput.value = ''; state.query = ''; state.shown = PAGE_SIZE;
+    document.getElementById('searchBox').classList.remove('has-value');
+    render(); searchInput.focus();
+  });
+  document.getElementById('sortSelect').addEventListener('change', function (e) {
+    state.sort = e.target.value; state.shown = PAGE_SIZE; render();
+  });
+  document.getElementById('moreBtn').addEventListener('click', function () {
+    state.shown += PAGE_SIZE; render();
+  });
   document.getElementById('refreshBtn').addEventListener('click', loadViolations);
 
-  document.getElementById('setMaxViolationsBtn').addEventListener('click', function() {
-    getMaxViolations().then(function(current) {
-      const newVal = prompt('الحد الأقصى للمخالفات قبل إنهاء الامتحان:', current);
-      if (newVal !== null) {
-        const num = parseInt(newVal, 10);
-        if (!isNaN(num) && num >= 1) {
-          setMaxViolations(num).then(function() {
-            showToast('✅ تم تحديث الحد الأقصى إلى ' + num, 'success');
-          }).catch(function(err) { showToast('❌ فشل: ' + err.message, 'error'); });
-        } else {
-          showToast('يرجى إدخال رقم صحيح أكبر من صفر.', 'warning');
-        }
-      }
+  document.getElementById('setMaxViolationsBtn').addEventListener('click', function () {
+    pvPromptNumber({
+      title: 'الحد الأقصى للمخالفات',
+      message: 'عدد المخالفات المسموح به قبل إنهاء الاختبار تلقائيًا.',
+      value: state.max, min: 1, max: 50, confirmText: 'حفظ الحد'
+    }).then(function (n) {
+      if (n == null) return;
+      setMaxViolations(n)
+        .then(function () { state.max = n; showToast('تم تحديث الحد الأقصى إلى ' + n.toLocaleString('ar-EG'), 'success'); renderKpis(); renderChips(); render(); })
+        .catch(function (err) { showToast('فشل: ' + explainDbError(err), 'error'); });
     });
   });
 </script>

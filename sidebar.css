@@ -1,0 +1,354 @@
+/* ============================================================
+   القائمة الجانبية — تصميم جديد بالكامل (v12)
+   - سطح المكتب (861px+): لوحة عائمة مستديرة على يمين الشاشة، قابلة للطي.
+   - الموبايل: شريط علوي رفيع + درج جانبي + شريط تبويب سفلي عائم.
+   يُحمَّل بعد style.css ويستبدل كل تنسيقات القائمة القديمة
+   (.admin-nav / .admin-links / .admin-bottom-nav) بفئات جديدة بادئتها sb-.
+   ============================================================ */
+
+:root {
+  --sidebar-w: 292px;            /* عرض اللوحة 264 + هامش 14 من كل جانب */
+  --sidebar-w-collapsed: 104px;  /* 76 + هوامش */
+  --sb-bg: #0B2542;
+  --sb-bg-2: #0F3157;
+  --sb-line: rgba(255, 255, 255, 0.08);
+  --sb-text: rgba(255, 255, 255, 0.66);
+  --sb-text-strong: #fff;
+  --sb-hover: rgba(255, 255, 255, 0.07);
+  --sb-active-bg: rgba(45, 212, 191, 0.14);
+  --sb-accent: #2DD4BF;
+  --sb-accent-solid: #14B8A6;
+  --sb-shadow: 0 18px 44px rgba(8, 30, 56, 0.28), 0 2px 0 rgba(255, 255, 255, 0.04) inset;
+}
+:root[data-theme="dark"] {
+  --sb-bg: #0F2238;
+  --sb-bg-2: #12293F;
+  --sb-line: rgba(94, 163, 224, 0.14);
+  --sb-shadow: 0 18px 44px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(94, 163, 224, 0.14);
+}
+
+/* الحاوية نفسها لا تظهر على الديسكتوب (اللوحة fixed) */
+.sb { position: static; }
+.sb .icon { width: 20px; height: 20px; flex-shrink: 0; vertical-align: middle; }
+
+/* ---------------------- اللوحة ---------------------- */
+.sb-panel {
+  position: fixed;
+  top: 14px; bottom: 14px; right: 14px;
+  width: 264px;
+  z-index: 100;
+  display: flex; flex-direction: column;
+  background:
+    radial-gradient(120% 60% at 100% 0%, rgba(45, 212, 191, 0.13), transparent 60%),
+    linear-gradient(180deg, var(--sb-bg-2) 0%, var(--sb-bg) 100%);
+  border-radius: 26px;
+  box-shadow: var(--sb-shadow);
+  color: var(--sb-text);
+  overflow: hidden;
+  transition: width .32s var(--ease);
+}
+
+/* الرأس: الشعار + زر الطي */
+.sb-head {
+  position: relative;
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 16px 14px;
+  min-height: 78px;
+}
+.sb-brand { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; text-decoration: none; }
+.sb-logo {
+  width: 52px; height: 40px; flex-shrink: 0;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--sb-line);
+  display: flex; align-items: center; justify-content: center;
+}
+.sb-logo img { width: 40px; height: 22px; object-fit: contain; display: block; }
+.sb-brand-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.sb-brand-text b { font-family: 'Amiri', serif; font-size: 1.35rem; color: var(--sb-text-strong); font-weight: 700; }
+.sb-brand-text small { font-size: 0.6875rem; color: var(--sb-accent); font-weight: 700; white-space: nowrap; }
+
+.sb-collapse, .sb-close {
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 11px;
+  border: 1px solid var(--sb-line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--sb-text);
+  cursor: pointer;
+  transition: background .2s var(--ease), color .2s var(--ease);
+}
+.sb-collapse:hover, .sb-close:hover { background: var(--sb-hover); color: #fff; }
+.sb-collapse .icon { width: 16px; height: 16px; transition: transform .32s var(--ease); }
+.sb-close { display: none; }
+
+/* منطقة الروابط */
+.sb-scroll {
+  flex: 1; min-height: 0;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 4px 12px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+.sb-group { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+.sb-group-label {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 10px 6px;
+  font-size: 0.625rem; font-weight: 800; letter-spacing: 0.4px;
+  color: rgba(255, 255, 255, 0.38);
+  white-space: nowrap;
+}
+.sb-group-label::after { content: ""; flex: 1; height: 1px; background: var(--sb-line); }
+
+.sb-link {
+  position: relative;
+  display: flex; align-items: center; gap: 12px;
+  width: 100%;
+  min-height: 46px;
+  padding: 6px 8px;
+  border: none; border-radius: 15px;
+  background: none;
+  color: var(--sb-text);
+  font-family: inherit; font-size: 0.8438rem; font-weight: 700;
+  text-align: right; text-decoration: none;
+  cursor: pointer;
+  transition: background .2s var(--ease), color .2s var(--ease);
+}
+.sb-ico {
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: background .2s var(--ease), color .2s var(--ease), transform .2s var(--ease);
+}
+.sb-ico .icon { width: 18px; height: 18px; }
+.sb-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-link:hover { background: var(--sb-hover); color: #fff; }
+.sb-link:hover .sb-ico { transform: scale(1.06); }
+.sb-link:focus-visible, .sb-collapse:focus-visible, .sb-logout:focus-visible,
+.sb-theme:focus-visible, .sb-menu-btn:focus-visible, .sb-tab:focus-visible, .sb-close:focus-visible {
+  outline: 2px solid var(--sb-accent); outline-offset: 2px;
+}
+.sb-link.active {
+  background: var(--sb-active-bg);
+  color: #fff;
+}
+.sb-link.active .sb-ico { background: var(--sb-accent-solid); color: #fff; box-shadow: 0 6px 14px rgba(20, 184, 166, 0.35); }
+.sb-link.active::after {
+  content: "";
+  position: absolute; left: 10px; top: 50%;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sb-accent);
+  transform: translateY(-50%);
+}
+
+.sb-badge {
+  min-width: 20px; height: 20px; padding: 0 6px;
+  border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #F0788A; color: #fff;
+  font-size: 0.6563rem; font-weight: 800; font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.sb-link.active .sb-badge { margin-inline-end: 12px; }
+
+/* التذييل: بطاقة المسؤول + الوضع الليلي + الخروج */
+.sb-foot {
+  padding: 12px;
+  border-top: 1px solid var(--sb-line);
+  display: flex; flex-direction: column; gap: 10px;
+  background: rgba(0, 0, 0, 0.12);
+}
+.sb-user { display: flex; align-items: center; gap: 11px; padding: 2px 4px; min-width: 0; margin: 0; background: none; border: none; }
+.sb-avatar {
+  width: 40px; height: 40px; flex-shrink: 0; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #2DD4BF, #1E5C94);
+  color: #fff; font-weight: 800; font-size: 1rem;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+.sb-user-info { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.sb-user-name { color: #fff; font-weight: 800; font-size: 0.8438rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-user-role { display: flex; align-items: center; gap: 5px; color: var(--sb-accent); font-size: 0.6875rem; font-weight: 700; }
+.sb-user-role .icon { width: 12px; height: 12px; }
+
+.sb-actions { display: flex; flex-direction: column; gap: 8px; }
+.sb-theme-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 4px; }
+.sb-theme-label { font-size: 0.75rem; font-weight: 700; color: var(--sb-text); white-space: nowrap; }
+
+/* مفتاح الوضع الليلي: شمس | قمر */
+.sb-theme {
+  position: relative;
+  width: 70px; height: 36px; flex-shrink: 0; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr; align-items: center; justify-items: center;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--sb-line);
+  cursor: pointer;
+}
+.sb-theme-thumb {
+  position: absolute; top: 3px; bottom: 3px; width: calc(50% - 3px);
+  right: 3px;
+  border-radius: 9px;
+  background: var(--sb-accent-solid);
+  box-shadow: 0 3px 10px rgba(20, 184, 166, 0.4);
+  transition: transform .28s var(--ease);
+}
+.sb-theme.on .sb-theme-thumb { transform: translateX(calc(-100% - 0px)); }
+.sb-theme-ic { position: relative; z-index: 1; display: flex; color: rgba(255, 255, 255, 0.5); transition: color .2s var(--ease); }
+.sb-theme-ic .icon { width: 16px; height: 16px; }
+/* في RTL: العمود الأول (يمين) = الشمس، الثاني (يسار) = القمر */
+.sb-theme:not(.on) .sb-theme-ic.sun, .sb-theme.on .sb-theme-ic.moon { color: #fff; }
+
+.sb-logout {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  width: 100%; min-height: 42px; padding: 0 12px;
+  border-radius: 13px;
+  border: 1px solid rgba(240, 120, 138, 0.28);
+  background: rgba(240, 120, 138, 0.1);
+  color: #F5909F;
+  font-family: inherit; font-size: 0.8125rem; font-weight: 800;
+  cursor: pointer;
+  transition: background .2s var(--ease), color .2s var(--ease);
+}
+.sb-logout:hover { background: rgba(240, 120, 138, 0.2); color: #fff; }
+.sb-logout .icon { width: 17px; height: 17px; }
+
+/* العناصر الخاصة بالموبايل مخفية على الديسكتوب */
+.sb-topbar, .sb-overlay, .sb-tabbar { display: none; }
+
+/* ---------------------- الديسكتوب: وضع الطي ---------------------- */
+@media (min-width: 861px) {
+  body.sidebar-collapsed .sb-panel { width: 76px; }
+  body.sidebar-collapsed .sb-brand { display: none; }
+  body.sidebar-collapsed .sb-head { justify-content: center; padding-inline: 0; }
+  body.sidebar-collapsed .sb-collapse .icon { transform: rotate(180deg); }
+  body.sidebar-collapsed .sb-label,
+  body.sidebar-collapsed .sb-group-label,
+  body.sidebar-collapsed .sb-user-info,
+  body.sidebar-collapsed .sb-theme-label,
+  body.sidebar-collapsed .sb-logout span { display: none; }
+  body.sidebar-collapsed .sb-group-label { display: block; height: 1px; padding: 0; margin: 8px 10px; background: var(--sb-line); font-size: 0; overflow: hidden; }
+  body.sidebar-collapsed .sb-group-label::after { display: none; }
+  body.sidebar-collapsed .sb-scroll { padding-inline: 10px; }
+  body.sidebar-collapsed .sb-link { justify-content: center; padding: 6px 0; }
+  body.sidebar-collapsed .sb-link.active::after { display: none; }
+  body.sidebar-collapsed .sb-user { justify-content: center; padding: 0; }
+  body.sidebar-collapsed .sb-theme-row { justify-content: center; padding: 0; }
+  body.sidebar-collapsed .sb-theme { width: 44px; height: 44px; grid-template-columns: 1fr; }
+  body.sidebar-collapsed .sb-theme-thumb { display: none; }
+  body.sidebar-collapsed .sb-theme-ic { grid-area: 1 / 1; }
+  body.sidebar-collapsed .sb-theme-ic .icon { width: 19px; height: 19px; }
+  body.sidebar-collapsed .sb-theme:not(.on) .sb-theme-ic.moon,
+  body.sidebar-collapsed .sb-theme.on .sb-theme-ic.sun { display: none; }
+  body.sidebar-collapsed .sb-theme .sb-theme-ic { color: #fff; }
+  body.sidebar-collapsed .sb-logout { min-height: 44px; }
+  /* الشارة تتحول لنقطة فوق الأيقونة */
+  body.sidebar-collapsed .sb-badge {
+    position: absolute; top: 4px; left: 12px;
+    min-width: 10px; height: 10px; padding: 0; font-size: 0;
+    border: 2px solid var(--sb-bg);
+  }
+  /* في الوضع المطوي يظهر اسم القسم كتلميح أصلي (title) عند الوقوف على الأيقونة */
+
+  .sb-collapse { display: flex; }
+}
+
+/* ---------------------- الموبايل والتابلت (حتى 860px) ---------------------- */
+@media (max-width: 860px) {
+  .sb { position: sticky; top: 0; z-index: 1000; }
+
+  .sb-topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    height: calc(58px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 14px 0;
+    background: linear-gradient(180deg, var(--sb-bg-2), var(--sb-bg));
+    border-bottom: 1px solid var(--sb-line);
+    box-shadow: 0 6px 20px rgba(8, 30, 56, 0.18);
+  }
+  .sb-top-brand { display: flex; align-items: center; gap: 10px; min-width: 0; text-decoration: none; }
+  .sb-top-brand .sb-logo { width: 46px; height: 36px; }
+  .sb-top-brand .sb-logo img { width: 34px; height: 20px; }
+  .sb-top-title { color: #fff; font-weight: 800; font-size: 0.9688rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sb-menu-btn {
+    width: 42px; height: 42px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 13px;
+    border: 1px solid var(--sb-line);
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff; cursor: pointer;
+    transition: background .2s var(--ease);
+  }
+  .sb-menu-btn:active { background: var(--sb-hover); }
+  .sb-menu-btn.open { background: var(--sb-accent-solid); border-color: transparent; }
+
+  /* الدرج */
+  .sb-panel {
+    top: 0; bottom: 0; right: 0;
+    width: min(86vw, 330px);
+    height: 100vh; height: 100dvh;
+    border-radius: 26px 0 0 26px;
+    transform: translateX(105%);
+    visibility: hidden;
+    transition: transform .3s var(--ease), visibility 0s linear .3s;
+    z-index: 1002;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .sb-panel.open { transform: translateX(0); visibility: visible; transition: transform .3s var(--ease), visibility 0s; }
+  .sb-collapse { display: none; }
+  .sb-close { display: flex; }
+  .sb-overlay {
+    display: block;
+    position: fixed; inset: 0; z-index: 1001;
+    background: rgba(4, 16, 32, 0.55);
+    backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s var(--ease);
+  }
+  .sb-overlay.open { opacity: 1; pointer-events: auto; }
+  .sb-link { min-height: 50px; }
+
+  /* شريط التبويب السفلي العائم */
+  .sb-tabbar {
+    display: flex; align-items: stretch; gap: 2px;
+    position: fixed; z-index: 997;
+    left: 12px; right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    height: 66px; padding: 6px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, var(--sb-bg-2), var(--sb-bg));
+    box-shadow: 0 14px 34px rgba(8, 30, 56, 0.4), 0 0 0 1px var(--sb-line);
+  }
+  .sb-tab {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    border-radius: 18px;
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    font-size: 0.625rem; font-weight: 700;
+    transition: background .2s var(--ease), color .2s var(--ease);
+  }
+  .sb-tab-ico { position: relative; display: flex; }
+  .sb-tab-ico .icon { width: 21px; height: 21px; }
+  .sb-tab-label { white-space: nowrap; }
+  .sb-tab.active { background: var(--sb-active-bg); color: var(--sb-accent); }
+  .sb-tab.active .sb-tab-label { color: #fff; }
+  .sb-tab:active { background: var(--sb-hover); }
+  .sb-tabbar .bn-badge {
+    position: absolute; top: -6px; left: -9px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    border-radius: 999px; display: none;
+    align-items: center; justify-content: center;
+    background: #F0788A; color: #fff;
+    font-size: 0.5625rem; font-weight: 800; line-height: 1;
+    border: 2px solid var(--sb-bg);
+  }
+  .sb-tabbar .bn-badge.show { display: flex; }
+
+  .admin-page { padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-panel, .sb-link, .sb-ico, .sb-theme-thumb, .sb-overlay { transition: none !important; }
+}

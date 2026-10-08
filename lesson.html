@@ -6,74 +6,163 @@
 <title>محاضرة — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
+<link rel="stylesheet" href="content-pages.css">
+<link rel="stylesheet" href="form-pages.css">
 <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 </head>
 <body>
 
-<nav class="admin-nav" id="adminNav"></nav>
+<nav class="sb" id="adminNav"></nav>
 
-<main class="admin-page" style="max-width:760px;">
-  <a class="back-link" id="backLink" href="home.html">رجوع للمحتوى</a>
-  <h1 class="page-title" id="pageTitle">إضافة محاضرة جديدة</h1>
-  <p class="page-sub">أضف عنوان المحاضرة ومعاد نشرها، ثم فيديوهات و/أو اختبارات حسب ما تريد. أسئلة كل اختبار تُدار في صفحة خاصة به.</p>
+<main class="admin-page">
+  <div class="cc-wrap lf">
+    <a class="back-link" id="backLink" href="home.html">رجوع للمحتوى</a>
 
-  <div class="form-msg" id="formMsg"></div>
-
-  <form id="lessonForm">
-    <div class="info-card">
-      <div class="field">
-        <label for="lessonTitle">عنوان المحاضرة</label>
-        <input type="text" id="lessonTitle" placeholder="مثال: المحاضرة الأولى - مقدمة" required>
+    <header class="lf-head">
+      <div>
+        <span class="lf-eyebrow" id="modeChip"></span>
+        <h1 id="pageTitle">إضافة محاضرة جديدة</h1>
+        <p id="pageSub">اكتب عنوان المحاضرة وموعد نشرها، ثم أضف فيديوهات و/أو اختبارات و/أو مرفقات حسب الحاجة. أسئلة كل اختبار تُدار في صفحة خاصة به.</p>
       </div>
-      <div class="field">
-        <label for="lessonRelease">معاد نشر المحاضرة</label>
-        <input type="datetime-local" id="lessonRelease" required>
-        <div class="field-hint">لن تظهر هذه المحاضرة قبل هذا الموعد، وحتى بعده لن تُفتح إلا بعد إكمال المحاضرة التي قبلها.</div>
-      </div>
-    </div>
+      <span class="lf-draft" id="draftStat" hidden></span>
+    </header>
 
-    <div class="admin-page-head" style="margin:26px 0 14px;">
-      <h3 style="font-family:'Cairo',sans-serif;font-weight:800;color:var(--primary-dark);margin:0;">الفيديوهات <span class="muted" style="font-size:0.75rem;">(اختياري)</span></h3>
-      <button type="button" class="btn btn-outline btn-sm" id="addVideoBtn" style="width:auto;">إضافة فيديو</button>
-    </div>
-    <div id="videosWrap"></div>
+    <div class="lf-msg" id="formMsg" role="alert"></div>
+    <div class="lf-notice" id="pubNotice" hidden></div>
 
-    <div class="admin-page-head" style="margin:30px 0 14px;">
-      <h3 style="font-family:'Cairo',sans-serif;font-weight:800;color:var(--primary-dark);margin:0;">الاختبارات <span class="muted" style="font-size:0.75rem;">(اختياري)</span></h3>
-      <button type="button" class="btn btn-outline btn-sm" id="addExamBtn" style="width:auto;">إضافة اختبار</button>
-    </div>
-    <div id="examsWrap"></div>
+    <form id="lessonForm" novalidate>
+      <div class="lf-layout">
 
-    <div class="admin-page-head" style="margin:30px 0 14px;">
-      <h3 style="font-family:'Cairo',sans-serif;font-weight:800;color:var(--primary-dark);margin:0;">المرفقات (PDF / صور) <span class="muted" style="font-size:0.75rem;">(اختياري)</span></h3>
-    </div>
-    <div class="info-card" style="margin-bottom:14px;">
-      <div class="field">
-        <label for="materialName">اسم المرفق</label>
-        <input type="text" id="materialName" placeholder="مثال: ملخص المحاضرة الأولى">
-      </div>
-      <div class="field">
-        <label for="materialUrl">رابط الملف (PDF أو صورة)</label>
-        <input type="url" id="materialUrl" placeholder="https://...">
-        <div class="field-hint">الصق رابط ملف مرفوع بالفعل على أي خدمة استضافة (Google Drive، Dropbox، إلخ)، وتأكد إن الرابط قابل للفتح المباشر.</div>
-      </div>
-      <div class="field">
-        <label>نوع المرفق</label>
-        <div style="display:flex; gap:10px;">
-          <label style="flex:1; display:flex; align-items:center; gap:8px; padding:10px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); cursor:pointer;">
-            <input type="radio" name="materialType" value="pdf" checked style="accent-color:var(--primary);"> PDF
-          </label>
-          <label style="flex:1; display:flex; align-items:center; gap:8px; padding:10px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); cursor:pointer;">
-            <input type="radio" name="materialType" value="image" style="accent-color:var(--primary);"> صورة
-          </label>
+        <div class="lf-main">
+
+          <!-- 1) البيانات الأساسية -->
+          <section class="lf-sec" id="secBasics" aria-labelledby="hBasics">
+            <div class="lf-sec-head">
+              <span class="lf-oct" id="octBasics">1</span>
+              <div class="lf-sec-title">
+                <h2 id="hBasics">بيانات المحاضرة</h2>
+                <p>العنوان وموعد الظهور للطلاب.</p>
+              </div>
+            </div>
+            <div class="lf-sec-body">
+              <div class="field" id="titleField">
+                <label for="lessonTitle">عنوان المحاضرة</label>
+                <input type="text" id="lessonTitle" placeholder="مثال: المحاضرة الأولى - مقدمة" maxlength="150" autocomplete="off">
+              </div>
+              <div class="field" id="releaseField">
+                <label for="lessonRelease">معاد نشر المحاضرة</label>
+                <input type="datetime-local" id="lessonRelease">
+                <div class="lf-quick" id="quickDates" role="group" aria-label="مواعيد سريعة">
+                  <button type="button" class="lf-chipbtn" data-q="now">الآن</button>
+                  <button type="button" class="lf-chipbtn" data-q="tomorrow">غدًا ٨ صباحًا</button>
+                  <button type="button" class="lf-chipbtn" data-q="week">بعد أسبوع</button>
+                </div>
+                <div class="lf-when" id="whenBox" hidden></div>
+              </div>
+              <div class="field">
+                <label for="lessonDescription">وصف المحاضرة <span class="lf-opt">اختياري</span></label>
+                <textarea id="lessonDescription" rows="3" maxlength="600" placeholder="يظهر للطالب في صفحة الفيديو"></textarea>
+                <div class="lf-counter" id="descCount">0 / 600</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2) الفيديوهات -->
+          <section class="lf-sec" id="secVideos" aria-labelledby="hVideos">
+            <div class="lf-sec-head">
+              <span class="lf-oct" id="octVideos">2</span>
+              <div class="lf-sec-title">
+                <h2 id="hVideos">الفيديوهات <span class="lf-count" id="cntVideos" hidden></span></h2>
+                <p>روابط يوتيوب، مع عدد المشاهدات المسموح به لكل طالب.</p>
+              </div>
+              <div class="lf-sec-actions"><button type="button" class="btn btn-outline btn-sm lf-add-btn" id="addVideoBtn">إضافة فيديو</button></div>
+            </div>
+            <div class="lf-sec-body">
+              <div class="lf-list" id="videosWrap"></div>
+              <div class="lf-empty" id="videosEmpty">
+                <span class="lf-empty-ico" id="icoVideosEmpty"></span>
+                <div><b>لا توجد فيديوهات بعد</b>اختياري. أضف فيديو إذا كانت المحاضرة تحتوي شرحًا مرئيًا.</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3) الاختبارات -->
+          <section class="lf-sec" id="secExams" aria-labelledby="hExams">
+            <div class="lf-sec-head">
+              <span class="lf-oct" id="octExams">3</span>
+              <div class="lf-sec-title">
+                <h2 id="hExams">الاختبارات <span class="lf-count" id="cntExams" hidden></span></h2>
+                <p>بطاقة ملخص لكل اختبار؛ الأسئلة نفسها تُحرَّر في صفحة مستقلة.</p>
+              </div>
+              <div class="lf-sec-actions"><button type="button" class="btn btn-outline btn-sm lf-add-btn" id="addExamBtn">إضافة اختبار</button></div>
+            </div>
+            <div class="lf-sec-body">
+              <div class="lf-list" id="examsWrap"></div>
+              <div class="lf-empty" id="examsEmpty">
+                <span class="lf-empty-ico" id="icoExamsEmpty"></span>
+                <div><b>لا توجد اختبارات بعد</b>اختياري. عند الإضافة تنتقل لصفحة الأسئلة وتعود هنا دون فقدان ما كتبته.</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 4) المرفقات -->
+          <section class="lf-sec" id="secMaterials" aria-labelledby="hMaterials">
+            <div class="lf-sec-head">
+              <span class="lf-oct" id="octMaterials">4</span>
+              <div class="lf-sec-title">
+                <h2 id="hMaterials">المرفقات <span class="lf-count" id="cntMaterials" hidden></span></h2>
+                <p>روابط ملفات PDF أو صور مرفوعة على أي خدمة استضافة.</p>
+              </div>
+            </div>
+            <div class="lf-sec-body">
+              <div class="lf-mat-add">
+                <div class="lf-mat-grid">
+                  <div class="field">
+                    <label for="materialName">اسم المرفق</label>
+                    <input type="text" id="materialName" placeholder="مثال: ملخص المحاضرة الأولى" autocomplete="off">
+                  </div>
+                  <div class="field">
+                    <label for="materialUrl">رابط الملف</label>
+                    <input type="url" id="materialUrl" placeholder="https://..." autocomplete="off">
+                  </div>
+                </div>
+                <div class="field-hint" style="margin:-4px 0 14px;">تأكد أن الرابط يفتح الملف مباشرة (Google Drive، Dropbox، إلخ).</div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+                  <div class="lf-seg" role="radiogroup" aria-label="نوع المرفق">
+                    <label><input type="radio" name="materialType" value="pdf" checked><span id="segPdf">PDF</span></label>
+                    <label><input type="radio" name="materialType" value="image"><span id="segImg">صورة</span></label>
+                  </div>
+                  <button type="button" class="btn btn-outline btn-sm lf-add-btn" id="addMaterialBtn">إضافة المرفق</button>
+                </div>
+              </div>
+              <div class="lf-list" id="materialsWrap"></div>
+            </div>
+          </section>
+
         </div>
-      </div>
-      <button type="button" class="btn btn-outline btn-sm" id="addMaterialBtn" style="width:auto;">إضافة المرفق</button>
-    </div>
-    <div id="materialsWrap"></div>
 
-    <button type="submit" class="btn btn-primary" id="saveBtn" style="margin-top:16px;">حفظ المحاضرة</button>
-  </form>
+        <!-- الملخص + الحفظ -->
+        <aside class="lf-rail" aria-label="ملخص المحاضرة">
+          <div class="lf-card">
+            <h2>ملخص المحاضرة</h2>
+            <dl class="lf-tiles">
+              <div><dd id="tileVideos">0</dd><dt>فيديو</dt></div>
+              <div><dd id="tileExams">0</dd><dt>اختبار</dt></div>
+              <div><dd id="tileMaterials">0</dd><dt>مرفق</dt></div>
+            </dl>
+            <ul class="lf-check" id="checkList"></ul>
+            <div class="lf-rail-actions">
+              <button type="submit" class="btn btn-gold" id="saveBtn">حفظ المحاضرة</button>
+              <a class="btn btn-outline" id="cancelBtn" href="home.html">إلغاء</a>
+            </div>
+            <p class="lf-rail-note">يُحفظ ما تكتبه تلقائيًا كمسودة على هذا الجهاز حتى تحفظ المحاضرة أو تضغط «إلغاء».</p>
+          </div>
+        </aside>
+
+      </div>
+    </form>
+  </div>
 </main>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -83,10 +172,17 @@
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
 <script>
-  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' رجوع للمحتوى';
-  document.getElementById('addVideoBtn').innerHTML = icon('plus') + ' إضافة فيديو';
-  document.getElementById('addExamBtn').innerHTML = icon('circlePlus') + ' إضافة اختبار جديد';
-  document.getElementById('saveBtn').innerHTML = icon('floppyDisk') + ' حفظ المحاضرة';
+  const $ = function (id) { return document.getElementById(id); };
+
+  $('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' رجوع للمحتوى';
+  $('addVideoBtn').innerHTML = icon('plus', 'icon-sm') + ' إضافة فيديو';
+  $('addExamBtn').innerHTML = icon('circlePlus', 'icon-sm') + ' إضافة اختبار';
+  $('saveBtn').innerHTML = icon('floppyDisk') + ' حفظ المحاضرة';
+  $('icoVideosEmpty').innerHTML = icon('video', 'icon-md');
+  $('icoExamsEmpty').innerHTML = icon('listCheck', 'icon-md');
+  $('segPdf').innerHTML = icon('filePdf', 'icon-sm') + ' PDF';
+  $('segImg').innerHTML = icon('image', 'icon-sm') + ' صورة';
+  $('addMaterialBtn').innerHTML = icon('plus', 'icon-sm') + ' إضافة المرفق';
 
   const params = new URLSearchParams(window.location.search);
   const compId = params.get('comp');
@@ -94,32 +190,53 @@
   if (!compId) window.location.href = 'home.html';
 
   let videoCounter = 0;
-  let materials = {}; // { materialId: { name, url, type, size } }
-  let examsData = []; // [{ localId, key, title, questions:[{key,text,options,correct,points}] }]
-  const videosWrap = document.getElementById('videosWrap');
-  const examsWrap = document.getElementById('examsWrap');
+  let materials = {}; // { materialId: { name, url, type, createdAt } }
+  let examsData = []; // [{ localId, key, title, releaseAt, duration, questionCount, questions:[{key,text,options,correct,points}] }]
+  let originalLesson = null;
+  const videosWrap = $('videosWrap');
+  const examsWrap = $('examsWrap');
   const draftKey = 'awab_lesson_draft::' + compId + '::' + (lessonId || 'new');
 
+  /* ---------------- البدء ---------------- */
   requireAdminAuth(function () {
     renderAdminNav('home');
-    const backLink = document.getElementById('backLink');
-    backLink.href = 'competition.html?id=' + encodeURIComponent(compId);
-    backLink.addEventListener('click', function () { localStorage.removeItem(draftKey); });
+    const compUrl = 'competition.html?id=' + encodeURIComponent(compId);
+    [$('backLink'), $('cancelBtn')].forEach(function (a) {
+      a.href = compUrl;
+      a.addEventListener('click', function () { localStorage.removeItem(draftKey); });
+    });
 
-    if (lessonId) document.getElementById('pageTitle').textContent = 'تعديل المحاضرة';
+    if (lessonId) {
+      $('modeChip').innerHTML = icon('pen', 'icon-sm') + ' تعديل';
+      $('pageTitle').textContent = 'تعديل المحاضرة';
+    } else {
+      $('modeChip').innerHTML = icon('plus', 'icon-sm') + ' جديدة';
+    }
 
     fetchOriginalLesson().then(function () {
+      if (lessonId && !originalLesson) showToast('تعذّر العثور على هذه المحاضرة. قد تكون حُذفت.', 'warning');
+      if (lessonId && originalLesson) {
+        if (originalLesson.title) $('pageSub').textContent = originalLesson.title;
+        if (originalLesson.releaseAt && originalLesson.releaseAt <= Date.now()) {
+          const n = $('pubNotice');
+          n.hidden = false;
+          n.innerHTML = icon('circleInfo', 'icon-md') + '<span>هذه المحاضرة منشورة بالفعل. إضافة فيديو أو سؤال جديد إليها ترسل إشعارًا للمشتركين عند الحفظ.</span>';
+        }
+      }
+
       const draftRaw = localStorage.getItem(draftKey);
       if (draftRaw) {
         try {
           const draft = JSON.parse(draftRaw);
-          document.getElementById('lessonTitle').value = draft.title || '';
-          document.getElementById('lessonRelease').value = draft.releaseAt || '';
-          (draft.videos || []).forEach(function (v) { addVideoBlock({ title: v.title, url: v.url }, v.key); });
+          $('lessonTitle').value = draft.title || '';
+          $('lessonRelease').value = draft.releaseAt || '';
+          $('lessonDescription').value = draft.description || '';
+          (draft.videos || []).forEach(function (v) { addVideoBlock({ title: v.title, url: v.url, maxViews: v.maxViews, durationMinutes: v.durationMinutes }, v.key); });
           materials = draft.materials || {};
           renderMaterialsList();
           examsData = draft.exams || [];
           renderExamsList();
+          refresh();
           return;
         } catch (e) { /* مسودة تالفة: نتابع بالتحميل العادي */ }
       }
@@ -128,11 +245,10 @@
       } else {
         renderExamsList();
       }
+      refresh();
       saveDraftToStorage();
     });
   });
-
-  let originalLesson = null;
 
   function fetchOriginalLesson() {
     if (!lessonId) return Promise.resolve(null);
@@ -143,8 +259,9 @@
   }
 
   function populateFormFromLesson(lesson) {
-    document.getElementById('lessonTitle').value = lesson.title || '';
-    if (lesson.releaseAt) document.getElementById('lessonRelease').value = toDatetimeLocalValue(lesson.releaseAt);
+    $('lessonTitle').value = lesson.title || '';
+    if (lesson.releaseAt) $('lessonRelease').value = toDatetimeLocalValue(lesson.releaseAt);
+    $('lessonDescription').value = lesson.description || '';
 
     const videos = lesson.videos || {};
     Object.keys(videos).forEach(function (vid) { addVideoBlock(videos[vid], vid); });
@@ -159,7 +276,7 @@
         const q = e.questions[qid];
         return { key: qid, text: q.text, options: q.options, correct: q.correct, points: q.points };
       });
-      return { localId: eid, key: eid, title: e.title, releaseAt: e.releaseAt ? toDatetimeLocalValue(e.releaseAt) : '', questions: questions };
+      return { localId: eid, key: eid, title: e.title, releaseAt: e.releaseAt ? toDatetimeLocalValue(e.releaseAt) : '', duration: e.duration || 10, questionCount: e.questionCount || 10, questions: questions };
     });
     renderExamsList();
   }
@@ -167,10 +284,11 @@
   /* ---------------- المسودة المؤقتة (لحفظ حالة النموذج أثناء التنقل لصفحة أسئلة الاختبار) ---------------- */
   function buildDraftObject() {
     return {
-      title: document.getElementById('lessonTitle').value,
-      releaseAt: document.getElementById('lessonRelease').value,
+      title: $('lessonTitle').value,
+      releaseAt: $('lessonRelease').value,
+      description: $('lessonDescription').value,
       videos: Array.from(videosWrap.children).map(function (block) {
-        return { key: block.dataset.key || '', title: block.querySelector('.v-title').value, url: block.querySelector('.v-url').value };
+        return { key: block.dataset.key || '', title: block.querySelector('.v-title').value, url: block.querySelector('.v-url').value, maxViews: block.querySelector('.v-maxviews').value, durationMinutes: block.querySelector('.v-duration').value };
       }),
       materials: materials,
       exams: examsData
@@ -178,20 +296,24 @@
   }
 
   function saveDraftToStorage() {
-    try { localStorage.setItem(draftKey, JSON.stringify(buildDraftObject())); }
-    catch (e) { console.warn('تعذر حفظ المسودة المؤقتة', e); }
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(buildDraftObject()));
+      const s = $('draftStat');
+      s.hidden = false;
+      s.classList.add('is-saved');
+      s.textContent = 'حُفظت مسودة تلقائيًا · ' + new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { console.warn('تعذر حفظ المسودة المؤقتة', e); }
   }
 
-  /* حفظ تلقائي أثناء الكتابة (عنوان المحاضرة، معادها، الفيديوهات) بحيث ريفريش
-     الصفحة أو قفل المتصفح/التطبيق قبل ما ينتقل لصفحة الأسئلة أو يضغط حفظ
-     ما يشيلش اللي كتبه. localStorage (مش sessionStorage) عشان يفضل موجود
+  /* حفظ تلقائي أثناء الكتابة بحيث ريفريش الصفحة أو قفل المتصفح قبل ما ينتقل لصفحة الأسئلة
+     أو يضغط حفظ ما يشيلش اللي كتبه. localStorage (مش sessionStorage) عشان يفضل موجود
      حتى لو الموبايل اتفصل ورجع على نفس الجهاز بعدين. */
-  let lessonAutosaveTimer = null;
-  function scheduleLessonAutosave() {
-    clearTimeout(lessonAutosaveTimer);
-    lessonAutosaveTimer = setTimeout(saveDraftToStorage, 300);
+  let autosaveTimer = null;
+  function scheduleAutosave() {
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(saveDraftToStorage, 300);
   }
-  document.addEventListener('input', scheduleLessonAutosave);
+  document.addEventListener('input', function () { scheduleAutosave(); refresh(); });
   window.addEventListener('beforeunload', saveDraftToStorage);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') saveDraftToStorage(); });
 
@@ -206,139 +328,316 @@
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
+  /* ---------------- ملخص وجاهزية (الشريط الجانبي + عدّادات الأقسام) ---------------- */
+  function setCount(id, n) {
+    const el = $(id);
+    el.hidden = n === 0;
+    el.textContent = n;
+  }
+
+  function examIssues(exam) {
+    const issues = [];
+    if (!(exam.title || '').trim()) issues.push('عنوان');
+    if (!(exam.questions || []).length) issues.push('أسئلة');
+    if (!exam.releaseAt) issues.push('موعد');
+    return issues;
+  }
+
+  function describeWhen() {
+    const v = $('lessonRelease').value;
+    const box = $('whenBox');
+    if (!v) { box.hidden = true; return; }
+    const ts = new Date(v).getTime();
+    if (isNaN(ts)) { box.hidden = true; return; }
+    const diff = ts - Date.now();
+    const mins = Math.round(Math.abs(diff) / 60000);
+    let rel;
+    if (mins < 2) rel = 'الآن';
+    else if (mins < 60) rel = (diff > 0 ? 'بعد ' : 'منذ ') + mins + ' دقيقة';
+    else if (mins < 60 * 48) rel = (diff > 0 ? 'بعد ' : 'منذ ') + Math.round(mins / 60) + ' ساعة';
+    else rel = (diff > 0 ? 'بعد ' : 'منذ ') + Math.round(mins / 1440) + ' يومًا';
+    const full = new Date(ts).toLocaleString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' });
+    let extra;
+    if (diff <= 60000) {
+      extra = lessonId ? 'الموعد حاضر أو مضى، فالمحاضرة متاحة للطلاب فور الحفظ.' : 'الموعد حاضر أو مضى، فتتاح فور الحفظ ويصل إشعار للمشتركين.';
+    } else {
+      extra = 'لن تظهر للطلاب قبل هذا الموعد، وحتى بعده لن تُفتح إلا بعد إكمال المحاضرة التي قبلها.';
+    }
+    box.hidden = false;
+    box.innerHTML = icon('calendar', 'icon-sm') + '<span><strong>' + escapeHtml(full) + '</strong> (' + rel + '). ' + extra + '</span>';
+  }
+
+  function refresh() {
+    const vCount = videosWrap.children.length;
+    const eCount = examsData.length;
+    const mCount = Object.keys(materials).length;
+
+    setCount('cntVideos', vCount); setCount('cntExams', eCount); setCount('cntMaterials', mCount);
+    $('tileVideos').textContent = vCount; $('tileExams').textContent = eCount; $('tileMaterials').textContent = mCount;
+    $('videosEmpty').hidden = vCount > 0;
+    $('examsEmpty').hidden = eCount > 0;
+
+    const titleOk = !!$('lessonTitle').value.trim();
+    const releaseOk = !!$('lessonRelease').value;
+    const contentOk = vCount + eCount + mCount > 0;
+    const badExams = examsData.filter(function (e) { return examIssues(e).length; }).length;
+
+    $('octBasics').classList.toggle('is-done', titleOk && releaseOk);
+    $('octVideos').classList.toggle('is-done', vCount > 0);
+    $('octExams').classList.toggle('is-done', eCount > 0 && badExams === 0);
+    $('octMaterials').classList.toggle('is-done', mCount > 0);
+
+    const items = [
+      { ok: titleOk, text: 'عنوان المحاضرة' },
+      { ok: releaseOk, text: 'موعد النشر' },
+      { ok: contentOk, text: 'فيديو أو اختبار أو مرفق واحد على الأقل' }
+    ];
+    if (eCount > 0) items.push({ ok: badExams === 0, bad: badExams > 0, text: badExams === 0 ? 'الاختبارات مكتملة' : (badExams + ' اختبار ناقص (عنوان / أسئلة / موعد)') });
+    $('checkList').innerHTML = items.map(function (it) {
+      return '<li class="' + (it.ok ? 'is-ok' : (it.bad ? 'is-bad' : '')) + '"><span class="lf-dot">' + icon('check') + '</span>' + escapeHtml(it.text) + '</li>';
+    }).join('');
+
+    $('descCount').textContent = $('lessonDescription').value.length + ' / 600';
+    describeWhen();
+  }
+
+  /* مواعيد سريعة */
+  $('quickDates').addEventListener('click', function (e) {
+    const b = e.target.closest('[data-q]');
+    if (!b) return;
+    const d = new Date();
+    if (b.dataset.q === 'tomorrow') { d.setDate(d.getDate() + 1); d.setHours(8, 0, 0, 0); }
+    if (b.dataset.q === 'week') { d.setDate(d.getDate() + 7); d.setHours(8, 0, 0, 0); }
+    $('lessonRelease').value = toDatetimeLocalValue(d.getTime());
+    $('releaseField').classList.remove('has-error');
+    refresh();
+    saveDraftToStorage();
+  });
+
   /* ---------------- الفيديوهات ---------------- */
   function addVideoBlock(existing, existingKey) {
     videoCounter++;
     const num = videoCounter;
     const block = document.createElement('div');
-    block.className = 'question-builder';
+    block.className = 'lf-item lf-video';
     block.dataset.key = existingKey || '';
     block.innerHTML =
-      '<div class="q-header"><h4>فيديو #<span class="v-index">' + num + '</span></h4>' +
-        '<button type="button" class="q-remove-btn">' + icon('trash', 'icon-sm') + ' حذف الفيديو</button></div>' +
-      '<div class="field"><label>عنوان الفيديو</label><input type="text" class="v-title" value="' + escapeHtml(existing ? existing.title : '') + '" placeholder="مثال: شرح الدرس" required></div>' +
-      '<div class="field" style="margin-bottom:0;"><label>رابط يوتيوب</label><input type="url" class="v-url" value="' + escapeHtml(existing ? existing.url : '') + '" placeholder="https://www.youtube.com/watch?v=..." required></div>';
-    videosWrap.appendChild(block);
-    block.querySelector('.q-remove-btn').addEventListener('click', function () { block.remove(); renumber(videosWrap, '.v-index'); });
-  }
-  document.getElementById('addVideoBtn').addEventListener('click', function () { addVideoBlock(); });
-
-  /* ---------------- الاختبارات (بطاقات ملخص فقط؛ الأسئلة تُدار في exam.html) ---------------- */
-  function renderExamsList() {
-    examsWrap.innerHTML = '';
-    if (examsData.length === 0) {
-      examsWrap.innerHTML = '<p class="muted" style="font-size:0.8125rem;margin:2px 0 4px;">لا توجد اختبارات مضافة بعد.</p>';
-      return;
-    }
-    examsData.forEach(function (exam, idx) {
-      const qCount = (exam.questions || []).length;
-      const totalPoints = (exam.questions || []).reduce(function (sum, q) { return sum + (parseInt(q.points, 10) || 0); }, 0);
-      const card = document.createElement('div');
-      card.className = 'question-builder';
-      card.style.borderColor = 'var(--primary-light)';
-      card.style.background = 'rgba(27,77,53,0.03)';
-      card.innerHTML =
-        '<div class="q-header"><h4>اختبار #' + (idx + 1) + (exam.title ? (' — ' + escapeHtml(exam.title)) : ' (بلا عنوان بعد)') + '</h4>' +
-          '<button type="button" class="q-remove-btn exam-del-btn" data-local="' + exam.localId + '">' + icon('trash', 'icon-sm') + ' حذف الاختبار</button></div>' +
-        '<div style="display:flex; gap:22px; flex-wrap:wrap; margin:6px 0 14px; font-size:0.8125rem; color:var(--text-muted);">' +
-          '<span>' + icon('listCheck', 'icon-sm') + ' عدد الأسئلة: <strong style="color:var(--primary-dark)">' + qCount + '</strong></span>' +
-          '<span>' + icon('medal', 'icon-sm') + ' إجمالي النقاط: <strong style="color:var(--primary-dark)">' + totalPoints + '</strong></span>' +
-          '<span>' + icon('clock', 'icon-sm') + ' ينزل: <strong style="color:var(--primary-dark)">' + (exam.releaseAt ? formatArabicDate(new Date(exam.releaseAt).getTime()) : 'لم يُحدد بعد') + '</strong></span>' +
+      '<div class="lf-item-head">' +
+        '<span class="lf-idx v-index">' + (videosWrap.children.length + 1) + '</span>' +
+        '<strong class="lf-item-title v-head">فيديو بلا عنوان</strong>' +
+        '<button type="button" class="lf-x" aria-label="حذف الفيديو">' + icon('trash', 'icon-sm') + '<span>حذف</span></button>' +
+      '</div>' +
+      '<div class="lf-video-body">' +
+        '<div class="lf-thumbcol"><div class="lf-thumb">' + icon('play', 'icon-lg') + '</div><div class="lf-thumb-stat"></div></div>' +
+        '<div class="lf-fields">' +
+          '<div class="field"><label for="vt' + num + '">عنوان الفيديو</label><input type="text" id="vt' + num + '" class="v-title" placeholder="مثال: شرح الدرس" autocomplete="off"></div>' +
+          '<div class="field"><label for="vu' + num + '">رابط يوتيوب</label><input type="url" id="vu' + num + '" class="v-url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off"></div>' +
+          '<div class="lf-pair">' +
+            '<div class="field"><label for="vm' + num + '">عدد المشاهدات المسموح بها</label><input type="number" id="vm' + num + '" class="v-maxviews" min="1" max="1000" placeholder="الافتراضي 3"></div>' +
+            '<div class="field"><label for="vd' + num + '">مدة الفيديو بالدقائق <span class="lf-opt">اختياري</span></label><input type="number" id="vd' + num + '" class="v-duration" min="1" max="1000" placeholder="تلقائي من يوتيوب"></div>' +
+          '</div>' +
         '</div>' +
-        '<button type="button" class="btn btn-outline btn-sm exam-edit-btn" data-local="' + exam.localId + '" style="width:auto;">' + icon('pen', 'icon-sm') + ' ' + (qCount ? 'تعديل الأسئلة' : 'إضافة الأسئلة') + '</button>';
-      examsWrap.appendChild(card);
+      '</div>';
+
+    // القيم تُكتب كخصائص (لا كنص HTML) حتى لا تنكسر بعلامات التنصيص
+    block.querySelector('.v-title').value = existing && existing.title ? existing.title : '';
+    block.querySelector('.v-url').value = existing && existing.url ? existing.url : '';
+    block.querySelector('.v-maxviews').value = existing && existing.maxViews ? existing.maxViews : '';
+    block.querySelector('.v-duration').value = existing && existing.durationMinutes ? existing.durationMinutes : '';
+
+    videosWrap.appendChild(block);
+    updateVideoBlock(block);
+
+    block.addEventListener('input', function () { updateVideoBlock(block); });
+    block.querySelector('.lf-x').addEventListener('click', function () {
+      if (block.dataset.key && !confirm('هذا الفيديو محفوظ بالفعل. هل تريد حذفه؟')) return;
+      block.remove();
+      renumber(videosWrap, '.v-index');
+      refresh();
+      saveDraftToStorage();
     });
-    examsWrap.querySelectorAll('.exam-edit-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () { saveDraftAndGoToExam(btn.dataset.local); });
-    });
-    examsWrap.querySelectorAll('.exam-del-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (!confirm('هل تريد حذف هذا الاختبار بالكامل؟')) return;
-        examsData = examsData.filter(function (e) { return e.localId !== btn.dataset.local; });
-        renderExamsList();
-        saveDraftToStorage();
-      });
-    });
+    return block;
   }
 
-  document.getElementById('addExamBtn').addEventListener('click', function () {
-    const localId = 'newexam_' + Date.now();
-    examsData.push({ localId: localId, key: '', title: '', releaseAt: '', questions: [] });
-    saveDraftAndGoToExam(localId);
+  function updateVideoBlock(block) {
+    const title = block.querySelector('.v-title').value.trim();
+    block.querySelector('.v-head').textContent = title || 'فيديو بلا عنوان';
+    const url = block.querySelector('.v-url').value.trim();
+    const vid = url ? extractYouTubeId(url) : null;
+    const thumb = block.querySelector('.lf-thumb');
+    const stat = block.querySelector('.lf-thumb-stat');
+    if (block._vid !== vid) {
+      const old = thumb.querySelector('img');
+      if (old) old.remove();
+      if (vid) {
+        const img = document.createElement('img');
+        img.alt = '';
+        img.onerror = function () { img.remove(); };
+        img.src = 'https://i.ytimg.com/vi/' + vid + '/mqdefault.jpg';
+        thumb.appendChild(img);
+      }
+      block._vid = vid;
+    }
+    if (!url) { stat.className = 'lf-thumb-stat'; stat.textContent = 'الصق رابط الفيديو لتظهر معاينته.'; }
+    else if (vid) { stat.className = 'lf-thumb-stat ok'; stat.textContent = 'رابط يوتيوب صحيح.'; }
+    else { stat.className = 'lf-thumb-stat bad'; stat.textContent = 'ليس رابط يوتيوب صالحًا.'; }
+  }
+
+  $('addVideoBtn').addEventListener('click', function () {
+    const b = addVideoBlock();
+    refresh();
+    b.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    b.querySelector('.v-title').focus({ preventScroll: true });
   });
 
   function renumber(container, selector) {
     Array.from(container.children).forEach(function (el, i) { el.querySelector(selector).textContent = i + 1; });
   }
 
+  /* ---------------- الاختبارات (بطاقات ملخص فقط؛ الأسئلة تُدار في exam.html) ---------------- */
+  function renderExamsList() {
+    examsWrap.innerHTML = '';
+    examsData.forEach(function (exam, idx) {
+      const qCount = (exam.questions || []).length;
+      const totalPoints = (exam.questions || []).reduce(function (sum, q) { return sum + (parseInt(q.points, 10) || 0); }, 0);
+      const issues = examIssues(exam);
+      const card = document.createElement('div');
+      card.className = 'lf-item lf-exam';
+      card.innerHTML =
+        '<div class="lf-item-head">' +
+          '<span class="lf-idx">' + (idx + 1) + '</span>' +
+          '<strong class="lf-item-title ex-title"></strong>' +
+          (issues.length ? '<span class="lf-warn">' + icon('circleInfo', 'icon-sm') + ' ناقص: ' + issues.join(' · ') + '</span>' : '') +
+          '<button type="button" class="lf-x exam-del-btn" aria-label="حذف الاختبار">' + icon('trash', 'icon-sm') + '<span>حذف</span></button>' +
+        '</div>' +
+        '<div class="lf-exam-body">' +
+          '<dl class="lf-stats">' +
+            '<div><dt>' + icon('listCheck', 'icon-sm') + ' الأسئلة</dt><dd>' + qCount + '</dd></div>' +
+            '<div><dt>' + icon('medal', 'icon-sm') + ' إجمالي النقاط</dt><dd>' + totalPoints + '</dd></div>' +
+            '<div><dt>' + icon('clock', 'icon-sm') + ' ينزل</dt><dd class="is-sm">' + (exam.releaseAt ? escapeHtml(formatArabicDate(new Date(exam.releaseAt).getTime())) : 'لم يُحدد بعد') + '</dd></div>' +
+          '</dl>' +
+          '<div class="lf-exam-actions"><button type="button" class="btn btn-outline btn-sm exam-edit-btn">' + icon('pen', 'icon-sm') + ' ' + (qCount ? 'تعديل الأسئلة والإعدادات' : 'إضافة الأسئلة') + '</button></div>' +
+        '</div>';
+      card.querySelector('.ex-title').textContent = exam.title ? exam.title : 'اختبار بلا عنوان';
+      card.querySelector('.exam-edit-btn').addEventListener('click', function () { saveDraftAndGoToExam(exam.localId); });
+      card.querySelector('.exam-del-btn').addEventListener('click', function () {
+        if (!confirm('هل تريد حذف هذا الاختبار بالكامل؟')) return;
+        examsData = examsData.filter(function (e) { return e.localId !== exam.localId; });
+        renderExamsList();
+        refresh();
+        saveDraftToStorage();
+      });
+      examsWrap.appendChild(card);
+    });
+    refresh();
+  }
+
+  $('addExamBtn').addEventListener('click', function () {
+    const localId = 'newexam_' + Date.now();
+    examsData.push({ localId: localId, key: '', title: '', releaseAt: '', questions: [] });
+    saveDraftAndGoToExam(localId);
+  });
+
   /* ---------------- المرفقات (روابط PDF / صور) ---------------- */
-  document.getElementById('addMaterialBtn').addEventListener('click', function () {
-    const nameInput = document.getElementById('materialName');
-    const urlInput = document.getElementById('materialUrl');
+  $('addMaterialBtn').addEventListener('click', function () {
+    const nameInput = $('materialName');
+    const urlInput = $('materialUrl');
     const name = nameInput.value.trim();
     const url = urlInput.value.trim();
     const type = document.querySelector('input[name="materialType"]:checked').value;
 
-    if (!name) { showToast('من فضلك اكتب اسم المرفق', 'warning'); return; }
-    if (!url) { showToast('من فضلك الصق رابط الملف', 'warning'); return; }
-    try { new URL(url); } catch (e) { showToast('الرابط غير صحيح', 'warning'); return; }
+    if (!name) { showToast('من فضلك اكتب اسم المرفق', 'warning'); nameInput.focus(); return; }
+    if (!url) { showToast('من فضلك الصق رابط الملف', 'warning'); urlInput.focus(); return; }
+    try { new URL(url); } catch (e) { showToast('الرابط غير صحيح', 'warning'); urlInput.focus(); return; }
 
     const materialId = 'm' + Date.now();
     materials[materialId] = { name: name, url: url, type: type, createdAt: Date.now() };
     renderMaterialsList();
+    saveDraftToStorage();
 
     nameInput.value = '';
     urlInput.value = '';
+    nameInput.focus();
   });
 
   function renderMaterialsList() {
-    const wrap = document.getElementById('materialsWrap');
-    const ids = Object.keys(materials);
-    if (ids.length === 0) { wrap.innerHTML = ''; return; }
-
-    wrap.innerHTML = ids.map(function (id) {
+    const wrap = $('materialsWrap');
+    wrap.innerHTML = '';
+    Object.keys(materials).forEach(function (id) {
       const m = materials[id];
-      return '<div class="material-upload-row" data-id="' + id + '">' +
-        '<span class="mu-icon">' + icon(m.type === 'pdf' ? 'filePdf' : 'image', 'icon-md') + '</span>' +
-        '<span class="mu-name">' + escapeHtml(m.name) + '</span>' +
-        '<button type="button" class="mu-remove" data-id="' + id + '">' + icon('trash', 'icon-sm') + '</button>' +
-      '</div>';
-    }).join('');
-
-    wrap.querySelectorAll('.mu-remove').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        delete materials[btn.dataset.id];
+      const isImg = m.type !== 'pdf';
+      const row = document.createElement('div');
+      row.className = 'lf-item lf-mat';
+      row.innerHTML =
+        '<span class="lf-mat-ico' + (isImg ? ' is-image' : '') + '">' + icon(isImg ? 'image' : 'filePdf', 'icon-md') + '</span>' +
+        '<div class="lf-mat-main"><b></b><a target="_blank" rel="noopener noreferrer"></a></div>' +
+        '<span class="lf-count">' + (isImg ? 'صورة' : 'PDF') + '</span>' +
+        '<button type="button" class="lf-x" aria-label="حذف المرفق">' + icon('trash', 'icon-sm') + '<span>حذف</span></button>';
+      row.querySelector('b').textContent = m.name;
+      const a = row.querySelector('a');
+      a.textContent = m.url;
+      a.href = m.url;
+      row.querySelector('.lf-x').addEventListener('click', function () {
+        delete materials[id];
         renderMaterialsList();
+        saveDraftToStorage();
       });
+      wrap.appendChild(row);
     });
+    refresh();
   }
 
   /* ---------------- الحفظ ---------------- */
-  document.getElementById('lessonForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    const msg = document.getElementById('formMsg');
-    msg.classList.remove('show');
+  const formMsg = $('formMsg');
+  function fail(message, el) {
+    formMsg.textContent = message;
+    formMsg.classList.add('show');
+    if (el) {
+      const f = el.closest('.field');
+      if (f) f.classList.add('has-error');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (el.focus) el.focus({ preventScroll: true });
+    } else {
+      formMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+  function clearErrors() {
+    formMsg.classList.remove('show');
+    document.querySelectorAll('.field.has-error').forEach(function (f) { f.classList.remove('has-error'); });
+  }
 
-    const title = document.getElementById('lessonTitle').value.trim();
-    const releaseInput = document.getElementById('lessonRelease').value;
-    if (!releaseInput) { msg.textContent = 'من فضلك حدد معاد نشر المحاضرة'; msg.className = 'form-msg show error'; return; }
+  $('lessonForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearErrors();
+
+    const title = $('lessonTitle').value.trim();
+    if (!title) { fail('اكتب عنوان المحاضرة.', $('lessonTitle')); return; }
+    const releaseInput = $('lessonRelease').value;
+    if (!releaseInput) { fail('من فضلك حدد معاد نشر المحاضرة.', $('lessonRelease')); return; }
     const releaseAt = new Date(releaseInput).getTime();
 
     // جمع الفيديوهات (نحافظ على نفس المعرف القديم عند التعديل حتى لا تنكسر روابط الإشعارات وتقدّم الطلاب)
     const videos = {};
     let newVideosCount = 0;
     let videoError = null;
+    let videoErrorEl = null;
     Array.from(videosWrap.children).forEach(function (block, i) {
+      if (videoError) return;
       const vTitle = block.querySelector('.v-title').value.trim();
       const vUrl = block.querySelector('.v-url').value.trim();
-      if (!extractYouTubeId(vUrl)) { videoError = 'رابط اليوتيوب غير صحيح في الفيديو #' + (i + 1); return; }
+      if (!vTitle) { videoError = 'اكتب عنوان الفيديو #' + (i + 1) + '.'; videoErrorEl = block.querySelector('.v-title'); return; }
+      if (!extractYouTubeId(vUrl)) { videoError = 'رابط اليوتيوب غير صحيح في الفيديو #' + (i + 1) + '.'; videoErrorEl = block.querySelector('.v-url'); return; }
       const existingKey = block.dataset.key;
       const key = existingKey || ('v' + i + '_' + Date.now());
       if (!existingKey) newVideosCount++;
       const oldVideo = existingKey && originalLesson && originalLesson.videos ? originalLesson.videos[existingKey] : null;
+      const vMax = parseInt(block.querySelector('.v-maxviews').value, 10);
+      const vDur = parseInt(block.querySelector('.v-duration').value, 10);
       videos[key] = { title: vTitle, url: vUrl, createdAt: (oldVideo && oldVideo.createdAt) || firebase.database.ServerValue.TIMESTAMP };
+      if (vMax > 0) videos[key].maxViews = vMax;
+      if (vDur > 0) videos[key].durationMinutes = vDur;
     });
-    if (videoError) { msg.textContent = videoError; msg.className = 'form-msg show error'; return; }
+    if (videoError) { fail(videoError, videoErrorEl); return; }
 
     // جمع الاختبارات من examsData (تُدار أسئلتها في صفحة exam.html المستقلة)
     const exams = {};
@@ -348,11 +647,11 @@
     examsData.forEach(function (exam, ei) {
       if (examError) return;
       const eTitle = (exam.title || '').trim();
-      if (!eTitle) { examError = 'أضف عنوانًا للاختبار #' + (ei + 1); return; }
-      if (!exam.releaseAt) { examError = 'حدد معاد نزول اختبار "' + eTitle + '"'; return; }
+      if (!eTitle) { examError = 'أضف عنوانًا للاختبار #' + (ei + 1) + ' من صفحة أسئلته.'; return; }
+      if (!exam.releaseAt) { examError = 'حدد معاد نزول اختبار "' + eTitle + '".'; return; }
       const examReleaseAt = new Date(exam.releaseAt).getTime();
       const qList = exam.questions || [];
-      if (qList.length === 0) { examError = 'أضف سؤالاً واحدًا على الأقل في اختبار "' + eTitle + '"'; return; }
+      if (qList.length === 0) { examError = 'أضف سؤالاً واحدًا على الأقل في اختبار "' + eTitle + '".'; return; }
 
       const examExistingKey = exam.key || '';
       if (!examExistingKey) newExamsCount++;
@@ -362,7 +661,7 @@
         const q = qList[qi];
         const options = q.options || [];
         if (!q.text || !q.text.trim() || options.length < 4 || options.some(function (o) { return !o || !String(o).trim(); }) || q.correct === null || q.correct === undefined) {
-          examError = 'تأكد من إكمال كل حقول السؤال #' + (qi + 1) + ' في اختبار "' + eTitle + '"';
+          examError = 'تأكد من إكمال كل حقول السؤال #' + (qi + 1) + ' في اختبار "' + eTitle + '".';
           break;
         }
         const qExistingKey = q.key || '';
@@ -374,21 +673,20 @@
 
       const examKey = examExistingKey || ('ex' + ei + '_' + Date.now());
       const oldExam = examExistingKey && originalLesson && originalLesson.exams ? originalLesson.exams[examExistingKey] : null;
-      exams[examKey] = { title: eTitle, releaseAt: examReleaseAt, questions: questions, createdAt: (oldExam && oldExam.createdAt) || firebase.database.ServerValue.TIMESTAMP };
+      exams[examKey] = { title: eTitle, releaseAt: examReleaseAt, duration: Math.max(1, parseInt(exam.duration, 10) || 10), questionCount: Math.max(1, parseInt(exam.questionCount, 10) || 10), questions: questions, createdAt: (oldExam && oldExam.createdAt) || firebase.database.ServerValue.TIMESTAMP };
     });
-    if (examError) { msg.textContent = examError; msg.className = 'form-msg show error'; return; }
+    if (examError) { fail(examError, $('secExams')); return; }
 
     if (Object.keys(videos).length === 0 && Object.keys(exams).length === 0 && Object.keys(materials).length === 0) {
-      msg.textContent = 'أضف فيديو واحدًا على الأقل أو اختبارًا واحدًا على الأقل أو مرفقًا واحدًا على الأقل';
-      msg.className = 'form-msg show error';
+      fail('أضف فيديو واحدًا على الأقل أو اختبارًا واحدًا على الأقل أو مرفقًا واحدًا على الأقل.', $('secVideos'));
       return;
     }
 
-    const saveBtn = document.getElementById('saveBtn');
+    const saveBtn = $('saveBtn');
     saveBtn.disabled = true;
-    saveBtn.textContent = 'جارٍ الحفظ...';
+    saveBtn.classList.add('is-loading');
 
-    const lessonData = { title: title, releaseAt: releaseAt, videos: videos, exams: exams, materials: materials, updatedAt: firebase.database.ServerValue.TIMESTAMP };
+    const lessonData = { title: title, description: ($('lessonDescription').value || '').trim(), releaseAt: releaseAt, videos: videos, exams: exams, materials: materials, updatedAt: firebase.database.ServerValue.TIMESTAMP };
 
     let writePromise;
     if (lessonId) {
@@ -406,7 +704,7 @@
       lessonData.createdAt = firebase.database.ServerValue.TIMESTAMP;
       writePromise = db.ref('competitions/' + compId + '/lessons').push(lessonData).then(function (ref) {
         // لو المحاضرة متاحة دلوقتي (معادها وصل أو فات)، نبلّغ المشتركين فورًا ونسجّل إنهم اتبعتلهم
-        // إشعار عشان النظام اللي في موقع المستخدم (checkAndNotifyReleasedLessons) محايبعتش لهم تاني.
+        // إشعار عشان النظام اللي في موقع المستخدم (checkAndNotifyReleasedLessons) ما يبعتش لهم تاني.
         // لو معادها لسه في المستقبل، مش هنبعت دلوقتي؛ هيتبعت تلقائيًا لما الطالب يفتح الموقع بعد المعاد.
         if (releaseAt <= Date.now()) {
           notifyEnrolledUsers('lesson', 'تمت إضافة محاضرة جديدة', lessonData.title || 'محاضرة جديدة');
@@ -425,10 +723,9 @@
       localStorage.removeItem(draftKey);
       window.location.href = 'competition.html?id=' + encodeURIComponent(compId);
     }).catch(function (err) {
-      msg.textContent = 'تعذر حفظ المحاضرة: ' + err.message;
-      msg.className = 'form-msg show error';
+      fail('تعذر حفظ المحاضرة: ' + (typeof explainDbError === 'function' ? explainDbError(err) : err.message));
       saveBtn.disabled = false;
-      saveBtn.innerHTML = icon('floppyDisk') + ' حفظ المحاضرة';
+      saveBtn.classList.remove('is-loading');
     });
   });
 

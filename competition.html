@@ -6,86 +6,87 @@
 <title>إدارة المحتوى — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
+<link rel="stylesheet" href="content-pages.css">
 <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 </head>
 <body>
 
-<nav class="admin-nav" id="adminNav"></nav>
+<nav class="sb" id="adminNav"></nav>
 
 <main class="admin-page">
-  <a class="back-link" href="home.html" id="backLink">كل المحتوى</a>
+  <div class="cc-wrap">
+    <a class="back-link" href="home.html" id="backLink">كل المحتوى</a>
 
-  <div class="admin-page-head">
-    <div>
-      <h1 class="page-title" id="compTitle">جارٍ التحميل...</h1>
-      <p class="page-sub" id="compDesc"></p>
-      <div id="compInstructorRow" style="display:none; align-items:center; gap:8px; margin-top:8px;">
-        <img id="compInstructorImg" src="" alt="" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:1px solid var(--border); display:none;">
-        <span id="compInstructorIconWrap" style="display:none; color:var(--gold);"></span>
-        <span style="font-size:0.8125rem; color:var(--text-muted);">المعلم: <strong id="compInstructorName" style="color:var(--text);"></strong></span>
+    <header class="cc-head">
+      <figure class="cc-arch" id="headArch"></figure>
+      <div>
+        <div class="cc-chips" id="headChips"></div>
+        <h1 class="cc-title" id="compTitle">جارٍ التحميل...</h1>
+        <p class="cc-desc is-clamped" id="compDesc"></p>
+        <button type="button" class="cc-desc-more" id="compDescMore" hidden>عرض المزيد</button>
+        <div class="cc-instructor" id="compInstructor" hidden></div>
+        <dl class="cc-stats" id="headStats"></dl>
       </div>
-    </div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button type="button" class="btn btn-outline" id="settingsToggleBtn" style="width:auto;">إعدادات المحتوى</button>
-      <a class="btn btn-outline" id="forumLink" href="#" style="width:auto;">منتدى الأسئلة</a>
-      <a class="btn btn-outline" id="participantsLink" href="#" style="width:auto;">المشتركون والنقاط</a>
-      <a class="btn btn-gold" id="addLessonLink" href="#" style="width:auto;">إضافة محاضرة جديدة</a>
-    </div>
-  </div>
+    </header>
 
-  <div class="info-card" id="settingsPanel" style="display:none; margin-bottom:22px;">
-    <div class="form-msg" id="settingsMsg"></div>
-    <div class="field">
-      <label>نوع المحتوى</label>
-      <div style="display:flex; gap:10px;">
-        <label style="flex:1; display:flex; align-items:center; gap:8px; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); cursor:pointer;">
-          <input type="radio" name="editContentType" value="course" style="accent-color:var(--primary);">
-          <span id="editCourseTypeIcon"></span> كورس
-        </label>
-        <label style="flex:1; display:flex; align-items:center; gap:8px; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); cursor:pointer;">
-          <input type="radio" name="editContentType" value="competition" style="accent-color:var(--gold);">
-          <span id="editCompTypeIcon"></span> مسابقة
-        </label>
-      </div>
-    </div>
-    <div class="field">
-      <label for="editTitle">الاسم</label>
-      <input type="text" id="editTitle" required>
-    </div>
-    <div class="field">
-      <label for="editDesc">الوصف (اختياري)</label>
-      <textarea id="editDesc" rows="4" style="width:100%; padding:13px 15px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; font-size:0.9375rem; resize:vertical;"></textarea>
-    </div>
-    <div class="field">
-      <label for="editCover">رابط صورة الغلاف (اختياري)</label>
-      <input type="url" id="editCover" placeholder="https://...">
-      <div class="field-hint">اتركه فارغًا لإزالة صورة الغلاف الحالية.</div>
-    </div>
-    <div id="editCoverPreviewWrap" style="display:none; margin-bottom:14px;">
-      <img id="editCoverPreview" alt="" style="max-height:140px; border-radius:var(--radius-sm); border:1px solid var(--border);">
-    </div>
-    <div class="field">
-      <label for="editInstructorName">اسم المعلم (اختياري)</label>
-      <input type="text" id="editInstructorName" placeholder="مثال: الأستاذ محمد أحمد">
-    </div>
-    <div class="field">
-      <label for="editInstructorPhoto">رابط صورة المعلم (اختياري)</label>
-      <input type="url" id="editInstructorPhoto" placeholder="https://...">
-      <div class="field-hint">اتركه فارغًا لإزالة صورة المعلم الحالية.</div>
-    </div>
-    <div id="editInstructorPreviewWrap" style="display:none; margin-bottom:14px;">
-      <img id="editInstructorPreview" alt="" style="width:56px; height:56px; object-fit:cover; border-radius:50%; border:1px solid var(--border);">
-    </div>
-    <div style="display:flex; gap:8px;">
-      <button type="button" class="btn btn-gold" id="saveSettingsBtn" style="width:auto;">حفظ التعديلات</button>
-      <button type="button" class="btn btn-ghost" id="cancelSettingsBtn" style="width:auto;">إلغاء</button>
-    </div>
-  </div>
+    <div class="cc-layout">
+      <section aria-labelledby="lessonsHeading">
+        <div class="cc-toolbar">
+          <h2 id="lessonsHeading">المحاضرات <span class="cc-count" id="lessonCount">0</span></h2>
+          <div class="cc-tools">
+            <div class="cc-search">
+              <input type="search" id="lessonSearch" placeholder="ابحث في المحاضرات" aria-label="ابحث في المحاضرات">
+            </div>
+            <div class="cc-seg" role="group" aria-label="تصفية المحاضرات" id="lessonFilter">
+              <button type="button" data-f="all" aria-pressed="true">الكل</button>
+              <button type="button" data-f="live" aria-pressed="false">منشورة</button>
+              <button type="button" data-f="scheduled" aria-pressed="false">مجدولة</button>
+            </div>
+            <a class="btn btn-gold btn-sm" id="addLessonLink" href="#">إضافة محاضرة</a>
+          </div>
+        </div>
 
-  <div id="lessonsWrap">
-    <div class="center-loading"><div class="loader"></div></div>
+        <ol class="cc-lessons" id="lessonsWrap">
+          <li class="skel cc-skel"></li><li class="skel cc-skel"></li><li class="skel cc-skel"></li>
+        </ol>
+      </section>
+
+      <aside class="cc-side" aria-label="إدارة المحتوى">
+        <h2>إدارة المحتوى</h2>
+        <a class="cc-side-link" id="participantsLink" href="#">
+          <span class="cc-side-ico" id="icoParticipants"></span>
+          <span><b>المشتركون والنقاط</b><small id="subsHint">جارٍ الحساب...</small></span>
+        </a>
+        <a class="cc-side-link" id="forumLink" href="#">
+          <span class="cc-side-ico" id="icoForum"></span>
+          <span><b>منتدى الأسئلة</b><small id="forumHint">جارٍ الحساب...</small></span>
+        </a>
+        <button type="button" class="cc-side-link" id="settingsBtn">
+          <span class="cc-side-ico" id="icoSettings"></span>
+          <span><b>إعدادات المحتوى</b><small>الاسم والوصف والغلاف والمعلم</small></span>
+        </button>
+      </aside>
+    </div>
   </div>
 </main>
+
+<div class="cc-overlay" id="drawerOverlay">
+  <aside class="cc-drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+    <div class="cc-drawer-head">
+      <h2 id="drawerTitle">إعدادات المحتوى</h2>
+      <button type="button" class="cc-icon-btn" id="drawerClose" aria-label="إغلاق"></button>
+    </div>
+    <div class="cc-drawer-body">
+      <div class="cc-formmsg" id="drawerMsg" role="alert"></div>
+      <div id="drawerForm"></div>
+    </div>
+    <div class="cc-drawer-foot">
+      <button type="button" class="btn btn-gold" id="saveSettingsBtn">حفظ التعديلات</button>
+      <button type="button" class="btn btn-outline" id="cancelSettingsBtn">إلغاء</button>
+    </div>
+  </aside>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -93,225 +94,324 @@
 <script src="firebase-config.js"></script>
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
+<script src="content-form.js"></script>
 <script>
-  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل المحتوى';
-  document.getElementById('settingsToggleBtn').innerHTML = icon('gear', 'icon-sm') + ' إعدادات المحتوى';
-  document.getElementById('editCourseTypeIcon').innerHTML = icon('bookOpen', 'icon-sm');
-  document.getElementById('editCompTypeIcon').innerHTML = icon('trophy', 'icon-sm');
-  document.getElementById('participantsLink').innerHTML = icon('medal', 'icon-sm') + ' المشتركون والنقاط';
-  document.getElementById('forumLink').innerHTML = icon('commentDots', 'icon-sm') + ' منتدى الأسئلة';
-  document.getElementById('addLessonLink').innerHTML = icon('plus') + ' إضافة محاضرة جديدة';
-  document.getElementById('compInstructorIconWrap').innerHTML = icon('graduationCap', 'icon-sm');
-
+  const $ = function (id) { return document.getElementById(id); };
   const params = new URLSearchParams(window.location.search);
   const compId = params.get('id');
   if (!compId) window.location.href = 'home.html';
+  const enc = encodeURIComponent(compId || '');
+
+  const GRIP = '<svg viewBox="0 0 14 18" fill="currentColor" aria-hidden="true"><circle cx="4" cy="3" r="1.6"/><circle cx="10" cy="3" r="1.6"/><circle cx="4" cy="9" r="1.6"/><circle cx="10" cy="9" r="1.6"/><circle cx="4" cy="15" r="1.6"/><circle cx="10" cy="15" r="1.6"/></svg>';
+
+  $('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' كل المحتوى';
+  $('addLessonLink').innerHTML = icon('plus', 'icon-sm') + ' إضافة محاضرة';
+  $('icoParticipants').innerHTML = icon('medal', 'icon-md');
+  $('icoForum').innerHTML = icon('commentDots', 'icon-md');
+  $('icoSettings').innerHTML = icon('gear', 'icon-md');
+  $('drawerClose').innerHTML = icon('xmark', 'icon-sm');
+  $('lessonSearch').insertAdjacentHTML('beforebegin', icon('search', 'icon-sm'));
+
+  let comp = null;
+  let lessons = {};
+  let filter = 'all';
+  let query = '';
 
   requireAdminAuth(function () {
     renderAdminNav('home');
-    document.getElementById('addLessonLink').href = 'lesson.html?comp=' + encodeURIComponent(compId);
-    document.getElementById('participantsLink').href = 'participants.html?id=' + encodeURIComponent(compId);
-    document.getElementById('forumLink').href = 'forum.html?id=' + encodeURIComponent(compId);
+    $('addLessonLink').href = 'lesson.html?comp=' + enc;
+    $('participantsLink').href = 'participants.html?id=' + enc;
+    $('forumLink').href = 'forum.html?id=' + enc;
     loadCompetition();
+    loadSideCounts();
   });
 
-  let currentComp = null;
-
+  /* ---------- تحميل المحتوى (لحظي) ---------- */
   function loadCompetition() {
     db.ref('competitions/' + compId).on('value', function (snap) {
       if (!snap.exists()) { window.location.href = 'home.html'; return; }
-      const comp = snap.val();
-      currentComp = comp;
-      document.getElementById('compTitle').textContent = comp.title || 'بدون عنوان';
-      document.getElementById('compDesc').textContent = comp.description || '';
-
-      const instrRow = document.getElementById('compInstructorRow');
-      if (comp.instructorName) {
-        instrRow.style.display = 'flex';
-        document.getElementById('compInstructorName').textContent = comp.instructorName;
-        const img = document.getElementById('compInstructorImg');
-        const iconWrap = document.getElementById('compInstructorIconWrap');
-        if (comp.instructorPhotoUrl) {
-          img.src = comp.instructorPhotoUrl; img.style.display = 'block'; iconWrap.style.display = 'none';
-        } else {
-          img.style.display = 'none'; iconWrap.style.display = 'inline-flex';
-        }
-      } else {
-        instrRow.style.display = 'none';
-      }
-
-      if (!settingsPanel.dataset.editing) populateSettingsForm(comp);
-      renderLessons(comp.lessons || {});
+      comp = snap.val();
+      lessons = comp.lessons || {};
+      document.title = (comp.title || 'المحتوى') + ' — لوحة تحكم أواب';
+      renderHead();
+      renderLessons();
+    }, function (err) {
+      $('lessonsWrap').innerHTML = '<li class="cc-error">تعذّر تحميل المحتوى: ' + escapeHtml(explainDbError(err)) + '</li>';
+      $('compTitle').textContent = 'تعذّر التحميل';
     });
   }
 
-  const settingsPanel = document.getElementById('settingsPanel');
-  const editTitleInput = document.getElementById('editTitle');
-  const editDescInput = document.getElementById('editDesc');
-  const editCoverInput = document.getElementById('editCover');
-  const coverPreviewWrap = document.getElementById('editCoverPreviewWrap');
-  const coverPreviewImg = document.getElementById('editCoverPreview');
-  const editInstructorNameInput = document.getElementById('editInstructorName');
-  const editInstructorPhotoInput = document.getElementById('editInstructorPhoto');
-  const instructorPreviewWrap = document.getElementById('editInstructorPreviewWrap');
-  const instructorPreviewImg = document.getElementById('editInstructorPreview');
-
-  function populateSettingsForm(comp) {
-    editTitleInput.value = comp.title || '';
-    editDescInput.value = comp.description || '';
-    editCoverInput.value = comp.coverUrl || '';
-    editInstructorNameInput.value = comp.instructorName || '';
-    editInstructorPhotoInput.value = comp.instructorPhotoUrl || '';
-    const type = comp.type === 'competition' ? 'competition' : 'course';
-    const radio = document.querySelector('input[name="editContentType"][value="' + type + '"]');
-    if (radio) radio.checked = true;
-    updateCoverPreview();
-    updateInstructorPreview();
-  }
-
-  function updateCoverPreview() {
-    const url = editCoverInput.value.trim();
-    if (url) {
-      coverPreviewImg.src = url;
-      coverPreviewWrap.style.display = 'block';
-    } else {
-      coverPreviewWrap.style.display = 'none';
-    }
-  }
-  editCoverInput.addEventListener('input', updateCoverPreview);
-
-  function updateInstructorPreview() {
-    const url = editInstructorPhotoInput.value.trim();
-    if (url) {
-      instructorPreviewImg.src = url;
-      instructorPreviewWrap.style.display = 'block';
-    } else {
-      instructorPreviewWrap.style.display = 'none';
-    }
-  }
-  editInstructorPhotoInput.addEventListener('input', updateInstructorPreview);
-
-  document.getElementById('settingsToggleBtn').addEventListener('click', function () {
-    const opening = settingsPanel.style.display === 'none';
-    if (opening && currentComp) populateSettingsForm(currentComp);
-    settingsPanel.style.display = opening ? 'block' : 'none';
-    settingsPanel.dataset.editing = opening ? '1' : '';
-  });
-
-  document.getElementById('cancelSettingsBtn').addEventListener('click', function () {
-    settingsPanel.style.display = 'none';
-    settingsPanel.dataset.editing = '';
-  });
-
-  document.getElementById('saveSettingsBtn').addEventListener('click', function () {
-    const msg = document.getElementById('settingsMsg');
-    const title = editTitleInput.value.trim();
-    if (!title) { msg.textContent = 'من فضلك اكتب الاسم'; msg.className = 'form-msg show error'; return; }
-    const description = editDescInput.value.trim();
-    const coverUrl = editCoverInput.value.trim();
-    const instructorName = editInstructorNameInput.value.trim();
-    const instructorPhotoUrl = editInstructorPhotoInput.value.trim();
-    const typeEl = document.querySelector('input[name="editContentType"]:checked');
-    const type = typeEl ? typeEl.value : 'course';
-    const btn = document.getElementById('saveSettingsBtn');
-    btn.disabled = true;
-    btn.textContent = 'جارٍ الحفظ...';
-    db.ref('competitions/' + compId).update({
-      title: title, description: description || '', coverUrl: coverUrl || null, type: type,
-      instructorName: instructorName || null, instructorPhotoUrl: instructorPhotoUrl || null
-    }).then(function () {
-      msg.textContent = 'تم حفظ التعديلات بنجاح';
-      msg.className = 'form-msg show success';
-      settingsPanel.dataset.editing = '';
-      btn.disabled = false;
-      btn.textContent = 'حفظ التعديلات';
-      setTimeout(function () { settingsPanel.style.display = 'none'; msg.classList.remove('show'); }, 1200);
-    }).catch(function (err) {
-      msg.textContent = 'تعذر الحفظ: ' + err.message;
-      msg.className = 'form-msg show error';
-      btn.disabled = false;
-      btn.textContent = 'حفظ التعديلات';
+  /* عدد المشتركين وأسئلة المنتدى التي بلا رد (للشريط الجانبي وشريط الأرقام) */
+  let subsCount = null;
+  function loadSideCounts() {
+    getEnrolledUids(compId).then(function (uids) {
+      subsCount = uids.length;
+      $('subsHint').textContent = subsCount === 0 ? 'لا يوجد مشتركون بعد' : subsCount + ' مشترك';
+      if (comp) renderStats();
     });
-  });
+    safeRead('forumQuestions/' + compId).then(function (f) {
+      let total = 0, pending = 0;
+      Object.keys(f).forEach(function (qid) { total++; if (!f[qid].adminReply) pending++; });
+      $('forumHint').textContent = pending > 0 ? pending + ' سؤال بانتظار الرد' : (total > 0 ? 'كل الأسئلة عليها رد' : 'لا توجد أسئلة بعد');
+      $('forumLink').classList.toggle('is-hot', pending > 0);
+    });
+  }
 
-  function renderLessons(lessons) {
-    const wrap = document.getElementById('lessonsWrap');
+  /* ---------- مساعدات ---------- */
+  function orderedIds() {
+    return Object.keys(lessons)
+      .map(function (id, i) { return { id: id, k: lessons[id].order !== undefined ? lessons[id].order : i }; })
+      .sort(function (a, b) { return a.k - b.k; })
+      .map(function (x) { return x.id; });
+  }
+  function isLive(l) { return !l.releaseAt || l.releaseAt <= Date.now(); }
+  function countOf(obj) { return obj ? Object.keys(obj).length : 0; }
 
-    // نرتب حسب حقل order المخزن؛ ولو محاضرة قديمة من غير order، بنحافظ على ترتيب الإنشاء كافتراضي
-    let ids = Object.keys(lessons);
-    if (ids.length === 0) {
-      wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon('video', 'icon-xl') + '</div><p>لا توجد محاضرات بعد. أضِف المحاضرة الأولى.</p></div>';
+  /* ---------- الرأس ---------- */
+  let lastCover = null, lastType = null;
+  function renderHead() {
+    const isComp = comp.type === 'competition';
+    $('compTitle').textContent = comp.title || 'بدون عنوان';
+    $('compDesc').textContent = comp.description || '';
+    (function () {
+      const d = $('compDesc'), m = $('compDescMore');
+      d.classList.add('is-clamped'); m.textContent = 'عرض المزيد'; m.hidden = true;
+      requestAnimationFrame(function () { m.hidden = !(d.scrollHeight > d.clientHeight + 1); });
+      m.onclick = function () {
+        const open = d.classList.toggle('is-clamped') === false;
+        m.textContent = open ? 'عرض أقل' : 'عرض المزيد';
+      };
+    })();
+
+    const cover = comp.coverUrl || '';
+    if (cover !== lastCover || comp.type !== lastType) {
+      $('headArch').innerHTML = icon(isComp ? 'trophy' : 'bookOpen', 'icon-xl') +
+        (cover ? '<img src="' + escapeHtml(cover) + '" alt="" onerror="this.remove()">' : '');
+      lastCover = cover; lastType = comp.type;
+    }
+
+    const scheduled = Object.keys(lessons).filter(function (id) { return !isLive(lessons[id]); }).length;
+    $('headChips').innerHTML =
+      '<span class="cc-chip' + (isComp ? ' comp' : '') + '">' + icon(isComp ? 'trophy' : 'bookOpen', 'icon-sm') + ' ' + (isComp ? 'مسابقة' : 'كورس') + '</span>' +
+      (scheduled > 0 ? '<span class="cc-chip warn">' + icon('clock', 'icon-sm') + ' ' + scheduled + ' محاضرة مجدولة</span>' : '');
+
+    const ins = $('compInstructor');
+    if (comp.instructorName) {
+      ins.hidden = false;
+      ins.innerHTML =
+        '<span class="cc-avatar">' + (comp.instructorPhotoUrl ? '<img src="' + escapeHtml(comp.instructorPhotoUrl) + '" alt="" onerror="this.remove()">' : icon('graduationCap', 'icon-sm')) + '</span>' +
+        '<span>المعلم: <strong>' + escapeHtml(comp.instructorName) + '</strong></span>';
+    } else {
+      ins.hidden = true; ins.innerHTML = '';
+    }
+    renderStats();
+  }
+
+  function renderStats() {
+    let videos = 0, exams = 0;
+    const ids = Object.keys(lessons);
+    ids.forEach(function (id) { videos += countOf(lessons[id].videos); exams += countOf(lessons[id].exams); });
+    const item = function (n, label) { return '<div><dt>' + label + '</dt><dd>' + n + '</dd></div>'; };
+    $('headStats').innerHTML = item(ids.length, 'محاضرة') + item(videos, 'فيديو') + item(exams, 'اختبار') + item(subsCount === null ? '—' : subsCount, 'مشترك');
+  }
+
+  /* ---------- قائمة المحاضرات ---------- */
+  function renderLessons() {
+    const wrap = $('lessonsWrap');
+    const all = orderedIds();
+    $('lessonCount').textContent = all.length;
+
+    if (all.length === 0) {
+      wrap.innerHTML =
+        '<li class="cc-empty"><div class="cc-empty-ico">' + icon('video', 'icon-lg') + '</div>' +
+        '<h3>ابدأ بأول محاضرة</h3><p>أضف فيديو أو اختبارًا أو مرفقًا، وستظهر هنا بالترتيب الذي يراه الطالب.</p>' +
+        '<a class="btn btn-gold btn-sm" href="lesson.html?comp=' + enc + '">' + icon('plus', 'icon-sm') + ' إضافة محاضرة</a></li>';
       return;
     }
-    ids = ids.map(function (id, i) { return { id: id, orderKey: (lessons[id].order !== undefined ? lessons[id].order : i) }; })
-             .sort(function (a, b) { return a.orderKey - b.orderKey; })
-             .map(function (x) { return x.id; });
 
-    const now = Date.now();
-    let html = '';
-    ids.forEach(function (lessonId, index) {
-      const lesson = lessons[lessonId];
-      const videoCount = lesson.videos ? Object.keys(lesson.videos).length : 0;
-      const examCount = lesson.exams ? Object.keys(lesson.exams).length : 0;
-      const materialCount = lesson.materials ? Object.keys(lesson.materials).length : 0;
-      const isLive = !lesson.releaseAt || lesson.releaseAt <= now;
-
-      html +=
-        '<div class="admin-lesson-row">' +
-          '<div class="info">' +
-            '<div class="lesson-num">' + (index + 1) + '</div>' +
-            '<div>' +
-              '<h4>' + escapeHtml(lesson.title || 'محاضرة') + '</h4>' +
-              '<div class="meta-row">' +
-                '<span>' + icon('video', 'icon-sm') + ' ' + videoCount + ' فيديو</span>' +
-                '<span>' + icon('listCheck', 'icon-sm') + ' ' + examCount + ' اختبار</span>' +
-                (materialCount > 0 ? '<span>' + icon('filePdf', 'icon-sm') + ' ' + materialCount + ' مرفق</span>' : '') +
-                '<span class="status-pill ' + (isLive ? 'live' : 'scheduled') + '">' +
-                  icon(isLive ? 'check' : 'clock', 'icon-sm') + ' ' + (isLive ? 'منشورة الآن' : 'تُنشر في ' + formatArabicDate(lesson.releaseAt)) +
-                '</span>' +
-              '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="actions" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">' +
-            '<div style="display:flex; flex-direction:column; gap:2px;">' +
-              '<button type="button" class="btn btn-ghost btn-sm move-up-btn" data-index="' + index + '" ' + (index === 0 ? 'disabled style="opacity:.35; width:auto; padding:4px 8px;"' : 'style="width:auto; padding:4px 8px;"') + '>' + icon('chevronUp', 'icon-sm') + '</button>' +
-              '<button type="button" class="btn btn-ghost btn-sm move-down-btn" data-index="' + index + '" ' + (index === ids.length - 1 ? 'disabled style="opacity:.35; width:auto; padding:4px 8px;"' : 'style="width:auto; padding:4px 8px;"') + '>' + icon('chevronDown', 'icon-sm') + '</button>' +
-            '</div>' +
-            '<a class="btn btn-outline btn-sm" href="lesson.html?comp=' + encodeURIComponent(compId) + '&lesson=' + encodeURIComponent(lessonId) + '">' + icon('pen', 'icon-sm') + ' تعديل</a>' +
-            '<button class="btn btn-ghost btn-sm delete-lesson-btn" data-id="' + lessonId + '">' + icon('trash', 'icon-sm') + ' حذف</button>' +
-          '</div>' +
-        '</div>';
-    });
-    wrap.innerHTML = html;
-
-    wrap.querySelectorAll('.delete-lesson-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (!confirm('حذف هذه المحاضرة بكل فيديوهاتها واختباراتها؟ لن يؤثر هذا على النقاط التي جمعها المستخدمون بالفعل.')) return;
-        db.ref('competitions/' + compId + '/lessons/' + btn.dataset.id).remove();
-      });
+    const q = query.trim().toLowerCase();
+    const reorderable = filter === 'all' && !q;
+    const shown = all.filter(function (id) {
+      const l = lessons[id];
+      if (filter === 'live' && !isLive(l)) return false;
+      if (filter === 'scheduled' && isLive(l)) return false;
+      return !q || (l.title || '').toLowerCase().indexOf(q) !== -1;
     });
 
-    // إعادة الترتيب: بنبدّل المحاضرة مع اللي جنبها، ثم نكتب order = 0..n-1 لكل المحاضرات دفعة واحدة
-    function moveLesson(index, dir) {
-      const newIndex = index + dir;
-      if (newIndex < 0 || newIndex >= ids.length) return;
-      const reordered = ids.slice();
-      const tmp = reordered[index];
-      reordered[index] = reordered[newIndex];
-      reordered[newIndex] = tmp;
-
-      const updateObj = {};
-      reordered.forEach(function (id, i) { updateObj['competitions/' + compId + '/lessons/' + id + '/order'] = i; });
-      db.ref().update(updateObj);
+    if (shown.length === 0) {
+      wrap.innerHTML = '<li class="cc-empty"><h3>لا توجد محاضرات مطابقة</h3><p>غيّر كلمة البحث أو التصفية.</p></li>';
+      return;
     }
 
-    wrap.querySelectorAll('.move-up-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () { moveLesson(parseInt(btn.dataset.index, 10), -1); });
-    });
-    wrap.querySelectorAll('.move-down-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () { moveLesson(parseInt(btn.dataset.index, 10), 1); });
-    });
+    wrap.innerHTML = shown.map(function (id) {
+      const l = lessons[id];
+      const idx = all.indexOf(id);
+      const live = isLive(l);
+      const v = countOf(l.videos), e = countOf(l.exams), m = countOf(l.materials);
+      const eid = encodeURIComponent(id);
+      return '<li class="cc-lesson' + (live ? '' : ' is-scheduled') + '" data-id="' + escapeHtml(id) + '">' +
+        '<span class="cc-node" aria-hidden="true">' + (idx + 1) + '</span>' +
+        '<div class="cc-lesson-card">' +
+          (reorderable ? '<span class="cc-grip" title="اسحب لإعادة الترتيب" aria-hidden="true">' + GRIP + '</span>' : '') +
+          '<div class="cc-lesson-main">' +
+            '<h3>' + escapeHtml(l.title || 'محاضرة بدون عنوان') + '</h3>' +
+            '<div class="cc-meta">' +
+              '<span>' + icon('video', 'icon-sm') + ' ' + v + ' فيديو</span>' +
+              '<span>' + icon('listCheck', 'icon-sm') + ' ' + e + ' اختبار</span>' +
+              (m > 0 ? '<span>' + icon('filePdf', 'icon-sm') + ' ' + m + ' مرفق</span>' : '') +
+              '<span class="status-pill ' + (live ? 'live' : 'scheduled') + '">' + icon(live ? 'check' : 'clock', 'icon-sm') + ' ' + (live ? 'منشورة الآن' : 'تُنشر في ' + formatArabicDate(l.releaseAt)) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="cc-lesson-actions">' +
+            (reorderable ?
+              '<span class="cc-move">' +
+                '<button type="button" class="cc-icon-btn" data-act="up" aria-label="نقل المحاضرة لأعلى"' + (idx === 0 ? ' disabled' : '') + '>' + icon('chevronUp', 'icon-sm') + '</button>' +
+                '<button type="button" class="cc-icon-btn" data-act="down" aria-label="نقل المحاضرة لأسفل"' + (idx === all.length - 1 ? ' disabled' : '') + '>' + icon('chevronDown', 'icon-sm') + '</button>' +
+              '</span>' : '') +
+            '<a class="btn btn-outline btn-xs cc-edit" href="lesson.html?comp=' + enc + '&lesson=' + eid + '">' + icon('pen', 'icon-sm') + ' تعديل</a>' +
+            '<button type="button" class="cc-icon-btn danger" data-act="del" aria-label="حذف المحاضرة" title="حذف المحاضرة">' + icon('trash', 'icon-sm') + '</button>' +
+          '</div>' +
+        '</div>' +
+      '</li>';
+    }).join('');
   }
+
+  /* التصفية والبحث */
+  $('lessonSearch').addEventListener('input', function (e) { query = e.target.value; renderLessons(); });
+  $('lessonFilter').addEventListener('click', function (e) {
+    const b = e.target.closest('button[data-f]');
+    if (!b) return;
+    filter = b.dataset.f;
+    Array.prototype.forEach.call($('lessonFilter').querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    renderLessons();
+  });
+
+  /* ---------- الترتيب والحذف ---------- */
+  function writeOrder(ids) {
+    const u = {};
+    ids.forEach(function (id, i) { u['competitions/' + compId + '/lessons/' + id + '/order'] = i; });
+    return db.ref().update(u).catch(function (err) { showToast('تعذّر حفظ الترتيب: ' + explainDbError(err), 'error'); });
+  }
+  function moveBy(id, dir) {
+    const ids = orderedIds();
+    const i = ids.indexOf(id), j = i + dir;
+    if (i < 0 || j < 0 || j >= ids.length) return;
+    ids.splice(j, 0, ids.splice(i, 1)[0]);
+    writeOrder(ids);
+  }
+  function moveTo(id, targetId, after) {
+    const ids = orderedIds();
+    ids.splice(ids.indexOf(id), 1);
+    const t = ids.indexOf(targetId);
+    ids.splice(t + (after ? 1 : 0), 0, id);
+    writeOrder(ids);
+  }
+
+  const list = $('lessonsWrap');
+  list.addEventListener('click', function (e) {
+    const btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    const id = btn.closest('.cc-lesson').dataset.id;
+    if (btn.dataset.act === 'up') moveBy(id, -1);
+    else if (btn.dataset.act === 'down') moveBy(id, 1);
+    else if (btn.dataset.act === 'del') {
+      if (!confirm('حذف هذه المحاضرة بكل فيديوهاتها واختباراتها؟ لن يؤثر هذا على النقاط التي جمعها المستخدمون بالفعل.')) return;
+      db.ref('competitions/' + compId + '/lessons/' + id).remove()
+        .then(function () { showToast('تم حذف المحاضرة', 'success'); })
+        .catch(function (err) { showToast('تعذّر حذف المحاضرة: ' + explainDbError(err), 'error'); });
+    }
+  });
+
+  /* السحب والإفلات (بالماوس؛ على اللمس تُستخدم أزرار النقل) */
+  let dragId = null;
+  function clearMarks() {
+    Array.prototype.forEach.call(list.querySelectorAll('.drop-before,.drop-after'), function (n) { n.classList.remove('drop-before', 'drop-after'); });
+  }
+  function endDrag() {
+    dragId = null; clearMarks();
+    Array.prototype.forEach.call(list.querySelectorAll('.cc-lesson'), function (n) { n.classList.remove('is-dragging'); n.draggable = false; });
+  }
+  list.addEventListener('pointerdown', function (e) {
+    const g = e.target.closest('.cc-grip');
+    if (g) g.closest('.cc-lesson').draggable = true;
+  });
+  list.addEventListener('pointerup', function () {
+    if (!dragId) Array.prototype.forEach.call(list.querySelectorAll('.cc-lesson'), function (n) { n.draggable = false; });
+  });
+  list.addEventListener('dragstart', function (e) {
+    const li = e.target.closest('.cc-lesson');
+    if (!li || !li.draggable) return;
+    dragId = li.dataset.id;
+    li.classList.add('is-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', dragId);
+  });
+  list.addEventListener('dragover', function (e) {
+    if (!dragId) return;
+    e.preventDefault();
+    const li = e.target.closest('.cc-lesson');
+    clearMarks();
+    if (!li || li.dataset.id === dragId) return;
+    const r = li.getBoundingClientRect();
+    li.classList.add(e.clientY - r.top > r.height / 2 ? 'drop-after' : 'drop-before');
+  });
+  list.addEventListener('drop', function (e) {
+    if (!dragId) return;
+    e.preventDefault();
+    const li = e.target.closest('.cc-lesson');
+    if (li && li.dataset.id !== dragId) moveTo(dragId, li.dataset.id, li.classList.contains('drop-after'));
+    endDrag();
+  });
+  list.addEventListener('dragend', endDrag);
+
+  /* ---------- درج إعدادات المحتوى ---------- */
+  const overlay = $('drawerOverlay');
+  const drawerMsg = $('drawerMsg');
+  let settingsForm = null, lastFocus = null;
+
+  function openDrawer() {
+    if (!comp) return;
+    lastFocus = document.activeElement;
+    if (!settingsForm) settingsForm = ContentForm.mount($('drawerForm'), { edit: true });
+    settingsForm.set({
+      type: comp.type === 'competition' ? 'competition' : 'course',
+      title: comp.title, description: comp.description, coverUrl: comp.coverUrl,
+      instructorName: comp.instructorName, instructorPhotoUrl: comp.instructorPhotoUrl
+    });
+    drawerMsg.classList.remove('show');
+    overlay.classList.add('open');
+    setTimeout(function () { settingsForm.focus(); }, 280);
+  }
+  function closeDrawer() {
+    overlay.classList.remove('open');
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  $('settingsBtn').addEventListener('click', openDrawer);
+  $('drawerClose').addEventListener('click', closeDrawer);
+  $('cancelSettingsBtn').addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeDrawer(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && overlay.classList.contains('open')) closeDrawer(); });
+
+  $('saveSettingsBtn').addEventListener('click', function () {
+    drawerMsg.classList.remove('show');
+    if (!settingsForm.validate()) return;
+    const v = settingsForm.get();
+    const btn = $('saveSettingsBtn');
+    btn.disabled = true; btn.classList.add('is-loading');
+    db.ref('competitions/' + compId).update({
+      title: v.title, description: v.description || '', coverUrl: v.coverUrl || null, type: v.type,
+      instructorName: v.instructorName || null, instructorPhotoUrl: v.instructorPhotoUrl || null
+    }).then(function () {
+      btn.disabled = false; btn.classList.remove('is-loading');
+      closeDrawer();
+      showToast('تم حفظ التعديلات', 'success');
+    }).catch(function (err) {
+      btn.disabled = false; btn.classList.remove('is-loading');
+      drawerMsg.textContent = 'تعذّر حفظ التعديلات: ' + explainDbError(err);
+      drawerMsg.classList.add('show');
+    });
+  });
 </script>
 </body>
 </html>

@@ -3,40 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
-<title>المشتركون — لوحة تحكم أواب</title>
+<title>المشتركون والنقاط — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
+<link rel="stylesheet" href="pages-v2.css">
 <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 </head>
 <body>
 
-<nav class="admin-nav" id="adminNav"></nav>
+<nav class="sb" id="adminNav"></nav>
 
 <main class="admin-page">
-  <a class="back-link" id="backLink" href="home.html">رجوع للمحتوى</a>
-  <h1 class="page-title" id="compTitle">المشتركون والنقاط</h1>
-  <p class="page-sub">كل مستخدم شارك في هذا المحتوى والنقاط التي جمعها</p>
+<div class="pv-page">
 
-  <div class="stat-grid" id="statGrid"></div>
+  <a class="pv-back" id="backLink" href="home.html"></a>
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr><th>#</th><th>الاسم</th><th>البريد الإلكتروني</th><th>محاضرات مكتملة</th><th>النقاط بهذا المحتوى</th><th>إجراءات</th></tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr><td colspan="6"><div class="center-loading" style="min-height:120px;"><div class="loader"></div></div></td></tr>
-      </tbody>
-    </table>
+  <header class="pv-head">
+    <div class="pv-head-main">
+      <div class="pv-head-ico gold" id="headIco"></div>
+      <div>
+        <h1 class="pv-title" id="compTitle">المشتركون والنقاط</h1>
+        <p class="pv-subtitle">كل طالب اشترك في هذا المحتوى، وتقدّمه والنقاط التي جمعها.</p>
+      </div>
+    </div>
+    <div class="pv-head-actions">
+      <button type="button" class="pv-btn" id="exportBtn" disabled></button>
+    </div>
+  </header>
+
+  <section class="pv-kpis" id="kpis" aria-label="ملخص المشتركين">
+    <div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div><div class="pv-skel pv-skel-kpi"></div>
+  </section>
+
+  <section class="pt-podium" id="podium" hidden aria-label="المتصدرون"></section>
+
+  <section class="pv-toolbar" id="toolbar" hidden>
+    <label class="pv-search" id="searchBox">
+      <span id="searchIco"></span>
+      <input type="search" id="searchInput" placeholder="ابحث بالاسم أو البريد الإلكتروني…" autocomplete="off" aria-label="بحث في المشتركين">
+      <button type="button" class="pv-search-clear" id="searchClear" aria-label="مسح البحث"></button>
+    </label>
+    <select class="pv-select" id="sortSelect" aria-label="ترتيب">
+      <option value="points">الأعلى نقاطًا</option>
+      <option value="progress">الأعلى تقدّمًا</option>
+      <option value="name">الاسم (أ–ي)</option>
+    </select>
+  </section>
+
+  <div class="pv-result-line" id="resultLine" hidden></div>
+  <div id="board" aria-live="polite">
+    <div class="pv-skel pv-skel-card"></div><div class="pv-skel pv-skel-card"></div><div class="pv-skel pv-skel-card"></div>
   </div>
+  <div class="vl-more" id="moreWrap" hidden><button type="button" class="pv-btn" id="moreBtn">عرض المزيد</button></div>
+
+</div>
 </main>
 
-<div class="modal-overlay" id="retakeModalOverlay">
-  <div class="modal modal-wide">
-    <button type="button" class="modal-close" id="retakeModalClose"><span class="icon"></span></button>
-    <h3 id="retakeModalTitle">إدارة محاولات الاختبار</h3>
-    <p class="page-sub" style="margin-top:-10px;">فتح أي اختبار لإعادة المحاولة متاح دايمًا لأي مشترك مهما كانت حالته (لم يبدأ، جارٍ، تم تسليمه، مقفول، عليه مخالفات أو لأ). عند إعادة المحاولة، تُحتسب أعلى نتيجة بين المحاولتين تلقائيًا ولا تُفقد نتيجة المستخدم الأفضل.</p>
-    <div id="retakeModalBody"><div class="center-loading" style="min-height:100px;"><div class="loader"></div></div></div>
+<!-- نافذة محاولات الاختبار لطالب -->
+<div class="pv-sheet-overlay" id="sheetOverlay">
+  <div class="pv-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="pv-sheet-head">
+      <div class="pv-sheet-title">
+        <h3 id="sheetTitle">محاولات الاختبار</h3>
+        <p id="sheetSub"></p>
+      </div>
+      <button type="button" class="pv-icon-btn" id="sheetClose" aria-label="إغلاق"></button>
+    </div>
+    <div class="pv-sheet-note" id="sheetNote"></div>
+    <div class="pv-sheet-body" id="sheetBody"></div>
   </div>
 </div>
 
@@ -46,12 +81,23 @@
 <script src="firebase-config.js"></script>
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
+<script src="pv-ui.js"></script>
 <script>
-  document.getElementById('backLink').innerHTML = icon('arrowRight', 'icon-sm') + ' رجوع للمحتوى';
-
+  const PAGE_SIZE = 20;
   const params = new URLSearchParams(window.location.search);
   const compId = params.get('id');
   if (!compId) window.location.href = 'home.html';
+
+  const state = { rows: [], compTitle: '', totalLessons: 0, query: '', sort: 'points', shown: PAGE_SIZE };
+
+  document.getElementById('backLink').innerHTML = icon('lArrowRight') + '<span>رجوع للمحتوى</span>';
+  document.getElementById('headIco').innerHTML = icon('lTrophy');
+  document.getElementById('exportBtn').innerHTML = icon('lDownload') + '<span>تصدير CSV</span>';
+  document.getElementById('searchIco').innerHTML = icon('lSearch');
+  document.getElementById('searchClear').innerHTML = icon('lX');
+  document.getElementById('sheetClose').innerHTML = icon('lX');
+  document.getElementById('sheetNote').innerHTML = icon('lShieldCheck') +
+    '<span>يمكنك فتح أي اختبار لإعادة المحاولة مهما كانت حالته. عند الإعادة تُحتسب أعلى نتيجة بين المحاولات تلقائيًا ولا يخسر الطالب أفضل درجة حصل عليها.</span>';
 
   requireAdminAuth(function () {
     renderAdminNav('home');
@@ -62,161 +108,293 @@
   function load() {
     Promise.all([
       db.ref('competitions/' + compId).once('value'),
-      db.ref('users').once('value'),
-      db.ref('userProgress').once('value'),
-      db.ref('enrollments/' + compId).once('value')
+      safeRead('users'),
+      safeRead('userProgress'),
+      getEnrolledUids(compId)
     ]).then(function (results) {
       const comp = results[0].val();
-      const users = results[1].val() || {};
-      const allProgress = results[2].val() || {};
-      const enrolled = results[3].val() || {};
+      const users = results[1] || {};
+      const allProgress = results[2] || {};
+      const enrolledUids = results[3] || [];
       if (!comp) { window.location.href = 'home.html'; return; }
-      document.getElementById('compTitle').textContent = 'مشتركو: ' + (comp.title || 'المحتوى');
 
-      const rows = [];
-      Object.keys(enrolled).forEach(function (uid) {
+      state.compTitle = comp.title || 'المحتوى';
+      document.getElementById('compTitle').textContent = 'مشتركو: ' + state.compTitle;
+      document.title = 'مشتركو ' + state.compTitle + ' — لوحة تحكم أواب';
+      state.totalLessons = Object.keys(comp.lessons || {}).length;
+
+      const rows = enrolledUids.map(function (uid) {
         const compProgress = (allProgress[uid] && allProgress[uid][compId]) || {};
-        const lessonIds = Object.keys(compProgress);
-        let points = 0;
-        let completedCount = 0;
-        lessonIds.forEach(function (lid) {
+        let points = 0, completed = 0;
+        Object.keys(compProgress).forEach(function (lid) {
           const lp = compProgress[lid];
-          if (lp.completed) { completedCount++; points += lp.earnedPoints || 0; }
+          if (!lp || typeof lp !== 'object') return;
+          if (lp.completed) completed++;
+          // النقاط المكتسبة تُحسب حتى لو المحاضرة لم تُعلَّم completed
+          points += Number(lp.earnedPoints) || 0;
         });
-
         const user = users[uid] || {};
-        rows.push({ uid: uid, name: user.name || 'مستخدم محذوف', email: user.email || '—', completedCount: completedCount, points: points });
+        return { uid: uid, name: user.name || 'مستخدم محذوف', email: user.email || '', deleted: !users[uid], completed: completed, points: points };
       });
 
+      // ترتيب النقاط (تعادل النقاط = نفس المركز)
       rows.sort(function (a, b) { return b.points - a.points; });
-      renderStats(rows);
-      renderTable(rows);
+      rows.forEach(function (r, i) {
+        r.rank = (i > 0 && rows[i - 1].points === r.points) ? rows[i - 1].rank : i + 1;
+      });
+      state.rows = rows;
+      state.totalLessons = Math.max(state.totalLessons, rows.reduce(function (m, r) { return Math.max(m, r.completed); }, 0));
+
+      document.getElementById('exportBtn').disabled = rows.length === 0;
+      document.getElementById('toolbar').hidden = rows.length === 0;
+      renderKpis(); renderPodium(); render();
+    }).catch(function (err) {
+      document.getElementById('kpis').innerHTML = '';
+      document.getElementById('board').innerHTML = emptyBlock('err', 'lAlert', 'تعذّر تحميل المشتركين', explainDbError(err), true);
+      const r = document.getElementById('retryBtn');
+      if (r) r.addEventListener('click', function () { location.reload(); });
     });
   }
 
-  function renderStats(rows) {
-    const totalPoints = rows.reduce(function (s, r) { return s + r.points; }, 0);
-    document.getElementById('statGrid').innerHTML =
-      '<div class="stat-card"><div class="stat-icon">' + icon('users', 'icon-md') + '</div><div><div class="stat-value">' + rows.length + '</div><div class="stat-label">مشترك</div></div></div>' +
-      '<div class="stat-card"><div class="stat-icon">' + icon('star', 'icon-md') + '</div><div><div class="stat-value">' + totalPoints + '</div><div class="stat-label">إجمالي النقاط الموزّعة</div></div></div>';
+  function emptyBlock(kind, ico, title, text, retry) {
+    return '<div class="pv-empty"><div class="pv-empty-ico ' + kind + '">' + icon(ico) + '</div><h3>' + escapeHtml(title) + '</h3><p>' + escapeHtml(text) + '</p>' +
+      (retry ? '<button type="button" class="pv-btn primary" id="retryBtn">' + icon('lRefresh') + '<span>إعادة المحاولة</span></button>' : '') + '</div>';
   }
 
-  function renderTable(rows) {
-    const body = document.getElementById('tableBody');
-    if (rows.length === 0) {
-      body.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:30px;">لا يوجد مشتركون بعد في هذا المحتوى</td></tr>';
+  /* ---------- مؤشرات ---------- */
+  function renderKpis() {
+    const rows = state.rows, n = rows.length;
+    const total = rows.reduce(function (s, r) { return s + r.points; }, 0);
+    const avg = n ? Math.round(total / n) : 0;
+    const done = rows.reduce(function (s, r) { return s + r.completed; }, 0);
+    const rate = (n && state.totalLessons) ? Math.round(done / (n * state.totalLessons) * 100) : 0;
+
+    function kpi(cls, ico, label, id, foot) {
+      return '<div class="pv-kpi ' + cls + '"><div class="pv-kpi-top"><span class="pv-kpi-label">' + label + '</span><span class="pv-kpi-ico">' + icon(ico) + '</span></div>' +
+        '<div class="pv-kpi-value" id="' + id + '">0</div><div class="pv-kpi-foot">' + foot + '</div></div>';
+    }
+    document.getElementById('kpis').innerHTML =
+      kpi('', 'lUsers', 'عدد المشتركين', 'kN', 'طالب مشترك في المحتوى') +
+      kpi('amber', 'lStar', 'إجمالي النقاط', 'kTotal', 'موزّعة على كل المشتركين') +
+      kpi('teal', 'lTarget', 'متوسط النقاط', 'kAvg', 'للطالب الواحد') +
+      kpi('violet', 'lCheckCircle', 'نسبة الإنجاز', 'kRate', state.totalLessons ? 'من ' + state.totalLessons.toLocaleString('ar-EG') + ' محاضرة' : 'لا محاضرات بعد');
+    pvAnimateNumber(document.getElementById('kN'), n);
+    pvAnimateNumber(document.getElementById('kTotal'), total);
+    pvAnimateNumber(document.getElementById('kAvg'), avg);
+    pvAnimateNumber(document.getElementById('kRate'), rate, '٪');
+  }
+
+  /* ---------- منصة المتصدرين ---------- */
+  function renderPodium() {
+    const el = document.getElementById('podium');
+    const top = state.rows.filter(function (r) { return r.points > 0; }).slice(0, 3);
+    if (top.length === 0 || state.query) { el.hidden = true; return; }
+    const cls = ['first', 'second', 'third'];
+    function pod(r, i) {
+      const av = pvAvatar(r.name);
+      return '<div class="pt-pod ' + cls[i] + '">' +
+        '<span class="pt-pod-medal">' + (i + 1) + '</span>' +
+        '<span class="pv-avatar" style="background:' + av.bg + ';color:' + av.fg + ';">' + escapeHtml(av.initial) + '</span>' +
+        '<span class="pt-pod-name" title="' + escapeHtml(r.name) + '">' + escapeHtml(r.name) + '</span>' +
+        '<span class="pt-pod-points">' + r.points.toLocaleString('ar-EG') + '<small>نقطة</small></span>' +
+        '<span class="pt-pod-sub">' + r.completed.toLocaleString('ar-EG') + ' محاضرة مكتملة</span>' +
+      '</div>';
+    }
+    // الأول في المنتصف: ترتيب DOM = الثاني، الأول، الثالث
+    const order = [1, 0, 2].filter(function (i) { return top[i]; });
+    el.innerHTML = order.map(function (i) { return pod(top[i], i); }).join('');
+    el.style.gridTemplateColumns = top.length === 1 ? 'minmax(0, 360px)' : top.length === 2 ? '1fr 1.12fr' : '';
+    el.style.justifyContent = top.length === 1 ? 'center' : '';
+    el.hidden = false;
+  }
+
+  /* ---------- التصفية والترتيب ---------- */
+  function filtered() {
+    const q = state.query.trim().toLowerCase();
+    const list = state.rows.filter(function (r) {
+      return !q || (r.name + ' ' + r.email).toLowerCase().indexOf(q) !== -1;
+    });
+    list.sort(function (a, b) {
+      if (state.sort === 'name') return a.name.localeCompare(b.name, 'ar');
+      if (state.sort === 'progress') return b.completed - a.completed || b.points - a.points;
+      return b.points - a.points || a.name.localeCompare(b.name, 'ar');
+    });
+    return list;
+  }
+
+  function render() {
+    const board = document.getElementById('board');
+    const line = document.getElementById('resultLine');
+    const moreWrap = document.getElementById('moreWrap');
+
+    if (state.rows.length === 0) {
+      line.hidden = true; moreWrap.hidden = true;
+      board.innerHTML = emptyBlock('', 'lUsers', 'لا يوجد مشتركون بعد', 'سيظهر هنا كل طالب يشترك في هذا المحتوى مع تقدّمه ونقاطه.', false);
       return;
     }
-    body.innerHTML = rows.map(function (r, i) {
-      const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
-      return '<tr>' +
-        '<td><span class="rank-badge ' + rankClass + '">' + (i + 1) + '</span></td>' +
-        '<td>' + escapeHtml(r.name) + '</td>' +
-        '<td>' + escapeHtml(r.email) + '</td>' +
-        '<td>' + r.completedCount + '</td>' +
-        '<td><strong>' + r.points + '</strong></td>' +
-        '<td><button type="button" class="btn btn-outline btn-xs manage-retake-btn" data-uid="' + r.uid + '" data-name="' + escapeHtml(r.name) + '" style="width:auto;">' + icon('rotateLeft', 'icon-sm') + ' الاختبارات</button></td>' +
-      '</tr>';
-    }).join('');
+    const rows = filtered();
+    if (rows.length === 0) {
+      line.hidden = true; moreWrap.hidden = true;
+      board.innerHTML = emptyBlock('', 'lSearch', 'لا نتائج مطابقة', 'جرّب اسمًا أو بريدًا آخر.', false);
+      return;
+    }
+    const maxPoints = state.rows.reduce(function (m, r) { return Math.max(m, r.points); }, 0) || 1;
+    const visible = rows.slice(0, state.shown);
+    line.hidden = false;
+    line.textContent = 'عرض ' + visible.length.toLocaleString('ar-EG') + ' من ' + rows.length.toLocaleString('ar-EG') + ' مشترك';
+    moreWrap.hidden = rows.length <= state.shown;
 
-    body.querySelectorAll('.manage-retake-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () { openRetakeModal(btn.dataset.uid, btn.dataset.name); });
-    });
+    board.innerHTML = '<div class="pt-board" role="table">' +
+      '<div class="pt-row-head" role="row"><span>#</span><span>الطالب</span><span>التقدّم</span><span>النقاط</span><span></span></div>' +
+      visible.map(function (r) { return rowHtml(r, maxPoints); }).join('') + '</div>';
   }
 
-  /* ---------------- نافذة إدارة محاولات الاختبار لأي مشترك ---------------- */
-  const retakeOverlay = document.getElementById('retakeModalOverlay');
-  const retakeBody = document.getElementById('retakeModalBody');
-
-  document.getElementById('retakeModalClose').querySelector('.icon').outerHTML = icon('xmark', 'icon-sm');
-  document.getElementById('retakeModalClose').addEventListener('click', closeRetakeModal);
-  retakeOverlay.addEventListener('click', function (e) { if (e.target === retakeOverlay) closeRetakeModal(); });
-  function closeRetakeModal() { retakeOverlay.classList.remove('open'); }
-
-  let currentModalUid = null;
-  function openRetakeModal(uid, name) {
-    currentModalUid = uid;
-    document.getElementById('retakeModalTitle').textContent = 'محاولات الاختبار — ' + name;
-    retakeBody.innerHTML = '<div class="center-loading" style="min-height:100px;"><div class="loader"></div></div>';
-    retakeOverlay.classList.add('open');
-    loadRetakeData(uid);
+  function rowHtml(r, maxPoints) {
+    const av = pvAvatar(r.name);
+    const total = state.totalLessons || 0;
+    const pct = total ? Math.min(100, Math.round(r.completed / total * 100)) : 0;
+    const ppct = Math.round(r.points / maxPoints * 100);
+    const rc = r.rank <= 3 && r.points > 0 ? ' r' + r.rank : '';
+    const nameHtml = r.deleted ? escapeHtml(r.name) : '<a href="user-detail.html?uid=' + encodeURIComponent(r.uid) + '">' + escapeHtml(r.name) + '</a>';
+    return '<div class="pt-row" role="row">' +
+      '<span class="pt-rank' + rc + '">' + r.rank.toLocaleString('ar-EG') + '</span>' +
+      '<div class="pt-person"><span class="pv-avatar" style="background:' + av.bg + ';color:' + av.fg + ';">' + escapeHtml(av.initial) + '</span>' +
+        '<span class="pt-person-text"><span class="pt-name">' + nameHtml + '</span>' + (r.email ? '<span class="pt-mail">' + escapeHtml(r.email) + '</span>' : '') + '</span></div>' +
+      '<div class="pt-prog"><div class="pt-prog-top"><span><span class="pt-label-m">المحاضرات: </span><b>' + r.completed.toLocaleString('ar-EG') + '</b>' + (total ? ' / ' + total.toLocaleString('ar-EG') : '') + '</span><span>' + pct.toLocaleString('ar-EG') + '٪</span></div>' +
+        '<div class="pt-bar"><i style="width:' + pct + '%"></i></div></div>' +
+      '<div class="pt-points"><span class="pt-points-num">' + icon('lStar') + r.points.toLocaleString('ar-EG') + '</span>' +
+        '<div class="pt-bar gold"><i style="width:' + ppct + '%"></i></div></div>' +
+      '<div class="pt-act"><button type="button" class="pv-btn sm" data-exams data-uid="' + escapeHtml(r.uid) + '">' + icon('lRotate') + '<span>الاختبارات</span></button></div>' +
+    '</div>';
   }
 
-  function loadRetakeData(uid) {
+  /* ---------- أحداث الأدوات ---------- */
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', pvDebounce(function () {
+    state.query = searchInput.value; state.shown = PAGE_SIZE;
+    document.getElementById('searchBox').classList.toggle('has-value', !!searchInput.value);
+    renderPodium(); render();
+  }, 160));
+  document.getElementById('searchClear').addEventListener('click', function () {
+    searchInput.value = ''; state.query = ''; state.shown = PAGE_SIZE;
+    document.getElementById('searchBox').classList.remove('has-value');
+    renderPodium(); render(); searchInput.focus();
+  });
+  document.getElementById('sortSelect').addEventListener('change', function (e) { state.sort = e.target.value; state.shown = PAGE_SIZE; render(); });
+  document.getElementById('moreBtn').addEventListener('click', function () { state.shown += PAGE_SIZE; render(); });
+
+  document.getElementById('exportBtn').addEventListener('click', function () {
+    const rows = [['المركز', 'الاسم', 'البريد الإلكتروني', 'محاضرات مكتملة', 'النقاط']];
+    state.rows.forEach(function (r) { rows.push([r.rank, r.name, r.email, r.completed, r.points]); });
+    pvDownloadCsv('مشتركو-' + state.compTitle.replace(/[\\/:*?"<>|]/g, '-') + '.csv', rows);
+    showToast('تم تجهيز ملف CSV.', 'success');
+  });
+
+  document.getElementById('board').addEventListener('click', function (e) {
+    const b = e.target.closest('[data-exams]');
+    if (b) openSheet(b.dataset.uid);
+  });
+
+  /* ============================================================
+     نافذة إدارة محاولات الاختبار لأي مشترك (نفس منطق Firebase السابق)
+     ============================================================ */
+  const overlay = document.getElementById('sheetOverlay');
+  const sheetBody = document.getElementById('sheetBody');
+  let sheetUid = null;
+
+  function openSheet(uid) {
+    const row = state.rows.find(function (r) { return r.uid === uid; });
+    sheetUid = uid;
+    document.getElementById('sheetTitle').textContent = 'محاولات الاختبار — ' + (row ? row.name : '');
+    document.getElementById('sheetSub').textContent = state.compTitle;
+    sheetBody.innerHTML = '<div class="pv-skel pv-skel-card"></div><div class="pv-skel pv-skel-card"></div>';
+    overlay.classList.add('open');
+    lockBodyScroll();
+    loadSheet(uid);
+  }
+  function closeSheet() {
+    if (!overlay.classList.contains('open')) return;
+    overlay.classList.remove('open');
+    unlockBodyScroll();
+  }
+  document.getElementById('sheetClose').addEventListener('click', closeSheet);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeSheet(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !document.querySelector('.pv-dialog-overlay')) closeSheet(); });
+
+  function loadSheet(uid) {
     Promise.all([
       db.ref('competitions/' + compId + '/lessons').once('value'),
-      db.ref('examAttempts').once('value'),
+      db.ref('examAttempts/' + compId).once('value'),
       db.ref('userProgress/' + uid + '/' + compId).once('value')
-    ]).then(function (results) {
-      const lessons = results[0].val() || {};
-      const allAttempts = results[1].val() || {};
-      const progress = results[2].val() || {};
-      renderRetakeList(uid, lessons, allAttempts, progress);
+    ]).then(function (res) {
+      if (uid !== sheetUid) return;
+      renderSheet(uid, res[0].val() || {}, res[1].val() || {}, res[2].val() || {});
+    }).catch(function (err) {
+      sheetBody.innerHTML = emptyBlock('err', 'lAlert', 'تعذّر التحميل', explainDbError(err), false);
     });
   }
 
-  function renderRetakeList(uid, lessons, allAttempts, progress) {
-    const lessonIds = Object.keys(lessons);
-    const examRows = [];
-    lessonIds.forEach(function (lid) {
-      const lesson = lessons[lid];
+  function renderSheet(uid, lessons, compAttempts, progress) {
+    const groups = [];
+    Object.keys(lessons).forEach(function (lid) {
+      const lesson = lessons[lid] || {};
       const exams = lesson.exams || {};
-      Object.keys(exams).forEach(function (eid) {
-        const exam = exams[eid];
-        const attempt = ((allAttempts[compId] || {})[lid] || {})[eid] || {};
-        const userAttempt = attempt[uid];
-        examRows.push({ lessonId: lid, lessonTitle: lesson.title || 'محاضرة', examId: eid, examTitle: exam.title || 'اختبار', attempt: userAttempt });
+      const items = Object.keys(exams).map(function (eid) {
+        const attempt = ((compAttempts[lid] || {})[eid] || {})[uid];
+        return { lid: lid, eid: eid, title: (exams[eid] && exams[eid].title) || 'اختبار', attempt: attempt };
       });
+      if (items.length) groups.push({ lid: lid, title: lesson.title || 'محاضرة', items: items });
     });
 
-    if (examRows.length === 0) {
-      retakeBody.innerHTML = '<p style="color:var(--text-muted); font-size:0.8438rem;">لا توجد اختبارات في هذا المحتوى بعد.</p>';
+    if (groups.length === 0) {
+      sheetBody.innerHTML = emptyBlock('', 'lBook', 'لا توجد اختبارات', 'لم تُضف اختبارات لهذا المحتوى بعد.', false);
       return;
     }
 
-    const lessonEarned = (lid) => (progress[lid] && progress[lid].earnedPoints) || 0;
-
-    retakeBody.innerHTML = examRows.map(function (row) {
-      let statusHtml;
-      if (!row.attempt) {
-        statusHtml = '<span class="status-pill" style="background:var(--bg); color:var(--text-muted);">' + icon('clock', 'icon-sm') + ' لم يبدأ بعد</span>';
-      } else if (row.attempt.submitted) {
-        statusHtml = '<span class="status-pill live">' + icon('check', 'icon-sm') + ' تم التسليم' + (row.attempt.submittedAt ? ' — ' + formatArabicDate(row.attempt.submittedAt) : '') + '</span>';
-      } else {
-        statusHtml = '<span class="status-pill scheduled">' + icon('hourglass', 'icon-sm') + ' جارٍ التنفيذ الآن</span>';
-      }
-      return '<div class="admin-lesson-row" style="margin-bottom:10px;">' +
-        '<div class="info">' +
-          '<div>' +
-            '<h4 style="margin:0 0 4px;">' + escapeHtml(row.examTitle) + '</h4>' +
-            '<div class="meta-row"><span>' + escapeHtml(row.lessonTitle) + '</span>' + statusHtml + '<span>' + icon('star', 'icon-sm') + ' نقاط المحاضرة الحالية: ' + lessonEarned(row.lessonId) + '</span></div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="actions">' +
-          '<button type="button" class="btn btn-gold btn-sm reopen-exam-btn" data-lesson="' + row.lessonId + '" data-exam="' + row.examId + '">' + icon('rotateLeft', 'icon-sm') + ' فتح لإعادة المحاولة</button>' +
-        '</div>' +
-      '</div>';
+    sheetBody.innerHTML = groups.map(function (g) {
+      const earned = (progress[g.lid] && Number(progress[g.lid].earnedPoints)) || 0;
+      return '<section><div class="ex-lesson-title">' + icon('lBook') + '<span>' + escapeHtml(g.title) + '</span><span style="margin-inline-start:auto;">' + icon('lStar') + ' ' + earned.toLocaleString('ar-EG') + ' نقطة</span></div>' +
+        g.items.map(function (it) {
+          const a = it.attempt;
+          let state_, meta = '';
+          if (!a) state_ = '<span class="ex-state">' + icon('lClock') + 'لم يبدأ</span>';
+          else if (a.submitted) {
+            state_ = '<span class="ex-state done">' + icon('lCheckCircle') + 'تم التسليم</span>';
+            if (a.submittedAt) meta += '<span>' + formatArabicDate(a.submittedAt) + '</span>';
+            if (a.bestScore != null && a.bestMaxScore != null) meta += '<span>أفضل درجة: ' + Number(a.bestScore).toLocaleString('ar-EG') + ' / ' + Number(a.bestMaxScore).toLocaleString('ar-EG') + '</span>';
+            if (a.attemptsCount) meta += '<span>المحاولات: ' + Number(a.attemptsCount).toLocaleString('ar-EG') + '</span>';
+          } else state_ = '<span class="ex-state run">' + icon('lHourglass') + 'جارٍ الآن</span>';
+          return '<div class="ex-item"><div class="ex-main"><span class="ex-name">' + escapeHtml(it.title) + '</span>' +
+            '<div class="ex-meta">' + state_ + meta + '</div></div>' +
+            '<button type="button" class="pv-btn sm primary" data-reopen data-lid="' + escapeHtml(it.lid) + '" data-eid="' + escapeHtml(it.eid) + '" data-title="' + escapeHtml(it.title) + '">' + icon('lUndo') + '<span>فتح لإعادة المحاولة</span></button></div>';
+        }).join('') + '</section>';
     }).join('');
-
-    retakeBody.querySelectorAll('.reopen-exam-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (!confirm('فتح هذا الاختبار لإعادة المحاولة؟ سيقدر المستخدم يبدأ محاولة جديدة بغض النظر عن أي حالة سابقة (لم يبدأ / مقفول / عليه مخالفات أو لأ)، وهتُحتسب أعلى نتيجة بين المحاولتين تلقائيًا.')) return;
-        const lid = btn.dataset.lesson, eid = btn.dataset.exam;
-        const examRef = compId + '_' + lid + '_' + eid;
-        btn.disabled = true;
-        Promise.all([
-          resetExamAttempt(compId, lid, eid, currentModalUid),
-          clearExamViolations(currentModalUid, examRef)
-        ]).then(function () {
-          loadRetakeData(currentModalUid);
-        }).catch(function (err) {
-          showToast('تعذر فتح الاختبار: ' + err.message, 'error');
-          btn.disabled = false;
-        });
-      });
-    });
   }
 
+  sheetBody.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-reopen]');
+    if (!btn) return;
+    const lid = btn.dataset.lid, eid = btn.dataset.eid, title = btn.dataset.title, uid = sheetUid;
+    pvConfirm({
+      title: 'فتح الاختبار لإعادة المحاولة؟',
+      message: 'سيتمكن الطالب من بدء محاولة جديدة في «' + title + '» بغض النظر عن حالته السابقة، وتُحتسب أعلى نتيجة بين المحاولتين.',
+      confirmText: 'نعم، افتح الاختبار', tone: 'primary', icon: 'lUndo'
+    }).then(function (ok) {
+      if (!ok) return;
+      const examRef = compId + '_' + lid + '_' + eid;
+      btn.disabled = true;
+      Promise.all([
+        resetExamAttempt(compId, lid, eid, uid),
+        clearExamViolations(uid, examRef)
+      ]).then(function () {
+        showToast('تم فتح الاختبار لإعادة المحاولة.', 'success');
+        loadSheet(uid);
+      }).catch(function (err) {
+        showToast('تعذّر فتح الاختبار: ' + explainDbError(err), 'error');
+        btn.disabled = false;
+      });
+    });
+  });
 </script>
 </body>
 </html>

@@ -6,34 +6,38 @@
 <title>الحسابات — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
 <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 </head>
 <body>
 
-<nav class="admin-nav" id="adminNav"></nav>
+<nav class="sb" id="adminNav"></nav>
 
 <main class="admin-page">
   <h1 class="page-title">الحسابات المسجّلة</h1>
-  <p class="page-sub">كل المستخدمين المسجّلين على المنصة</p>
+  <div class="acct-meta" id="acctMeta"></div>
 
-  <div class="stat-grid" id="statGrid"></div>
-
-  <div class="accounts-toolbar">
-    <div class="search-wrap">
-      <input type="text" id="searchBox" placeholder="ابحث بالاسم أو البريد الإلكتروني أو رقم الهاتف...">
-      <span class="icon" id="searchIcon"></span>
+  <section class="acct-panel">
+    <div class="acct-bar">
+      <div class="acct-tabs" id="acctTabs" role="group" aria-label="تصفية الحسابات"></div>
+      <div class="acct-tools">
+        <div class="acct-search">
+          <input type="text" id="searchBox" placeholder="ابحث بالاسم أو البريد الإلكتروني أو رقم الهاتف..." aria-label="بحث في الحسابات">
+          <span class="icon" id="searchIcon"></span>
+        </div>
+        <select class="acct-sort" id="sortSelect" aria-label="ترتيب الحسابات">
+          <option value="newest">الأحدث تسجيلاً</option>
+          <option value="points">الأعلى نقاطًا</option>
+          <option value="name">الاسم أبجديًا</option>
+          <option value="blocked">المحظورون أولاً</option>
+        </select>
+      </div>
     </div>
-    <select class="sort-select" id="sortSelect">
-      <option value="newest">الأحدث تسجيلاً</option>
-      <option value="points">الأعلى نقاطًا</option>
-      <option value="name">الاسم أبجديًا</option>
-      <option value="blocked">المحظورون أولاً</option>
-    </select>
-  </div>
 
-  <div class="accounts-grid" id="accountsGrid">
-    <div class="center-loading" style="grid-column:1/-1;"><div class="loader"></div></div>
-  </div>
+    <div id="accountsGrid">
+      <div class="center-loading"><div class="loader"></div></div>
+    </div>
+  </section>
 </main>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -46,129 +50,201 @@
   document.getElementById('searchIcon').innerHTML = icon('search', 'icon-sm');
 
   let allUsers = [];
+  let progressAll = {};
+  let activeFilter = 'all';
+  let myUid = null;
 
-  requireAdminAuth(function () {
+  // تبويبات التصفية: "الطلاب" = كل الحسابات غير المسؤولة (محظورة أو لا)
+  const FILTERS = [
+    { key: 'all',      label: 'الكل',       test: function () { return true; } },
+    { key: 'students', label: 'الطلاب',     test: function (u) { return u.isAdmin !== true; } },
+    { key: 'blocked',  label: 'المحظورون',  test: function (u) { return u.blocked === true; } },
+    { key: 'admins',   label: 'المسؤولون',  test: function (u) { return u.isAdmin === true; } }
+  ];
+
+  requireAdminAuth(function (user) {
+    myUid = user.uid;
     renderAdminNav('users');
     loadUsers();
   });
 
   function loadUsers() {
-    db.ref('users').on('value', function (snap) {
-      const data = snap.val() || {};
-      allUsers = Object.keys(data)
-        .map(function (uid) { return Object.assign({ uid: uid }, data[uid]); });
-      renderStats();
-      applyFilters();
+    // التقدّم أولاً (لحساب النقاط الفعلية) ثم الاستماع اللحظي للحسابات
+    safeRead('userProgress').then(function (p) {
+      progressAll = p || {};
+      db.ref('users').on('value', function (snap) {
+        const data = snap.val() || {};
+        allUsers = Object.keys(data).map(function (uid) {
+          const u = data[uid] || {};
+          return Object.assign({ uid: uid }, u, { points: getUserPoints(u, progressAll[uid]) });
+        });
+        renderMeta();
+        renderTabs();
+        applyFilters();
+      }, function (err) {
+        document.getElementById('accountsGrid').innerHTML = '<div class="empty-state"><p style="color:var(--danger);">تعذر تحميل الحسابات: ' + escapeHtml(explainDbError(err)) + '</p></div>';
+      });
     });
   }
 
-  function renderStats() {
+  function renderMeta() {
     const totalPoints = allUsers.reduce(function (sum, u) { return sum + (u.points || 0); }, 0);
-    const blockedCount = allUsers.filter(function (u) { return u.blocked === true; }).length;
-    document.getElementById('statGrid').innerHTML =
-      '<div class="stat-card"><div class="stat-icon">' + icon('users', 'icon-md') + '</div><div><div class="stat-value">' + allUsers.length + '</div><div class="stat-label">حساب مسجّل</div></div></div>' +
-      '<div class="stat-card"><div class="stat-icon">' + icon('star', 'icon-md') + '</div><div><div class="stat-value">' + totalPoints + '</div><div class="stat-label">إجمالي النقاط الموزّعة</div></div></div>' +
-      '<div class="stat-card"><div class="stat-icon">' + icon('lock', 'icon-md') + '</div><div><div class="stat-value">' + blockedCount + '</div><div class="stat-label">حساب محظور</div></div></div>';
+    document.getElementById('acctMeta').innerHTML =
+      '<span><b>' + allUsers.length + '</b>حساب مسجّل</span>' +
+      '<span><b>' + totalPoints + '</b>نقطة موزّعة</span>';
+  }
+
+  function renderTabs() {
+    document.getElementById('acctTabs').innerHTML = FILTERS.map(function (f) {
+      const count = allUsers.filter(f.test).length;
+      return '<button type="button" class="acct-tab" data-filter="' + f.key + '" aria-pressed="' + (activeFilter === f.key) + '">' +
+        f.label + '<span class="n">' + count + '</span></button>';
+    }).join('');
   }
 
   function applyFilters() {
     const q = document.getElementById('searchBox').value.trim().toLowerCase();
     const sort = document.getElementById('sortSelect').value;
+    const tab = FILTERS.filter(function (f) { return f.key === activeFilter; })[0] || FILTERS[0];
 
-    let list = allUsers.slice();
+    let list = allUsers.filter(tab.test);
     if (q) {
       list = list.filter(function (u) {
         return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q) || (u.phone || '').toLowerCase().includes(q);
       });
     }
 
+    const newestFirst = function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); };
     if (sort === 'points') list.sort(function (a, b) { return (b.points || 0) - (a.points || 0); });
     else if (sort === 'name') list.sort(function (a, b) { return (a.name || '').localeCompare(b.name || '', 'ar'); });
-    else if (sort === 'blocked') list.sort(function (a, b) { return (b.blocked === true ? 1 : 0) - (a.blocked === true ? 1 : 0); });
-    else list.sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+    else if (sort === 'blocked') list.sort(function (a, b) { return (b.blocked === true ? 1 : 0) - (a.blocked === true ? 1 : 0) || newestFirst(a, b); });
+    else list.sort(newestFirst);
 
     renderGrid(list);
+  }
+
+  function formatDateOnly(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function rowHtml(u, maxPoints) {
+    const blocked = u.blocked === true;
+    const admin = u.isAdmin === true;
+    const isSelf = u.uid === myUid;
+    const name = escapeHtml(u.name || '');
+    const initial = (u.name || '؟').trim().charAt(0);
+    const pts = u.points || 0;
+    const width = pts > 0 && maxPoints > 0 ? Math.max(3, Math.round(pts / maxPoints * 100)) : 0;
+    const phone = u.phone ? '<span class="acct-phone">' + escapeHtml(u.phone) + '</span>' : '<span class="muted">غير مسجّل</span>';
+    const detailUrl = 'user-detail.html?uid=' + encodeURIComponent(u.uid);
+
+    return '<tr class="' + (blocked ? 'is-blocked' : '') + '">' +
+      '<td class="c-who"><div class="acct-who">' +
+        '<div class="acct-av" aria-hidden="true">' + escapeHtml(initial) + '</div>' +
+        '<div class="acct-id">' +
+          '<a class="acct-name" href="' + detailUrl + '">' + (name || '—') +
+            (admin ? '<span class="admin-badge-pill">' + icon('shield', 'icon-sm') + ' مسؤول</span>' : '') +
+          '</a>' +
+          '<div class="acct-email">' + escapeHtml(u.email || '—') + '</div>' +
+          (u.phone ? '<div class="acct-inline-phone">' + icon('phone', 'icon-xs') + ' ' + escapeHtml(u.phone) + '</div>' : '') +
+        '</div>' +
+      '</div></td>' +
+      '<td class="c-phone" data-label="الهاتف">' + phone + '</td>' +
+      '<td class="c-pts" data-label="النقاط"><div class="acct-pts"><b>' + pts + '</b><i style="--w:' + width + '%"></i></div></td>' +
+      '<td class="c-date" data-label="تاريخ التسجيل"><span class="acct-date">' + formatDateOnly(u.createdAt) + '</span></td>' +
+      '<td class="c-status"><span class="acct-status ' + (blocked ? 'is-blocked' : '') + '">' + (blocked ? 'محظور' : 'نشط') + '</span></td>' +
+      '<td class="c-act"><div class="acct-actions">' +
+        '<a class="acct-btn" href="' + detailUrl + '" data-tip="عرض التفاصيل" aria-label="عرض تفاصيل ' + name + '">' + icon('eye', 'icon-sm') + '<span class="lbl">التفاصيل</span></a>' +
+        (admin ? '' :
+          '<button type="button" class="acct-btn" data-act="reset" data-uid="' + escapeHtml(u.uid) + '" data-name="' + name + '" data-tip="تصفير النقاط" aria-label="تصفير نقاط ' + name + '">' + icon('hourglass', 'icon-sm') + '<span class="lbl">تصفير</span></button>' +
+          '<button type="button" class="acct-btn ' + (blocked ? 'is-active' : '') + '" data-act="block" data-uid="' + escapeHtml(u.uid) + '" data-blocked="' + blocked + '" data-name="' + name + '" data-tip="' + (blocked ? 'إلغاء الحظر' : 'حظر الحساب') + '" aria-label="' + (blocked ? 'إلغاء حظر ' : 'حظر ') + name + '">' + icon('lock', 'icon-sm') + '<span class="lbl">' + (blocked ? 'إلغاء الحظر' : 'حظر') + '</span></button>'
+        ) +
+        // الحذف متاح لأي حساب (طالب أو مسؤول) ما عدا حساب المسؤول الحالي نفسه
+        '<button type="button" class="acct-btn danger ' + (isSelf ? 'is-disabled' : '') + '" data-act="delete" ' + (isSelf ? 'aria-disabled="true" ' : '') +
+          'data-uid="' + escapeHtml(u.uid) + '" data-admin="' + admin + '" data-name="' + name + '" data-email="' + escapeHtml(u.email || '') + '" ' +
+          'data-tip="' + (isSelf ? 'ده حسابك الحالي، مينفعش تحذفه' : 'حذف الحساب') + '" aria-label="حذف حساب ' + name + '">' + icon('trash', 'icon-sm') + '<span class="lbl">حذف</span></button>' +
+      '</div></td>' +
+    '</tr>';
   }
 
   function renderGrid(list) {
     const grid = document.getElementById('accountsGrid');
     if (list.length === 0) {
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">' + icon('users', 'icon-xl') + '</div><p>لا توجد نتائج</p></div>';
+      grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon('users', 'icon-xl') + '</div><p>لا توجد حسابات مطابقة للبحث أو التصفية الحالية</p></div>';
       return;
     }
 
-    grid.innerHTML = list.map(function (u) {
-      const blocked = u.blocked === true;
-      const initial = (u.name || '؟').trim().charAt(0);
-      return '<div class="account-card ' + (blocked ? 'is-blocked' : '') + '">' +
-        '<div class="ac-head">' +
-          '<div class="ac-avatar">' + escapeHtml(initial) + '</div>' +
-          '<div style="flex:1; min-width:0;">' +
-            '<div class="ac-name">' + escapeHtml(u.name || '—') +
-              (u.isAdmin ? '<span class="admin-badge-pill">' + icon('shield', 'icon-sm') + ' مسؤول</span>' : '') +
-              (blocked ? '<span class="status-chip blocked">' + icon('lock', 'icon-sm') + ' محظور</span>' : '') +
-            '</div>' +
-            '<div class="ac-email">' + escapeHtml(u.email || '—') + '</div>' +
-            '<div class="ac-phone">' + icon('phone', 'icon-xs') + ' ' + escapeHtml(u.phone || 'رقم الهاتف غير مسجّل') + '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="ac-stats">' +
-          '<span class="ac-points">' + icon('star', 'icon-sm') + ' ' + (u.points || 0) + '</span>' +
-          '<span class="ac-date">' + icon('calendar', 'icon-sm') + ' ' + formatArabicDate(u.createdAt) + '</span>' +
-        '</div>' +
-        '<div class="ac-actions">' +
-          '<a class="btn btn-outline btn-xs ac-primary-btn" href="user-detail.html?uid=' + u.uid + '">' + icon('eye', 'icon-sm') + ' عرض التفاصيل الكاملة</a>' +
-          (u.isAdmin ? '' :
-            '<div class="ac-actions-row">' +
-              '<button class="ac-icon-btn reset-btn" data-tip="تصفير النقاط" data-uid="' + u.uid + '" data-name="' + escapeHtml(u.name || '') + '">' + icon('hourglass', 'icon-sm') + '</button>' +
-              '<button class="ac-icon-btn block-btn ' + (blocked ? 'is-active' : '') + '" data-tip="' + (blocked ? 'إلغاء الحظر' : 'حظر الحساب') + '" data-uid="' + u.uid + '" data-blocked="' + blocked + '" data-name="' + escapeHtml(u.name || '') + '">' + icon('lock', 'icon-sm') + '</button>' +
-              '<button class="ac-icon-btn danger delete-btn" data-tip="حذف الحساب" data-uid="' + u.uid + '" data-name="' + escapeHtml(u.name || '') + '" data-email="' + escapeHtml(u.email || '') + '">' + icon('trash', 'icon-sm') + '</button>' +
-            '</div>'
-          ) +
-        '</div>' +
-      '</div>';
-    }).join('');
-
-    grid.querySelectorAll('.reset-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        const uid = btn.dataset.uid;
-        if (!confirm('هل تريد إعادة تعيين كل نقاط "' + btn.dataset.name + '" إلى صفر؟ سيتم مسح كل تقدّمه في كل الكورسات والمسابقات ولا يمكن التراجع.')) return;
-        Promise.all([db.ref('users/' + uid + '/points').set(0), db.ref('userProgress/' + uid).remove()])
-          .catch(function (err) { showToast('تعذر إعادة التعيين: ' + err.message, 'error'); });
-      });
-    });
-
-    grid.querySelectorAll('.block-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        const uid = btn.dataset.uid;
-        const currentlyBlocked = btn.dataset.blocked === 'true';
-        const msg = currentlyBlocked
-          ? 'إلغاء حظر "' + btn.dataset.name + '"؟ سيتمكن من الدخول للمنصة مرة أخرى.'
-          : 'حظر "' + btn.dataset.name + '"؟ لن يتمكن من الدخول للمنصة حتى تُلغي الحظر.';
-        if (!confirm(msg)) return;
-        db.ref('users/' + uid + '/blocked').set(!currentlyBlocked).catch(function (err) { showToast('تعذر تنفيذ الإجراء: ' + err.message, 'error'); });
-      });
-    });
-
-    grid.querySelectorAll('.delete-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        const uid = btn.dataset.uid;
-        const name = btn.dataset.name || btn.dataset.email || 'هذا المستخدم';
-        if (!confirm('هل أنت متأكد من حذف حساب "' + name + '" نهائيًا؟ سيُحذف نهائيًا كل شيء: نقاطه، تقدّمه، اشتراكاته في كل المسابقات، إشعاراته، ومحادثات الدعم الفني معه. لا يمكن التراجع عن هذا الإجراء.')) return;
-        if (prompt('للتأكيد، اكتب "حذف" في المربع التالي:') !== 'حذف') { showToast('تم إلغاء الحذف.', 'warning'); return; }
-        btn.disabled = true;
-        btn.setAttribute('data-tip', 'جارٍ الحذف...');
-        deleteUserAccountData(uid).catch(function (err) {
-          showToast('تعذر حذف الحساب: ' + err.message, 'error');
-          btn.disabled = false;
-          btn.setAttribute('data-tip', 'حذف الحساب');
-        });
-      });
-    });
+    const maxPoints = allUsers.reduce(function (m, u) { return Math.max(m, u.points || 0); }, 0);
+    grid.innerHTML =
+      '<table class="acct-table">' +
+        '<thead><tr>' +
+          '<th scope="col" class="c-who">الحساب</th>' +
+          '<th scope="col" class="c-phone">الهاتف</th>' +
+          '<th scope="col" class="c-pts">النقاط</th>' +
+          '<th scope="col" class="c-date">تاريخ التسجيل</th>' +
+          '<th scope="col" class="c-status">الحالة</th>' +
+          '<th scope="col" class="c-act"><span class="sr-only">إجراءات</span></th>' +
+        '</tr></thead>' +
+        '<tbody>' + list.map(function (u) { return rowHtml(u, maxPoints); }).join('') + '</tbody>' +
+      '</table>';
   }
 
+  // ---------- أحداث ثابتة (مرة واحدة، بتشتغل على الصفوف مهما اتعاد رسمها) ----------
   document.getElementById('searchBox').addEventListener('input', applyFilters);
   document.getElementById('sortSelect').addEventListener('change', applyFilters);
+
+  document.getElementById('acctTabs').addEventListener('click', function (e) {
+    const tab = e.target.closest('[data-filter]');
+    if (!tab) return;
+    activeFilter = tab.dataset.filter;
+    renderTabs();
+    applyFilters();
+  });
+
+  document.getElementById('accountsGrid').addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const uid = btn.dataset.uid;
+
+    if (btn.dataset.act === 'reset') {
+      if (!confirm('هل تريد إعادة تعيين كل نقاط "' + btn.dataset.name + '" إلى صفر؟ سيتم مسح كل تقدّمه في كل الكورسات والمسابقات ولا يمكن التراجع.')) return;
+      Promise.all([db.ref('users/' + uid + '/points').set(0), db.ref('userProgress/' + uid).remove()])
+        .catch(function (err) { showToast('تعذر إعادة التعيين: ' + err.message, 'error'); });
+      return;
+    }
+
+    if (btn.dataset.act === 'block') {
+      const currentlyBlocked = btn.dataset.blocked === 'true';
+      const msg = currentlyBlocked
+        ? 'إلغاء حظر "' + btn.dataset.name + '"؟ سيتمكن من الدخول للمنصة مرة أخرى.'
+        : 'حظر "' + btn.dataset.name + '"؟ لن يتمكن من الدخول للمنصة حتى تُلغي الحظر.';
+      if (!confirm(msg)) return;
+      db.ref('users/' + uid + '/blocked').set(!currentlyBlocked).catch(function (err) { showToast('تعذر تنفيذ الإجراء: ' + err.message, 'error'); });
+      return;
+    }
+
+    if (btn.dataset.act === 'delete') {
+      if (uid === myUid || btn.getAttribute('aria-disabled') === 'true') {
+        showToast('ده حسابك الحالي — مينفعش تحذفه من هنا عشان ما تفقدش صلاحية الدخول للوحة.', 'warning');
+        return;
+      }
+      const name = btn.dataset.name || btn.dataset.email || 'هذا المستخدم';
+      const isAdminTarget = btn.dataset.admin === 'true';
+      const warn = isAdminTarget
+        ? 'حذف حساب المسؤول "' + name + '"؟ ده حساب له صلاحيات كاملة على اللوحة، وهيتحذف نهائيًا بكل بياناته (نقاطه، تقدّمه، اشتراكاته، إشعاراته، ومحادثات الدعم الفني معه). لا يمكن التراجع عن هذا الإجراء.'
+        : 'هل أنت متأكد من حذف حساب "' + name + '" نهائيًا؟ سيُحذف نهائيًا كل شيء: نقاطه، تقدّمه، اشتراكاته في كل المسابقات، إشعاراته، ومحادثات الدعم الفني معه. لا يمكن التراجع عن هذا الإجراء.';
+      if (!confirm(warn)) return;
+      if (prompt('للتأكيد، اكتب "حذف" في المربع التالي:') !== 'حذف') { showToast('تم إلغاء الحذف.', 'warning'); return; }
+      btn.disabled = true;
+      btn.setAttribute('data-tip', 'جارٍ الحذف...');
+      deleteUserAccountData(uid).catch(function (err) {
+        showToast('تعذر حذف الحساب: ' + err.message, 'error');
+        btn.disabled = false;
+        btn.setAttribute('data-tip', 'حذف الحساب');
+      });
+    }
+  });
 </script>
 </body>
 </html>

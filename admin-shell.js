@@ -30,69 +30,81 @@ function requireAdminAuth(onReady) {
 }
 
 /**
- * يرسم شريط تنقل المسؤول العلوي داخل #adminNav
- * activePage: 'home' | 'users' | 'competition' | 'violations' | 'support'
+ * يرسم القائمة الجانبية (v12 — تصميم جديد بالكامل) داخل #adminNav.
+ *  - سطح المكتب: لوحة عائمة على يمين الشاشة قابلة للطي.
+ *  - الموبايل: شريط علوي رفيع + درج جانبي بنفس القائمة + شريط تبويب سفلي عائم.
+ * activePage: 'home' | 'users' | 'competition' | 'violations' | 'forum' | 'support'
+ * (كل المعرّفات/الدوال التي تعتمد عليها باقي الصفحات محفوظة كما هي.)
  */
+const ADMIN_PAGE_TITLES = {
+  home: 'لوحة القيادة', competition: 'لوحة القيادة', forum: 'منتدى الأسئلة',
+  users: 'الحسابات', violations: 'المخالفات', support: 'الدعم الفني'
+};
+
 function renderAdminNav(activePage) {
   const nav = document.getElementById('adminNav');
   if (!nav) return;
+  nav.className = 'sb';
+
+  function link(href, page, iconName, label, badgeId) {
+    return '<a href="' + href + '" class="sb-link' + (activePage === page ? ' active' : '') + '" title="' + label + '"' + (activePage === page ? ' aria-current="page"' : '') + '>' +
+      '<span class="sb-ico">' + icon(iconName) + '</span>' +
+      '<span class="sb-label">' + label + '</span>' +
+      (badgeId ? '<span class="sb-badge" id="' + badgeId + '" style="display:none;">0</span>' : '') +
+    '</a>';
+  }
+
+  const pageTitle = ADMIN_PAGE_TITLES[activePage] || 'لوحة التحكم';
 
   nav.innerHTML =
-    '<div class="admin-nav-inner">' +
-      '<div class="admin-brand-row">' +
-        '<div class="admin-brand">' +
-          '<span class="admin-brand-mark">' +
-            '<img src="logo.png" alt="أواب">' +
-          '</span>' +
-          '<div class="admin-brand-text">' +
-            '<h2>أواب</h2>' +
-            '<span>لوحة التحكم بمنصة أواب</span>' +
-          '</div>' +
-        '</div>' +
-        '<button class="admin-collapse-toggle" id="adminCollapseToggle" type="button" aria-label="طي القائمة الجانبية" aria-expanded="true" title="طي/فتح القائمة">' +
-          icon('chevronLeft', 'icon-sm') +
-        '</button>' +
-      '</div>' +
-      '<button class="admin-menu-toggle" id="adminMenuToggle" type="button" aria-label="حساب المسؤول وقائمة الإعدادات" aria-expanded="false" aria-controls="adminLinks">' +
-        '<span class="amt-avatar" id="adminHeaderAvatar">…</span>' +
-        '<span class="amt-name" id="adminHeaderName">جارٍ التحميل…</span>' +
-        icon('chevronDown', 'icon-xs') +
-      '</button>' +
-      '<div class="admin-links" id="adminLinks">' +
-        '<div class="admin-profile-block" id="adminProfileBlock">' +
-          '<div class="ap-avatar" id="adminProfileAvatar">…</div>' +
-          '<div class="ap-info"><div class="ap-name"><span class="ap-name-text" id="adminProfileName">جارٍ التحميل…</span>' + icon('chevronDown', 'icon-xs') + '</div><div class="ap-role">' + icon('shieldCheck', 'icon-xs') + '<span>مسؤول المنصة</span></div></div>' +
-        '</div>' +
-        '<div class="nav-scroll">' +
-          '<div class="nav-group">' +
-            '<span class="nav-group-label">الرئيسية</span>' +
-            '<a href="home.html" title="لوحة القيادة والمحتوى" class="dup-mobile ' + (activePage === 'home' ? 'active' : '') + '">' + icon('gauge', 'icon-sm') + '<span class="link-label">لوحة القيادة</span></a>' +
-            '<button type="button" id="adminActivityBtn" title="آخر الأنشطة">' + icon('clock', 'icon-sm') + '<span class="link-label">آخر الأنشطة</span></button>' +
-          '</div>' +
-          '<div class="nav-group dup-mobile-group">' +
-            '<span class="nav-group-label">إدارة المحتوى</span>' +
-            '<a href="forum.html" title="منتدى الأسئلة" class="' + (activePage === 'forum' ? 'active' : '') + '">' + icon('commentDots', 'icon-sm') + '<span class="link-label">منتدى الأسئلة</span><span class="nav-badge" id="forumNavBadge" style="display:none;">0</span></a>' +
-          '</div>' +
-          '<div class="nav-group dup-mobile-group">' +
-            '<span class="nav-group-label">المستخدمون</span>' +
-            '<a href="users.html" title="الحسابات" class="' + (activePage === 'users' ? 'active' : '') + '">' + icon('users', 'icon-sm') + '<span class="link-label">الحسابات</span></a>' +
-            '<a href="violations.html" title="المخالفات" class="' + (activePage === 'violations' ? 'active' : '') + '">' + icon('bell', 'icon-sm') + '<span class="link-label">المخالفات</span><span class="nav-badge" id="violationsNavBadge" style="display:none;">0</span></a>' +
-          '</div>' +
-          '<div class="nav-group dup-mobile-group">' +
-            '<span class="nav-group-label">النظام</span>' +
-            '<a href="support.html" title="الدعم الفني" class="' + (activePage === 'support' ? 'active' : '') + '">' + icon('headset', 'icon-sm') + '<span class="link-label">الدعم الفني</span><span class="nav-badge" id="supportNavBadge" style="display:none;">0</span></a>' +
-          '</div>' +
-        '</div>' +
-        '<div class="nav-foot">' +
-          '<div class="theme-toggle-row">' +
-            '<span class="ttr-label">' + icon('sun', 'icon-sm') + '<span class="link-label">الوضع الليلي</span></span>' +
-            '<button class="theme-switch" id="adminThemeSwitch" type="button" aria-label="تبديل الوضع الليلي"></button>' +
-          '</div>' +
-          '<button class="danger-link" id="adminLogoutBtn" title="تسجيل الخروج">' + icon('logout', 'icon-sm') + '<span class="link-label">تسجيل الخروج</span></button>' +
-        '</div>' +
-      '</div>' +
+    /* شريط علوي (موبايل فقط) */
+    '<div class="sb-topbar">' +
+      '<a class="sb-top-brand" href="home.html"><span class="sb-logo"><img src="logo.png" alt="أواب"></span>' +
+      '<span class="sb-top-title">' + pageTitle + '</span></a>' +
+      '<button class="sb-menu-btn" id="adminMenuToggle" type="button" aria-label="فتح القائمة" aria-expanded="false" aria-controls="adminLinks">' + icon('lBars') + '</button>' +
     '</div>' +
-    '<div class="admin-sidebar-overlay" id="adminSidebarOverlay"></div>' +
+    /* اللوحة الجانبية (درج على الموبايل) */
+    '<aside class="sb-panel" id="adminLinks" aria-label="القائمة الرئيسية">' +
+      '<div class="sb-head">' +
+        '<a class="sb-brand" href="home.html">' +
+          '<span class="sb-logo"><img src="logo.png" alt="أواب"></span>' +
+          '<span class="sb-brand-text"><b>أواب</b><small>لوحة تحكم المنصة</small></span>' +
+        '</a>' +
+        '<button class="sb-collapse" id="adminCollapseToggle" type="button" aria-label="طي القائمة الجانبية" aria-expanded="true" title="طي / فتح القائمة">' + icon('lChevronsRight') + '</button>' +
+        '<button class="sb-close" id="adminMenuClose" type="button" aria-label="إغلاق القائمة">' + icon('lX') + '</button>' +
+      '</div>' +
+      '<div class="sb-scroll">' +
+        '<div class="sb-group"><span class="sb-group-label">الرئيسية</span>' +
+          link('home.html', 'home', 'lDashboard', 'لوحة القيادة') +
+          '<button type="button" class="sb-link" id="adminActivityBtn" title="آخر الأنشطة"><span class="sb-ico">' + icon('lActivity') + '</span><span class="sb-label">آخر الأنشطة</span></button>' +
+        '</div>' +
+        '<div class="sb-group"><span class="sb-group-label">التفاعل</span>' +
+          link('forum.html', 'forum', 'lMessage', 'منتدى الأسئلة', 'forumNavBadge') +
+          link('support.html', 'support', 'lHeadset', 'الدعم الفني', 'supportNavBadge') +
+        '</div>' +
+        '<div class="sb-group"><span class="sb-group-label">المستخدمون</span>' +
+          link('users.html', 'users', 'lUsers', 'الحسابات') +
+          link('violations.html', 'violations', 'lAlert', 'المخالفات', 'violationsNavBadge') +
+        '</div>' +
+      '</div>' +
+      '<div class="sb-foot">' +
+        '<div class="sb-user" id="adminProfileBlock">' +
+          '<span class="sb-avatar" id="adminProfileAvatar">…</span>' +
+          '<span class="sb-user-info"><span class="sb-user-name" id="adminProfileName">جارٍ التحميل…</span>' +
+          '<span class="sb-user-role">' + icon('lShieldCheck') + 'مسؤول المنصة</span></span>' +
+        '</div>' +
+        '<div class="sb-actions">' +
+          '<div class="sb-theme-row"><span class="sb-theme-label">الوضع الليلي</span>' +
+            '<button class="sb-theme" id="adminThemeSwitch" type="button" aria-label="تبديل الوضع الليلي" title="الوضع الليلي">' +
+              '<span class="sb-theme-thumb"></span>' +
+              '<span class="sb-theme-ic sun">' + icon('lSun') + '</span><span class="sb-theme-ic moon">' + icon('lMoon') + '</span>' +
+            '</button>' +
+          '</div>' +
+          '<button class="sb-logout" id="adminLogoutBtn" type="button" title="تسجيل الخروج">' + icon('lLogout') + '<span>تسجيل الخروج</span></button>' +
+        '</div>' +
+      '</div>' +
+    '</aside>' +
+    '<div class="sb-overlay" id="adminSidebarOverlay"></div>' +
     '<div class="toast-stack" id="adminToastStack"></div>';
 
   document.getElementById('adminLogoutBtn').addEventListener('click', function () {
@@ -111,35 +123,31 @@ function renderAdminNav(activePage) {
 }
 
 /**
- * يرسم شريط التنقل السفلي الثابت (يظهر على الموبايل فقط عبر CSS).
- * بيحتوي على أهم 4 أقسام: الرئيسية، المستخدمون، المخالفات، الدعم الفني.
- * حساب المسؤول (البروفايل/آخر الأنشطة/الوضع الليلي/تسجيل الخروج) بقى
- * ليه زرار مخصص في الهيدر نفسه (اسم المسؤول + سهم) بدل ما يتكرر هنا.
+ * شريط التبويب السفلي العائم (موبايل فقط عبر CSS): الرئيسية، المنتدى،
+ * المستخدمون، المخالفات، الدعم. باقي الأشياء (الحساب/الوضع الليلي/الخروج)
+ * داخل الدرج الجانبي اللي بيفتحه زر القائمة في الشريط العلوي.
  */
 function renderAdminBottomNav(activePage) {
   let bar = document.getElementById('adminBottomNav');
   if (!bar) {
     bar = document.createElement('nav');
-    bar.className = 'admin-bottom-nav';
     bar.id = 'adminBottomNav';
     document.body.appendChild(bar);
   }
+  bar.className = 'sb-tabbar';
+  bar.setAttribute('aria-label', 'التنقل السريع');
+  function tab(href, page, iconName, label, badgeId) {
+    const on = activePage === page;
+    return '<a href="' + href + '" class="sb-tab' + (on ? ' active' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' +
+      '<span class="sb-tab-ico">' + icon(iconName) + (badgeId ? '<span class="bn-badge" id="' + badgeId + '">0</span>' : '') + '</span>' +
+      '<span class="sb-tab-label">' + label + '</span></a>';
+  }
   bar.innerHTML =
-    '<a href="home.html" class="' + (activePage === 'home' ? 'active' : '') + '">' +
-      icon('gauge', 'icon') + '<span>الرئيسية</span>' +
-    '</a>' +
-    '<a href="forum.html" class="' + (activePage === 'forum' ? 'active' : '') + '">' +
-      icon('commentDots', 'icon') + '<span class="bn-badge" id="bottomNavForumBadge">0</span><span>المنتدى</span>' +
-    '</a>' +
-    '<a href="users.html" class="' + (activePage === 'users' ? 'active' : '') + '">' +
-      icon('users', 'icon') + '<span>المستخدمون</span>' +
-    '</a>' +
-    '<a href="violations.html" class="' + (activePage === 'violations' ? 'active' : '') + '">' +
-      icon('bell', 'icon') + '<span class="bn-badge" id="bottomNavViolationsBadge">0</span><span>المخالفات</span>' +
-    '</a>' +
-    '<a href="support.html" class="' + (activePage === 'support' ? 'active' : '') + '">' +
-      icon('headset', 'icon') + '<span class="bn-badge" id="bottomNavSupportBadge">0</span><span>الدعم</span>' +
-    '</a>';
+    tab('home.html', 'home', 'lDashboard', 'الرئيسية') +
+    tab('forum.html', 'forum', 'lMessage', 'المنتدى', 'bottomNavForumBadge') +
+    tab('users.html', 'users', 'lUsers', 'المستخدمون') +
+    tab('violations.html', 'violations', 'lAlert', 'المخالفات', 'bottomNavViolationsBadge') +
+    tab('support.html', 'support', 'lHeadset', 'الدعم', 'bottomNavSupportBadge');
 }
 
 /**
@@ -271,11 +279,13 @@ function setupAdminThemeToggle() {
 
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   btn.classList.toggle('on', isDark);
+  btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
 
   btn.addEventListener('click', function () {
     const nowDark = !document.documentElement.hasAttribute('data-theme');
     applyAdminTheme(nowDark ? 'dark' : 'light');
     btn.classList.toggle('on', nowDark);
+    btn.setAttribute('aria-pressed', nowDark ? 'true' : 'false');
     try { localStorage.setItem('adminTheme', nowDark ? 'dark' : 'light'); } catch (e) {}
   });
 }
@@ -416,7 +426,10 @@ function setupAdminMobileNav() {
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closeMenu();
   });
+  const closeBtn = document.getElementById('adminMenuClose');
+  if (closeBtn) closeBtn.addEventListener('click', closeMenu);
   links.querySelectorAll('a, button').forEach(function (el) {
+    if (el.id === 'adminThemeSwitch' || el.id === 'adminCollapseToggle') return; // تبديل الثيم لا يغلق الدرج
     el.addEventListener('click', closeMenu);
   });
   window.addEventListener('resize', function () {
@@ -425,13 +438,235 @@ function setupAdminMobileNav() {
 }
 
 /* ============================================================
-   🕘 درج "آخر الأنشطة" الجانبي (متاح من كل صفحات لوحة التحكم)
+   🕘 نظام "الأنشطة" (v13 — إعادة تصميم كاملة من الصفر)
+   مكوّن واحد مشترك:
+     • الدرج الجانبي "آخر الأنشطة" (كل الحسابات) — متاح من كل صفحات اللوحة.
+     • قسم "آخر نشاط" داخل صفحة تفاصيل الحساب (نشاط حساب واحد).
+   الجديد: أسماء أصحاب الأحداث (حتى المخالفات والاختبارات)، تجميع بالأيام،
+   وقت نسبي ("منذ 3 ساعات")، فلاتر بنوع الحدث، ملخّص آخر 24 ساعة،
+   "عرض المزيد" بدل الاكتفاء بآخر 30 حدث، وكل حدث بيفتح الحساب بتاعه.
    ============================================================ */
 
+const ACTIVITY_KINDS = {
+  signup:    { label: 'تسجيلات', icon: 'user' },
+  exam:      { label: 'اختبارات', icon: 'trophy' },
+  violation: { label: 'مخالفات', icon: 'bell' }
+};
+const ACTIVITY_MAX_EVENTS = 500;
+
 /**
- * ينشئ (لو مش موجود) ويربط زرار "آخر الأنشطة" في الشريط الجانبي
- * بدرج منزلق يعرض أحدث التسجيلات والمخالفات وتسليمات الاختبارات،
- * بيتحمّل من قاعدة البيانات أول ما المستخدم يفتح الدرج فقط (مش تحميل زيادة لو مافتحوش).
+ * يجمع أحداث النشاط من قاعدة البيانات ويرجّعها مرتّبة من الأحدث للأقدم.
+ * uid اختياري: لو اتحدد، بيرجّع نشاط الحساب ده بس.
+ */
+function collectActivityEvents(uid) {
+  const single = !!uid;
+  const usersP = single
+    ? db.ref('users/' + uid).once('value').then(function (s) { const o = {}; if (s.exists()) o[uid] = s.val(); return o; }).catch(function () { return {}; })
+    : safeRead('users');
+
+  return Promise.all([
+    usersP,
+    safeRead(single ? 'violations/' + uid : 'violations'),
+    safeRead('examAttempts'),
+    safeRead('competitions')
+  ]).then(function (r) {
+    const users = r[0];
+    const comps = r[3];
+    let violations = r[1];
+    if (single) { const wrap = {}; wrap[uid] = r[1]; violations = wrap; }
+    const attempts = r[2];
+
+    const nameOf = function (id) { const u = users[id]; return (u && (u.name || u.email)) || 'حساب محذوف'; };
+    const events = [];
+
+    Object.keys(users).forEach(function (id) {
+      const u = users[id];
+      if (!u || !u.createdAt) return;
+      if (!single && u.isAdmin === true) return; // في الدرج: تسجيلات الطلاب بس
+      events.push({ ts: u.createdAt, kind: 'signup', uid: id, who: nameOf(id), subs: [] });
+    });
+
+    Object.keys(violations).forEach(function (id) {
+      const list = violations[id] || {};
+      Object.keys(list).forEach(function (vid) {
+        const v = list[vid];
+        if (!v || !v.timestamp) return;
+        const subs = ['النوع: ' + (v.type || 'غير معروف')];
+        if (v.details) subs.push(String(v.details));
+        events.push({ ts: v.timestamp, kind: 'violation', uid: id, who: nameOf(id), subs: subs });
+      });
+    });
+
+    Object.keys(attempts).forEach(function (cid) {
+      const lessons = attempts[cid] || {};
+      Object.keys(lessons).forEach(function (lid) {
+        const exams = lessons[lid] || {};
+        Object.keys(exams).forEach(function (eid) {
+          const byUser = exams[eid] || {};
+          Object.keys(byUser).forEach(function (id) {
+            if (single && id !== uid) return;
+            const a = byUser[id];
+            if (!a || !a.submittedAt) return;
+            const comp = comps[cid] || {};
+            const lesson = (comp.lessons || {})[lid] || {};
+            const exam = (lesson.exams || {})[eid] || {};
+            const subs = [(lesson.title || 'محاضرة') + ' — ' + (comp.title || 'محتوى')];
+            events.push({
+              ts: a.submittedAt, kind: 'exam', uid: id, who: nameOf(id),
+              detail: exam.title || 'اختبار',
+              score: (typeof a.lastScore === 'number' && a.lastMaxScore) ? (a.lastScore + '/' + a.lastMaxScore) : '',
+              subs: subs
+            });
+          });
+        });
+      });
+    });
+
+    events.sort(function (a, b) { return b.ts - a.ts; });
+    return events.slice(0, ACTIVITY_MAX_EVENTS);
+  });
+}
+
+const _activityRtf = (typeof Intl !== 'undefined' && Intl.RelativeTimeFormat) ? new Intl.RelativeTimeFormat('ar', { numeric: 'auto' }) : null;
+
+function activityRelTime(ts) {
+  if (!_activityRtf) return formatArabicDate(ts);
+  const sec = Math.round((Date.now() - ts) / 1000);
+  if (sec < 45) return 'الآن';
+  const min = Math.round(sec / 60);
+  if (min < 60) return _activityRtf.format(-min, 'minute');
+  const hr = Math.round(min / 60);
+  if (hr < 24) return _activityRtf.format(-hr, 'hour');
+  const day = Math.round(hr / 24);
+  if (day < 7) return _activityRtf.format(-day, 'day');
+  return new Date(ts).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' });
+}
+
+function activityDayKey(ts) {
+  const d = new Date(ts);
+  return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+}
+
+function activityDayLabel(ts) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const d = new Date(ts); d.setHours(0, 0, 0, 0);
+  const diff = Math.round((today - d) / 86400000);
+  if (diff <= 0) return 'اليوم';
+  if (diff === 1) return 'أمس';
+  return d.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function activityItemHtml(e, single) {
+  const who = '<b>' + escapeHtml(e.who) + '</b>';
+  let main;
+  if (e.kind === 'signup') main = single ? 'تسجيل الحساب على المنصة' : who + ' سجّل حسابًا جديدًا';
+  else if (e.kind === 'exam') main = (single ? 'تسليم اختبار ' : who + ' سلّم اختبار ') + '<b>' + escapeHtml(e.detail) + '</b>';
+  else main = single ? 'مخالفة مسجّلة' : 'مخالفة على ' + who;
+
+  const subs = e.subs.map(function (t) { return '<span>' + escapeHtml(t) + '</span>'; });
+  if (e.score) subs.unshift('<span class="ax-score">' + escapeHtml(e.score) + '</span>');
+
+  const inner =
+    '<span class="ax-dot" aria-hidden="true">' + icon(ACTIVITY_KINDS[e.kind].icon, 'icon-sm') + '</span>' +
+    '<div class="ax-main"><div class="ax-text">' + main + '</div>' +
+      (subs.length ? '<div class="ax-sub">' + subs.join('') + '</div>' : '') +
+    '</div>' +
+    '<time class="ax-time" datetime="' + new Date(e.ts).toISOString() + '" title="' + escapeHtml(formatArabicDate(e.ts)) + '">' + activityRelTime(e.ts) + '</time>';
+
+  return single
+    ? '<div class="ax-item ax-' + e.kind + '">' + inner + '</div>'
+    : '<a class="ax-item ax-' + e.kind + '" href="user-detail.html?uid=' + encodeURIComponent(e.uid) + '">' + inner + '</a>';
+}
+
+/**
+ * يركّب مكوّن الأنشطة جوه container.
+ * opts.uid      → نشاط حساب واحد (من غيره: كل الحسابات + ملخّص آخر 24 ساعة)
+ * opts.pageSize → عدد الأحداث في كل دفعة عرض
+ * بيرجّع { reload() }.
+ */
+function mountActivityFeed(container, opts) {
+  opts = opts || {};
+  const single = !!opts.uid;
+  const pageSize = opts.pageSize || 25;
+  const state = { filter: 'all', shown: pageSize, events: [] };
+
+  function draw() {
+    const events = state.events;
+    const counts = { all: events.length, signup: 0, exam: 0, violation: 0 };
+    const recent = { signup: 0, exam: 0, violation: 0 };
+    const since = Date.now() - 86400000;
+    events.forEach(function (e) { counts[e.kind]++; if (e.ts >= since) recent[e.kind]++; });
+
+    let html = '';
+
+    if (!single) {
+      html += '<div class="ax-summary-wrap"><div class="ax-summary-title">آخر 24 ساعة</div><div class="ax-summary">' +
+        [['signup', 'تسجيل جديد'], ['exam', 'اختبار مُسلَّم'], ['violation', 'مخالفة']].map(function (p) {
+          return '<div class="ax-sum k-' + p[0] + (recent[p[0]] === 0 ? ' is-zero' : '') + '"><b>' + recent[p[0]] + '</b><span>' + p[1] + '</span></div>';
+        }).join('') +
+      '</div></div>';
+    }
+
+    html += '<div class="ax-chips" role="group" aria-label="تصفية الأنشطة">' +
+      [['all', 'الكل']].concat(Object.keys(ACTIVITY_KINDS).map(function (k) { return [k, ACTIVITY_KINDS[k].label]; })).map(function (p) {
+        return '<button type="button" class="ax-chip" data-filter="' + p[0] + '" aria-pressed="' + (state.filter === p[0]) + '">' + p[1] + ' <span class="n">' + counts[p[0]] + '</span></button>';
+      }).join('') +
+    '</div>';
+
+    const filtered = state.filter === 'all' ? events : events.filter(function (e) { return e.kind === state.filter; });
+    const visible = filtered.slice(0, state.shown);
+
+    if (visible.length === 0) {
+      html += '<div class="ax-empty">' + (state.filter === 'all' ? 'لسه مفيش أنشطة مسجّلة.' : 'مفيش أنشطة من النوع ده.') + '</div>';
+    } else {
+      let lastDay = null;
+      visible.forEach(function (e) {
+        const key = activityDayKey(e.ts);
+        if (key !== lastDay) {
+          if (lastDay !== null) html += '</div></section>';
+          html += '<section><h4 class="ax-day">' + activityDayLabel(e.ts) + '</h4><div class="ax-list">';
+          lastDay = key;
+        }
+        html += activityItemHtml(e, single);
+      });
+      html += '</div></section>';
+
+      if (filtered.length > visible.length) {
+        html += '<button type="button" class="ax-more" data-more="1">عرض ' + Math.min(pageSize, filtered.length - visible.length) + ' نشاط إضافي</button>';
+      }
+    }
+
+    container.innerHTML = html;
+  }
+
+  function load() {
+    container.innerHTML = '<div class="center-loading" style="min-height:140px;"><div class="loader"></div></div>';
+    return collectActivityEvents(opts.uid).then(function (events) {
+      state.events = events;
+      state.shown = pageSize;
+      draw();
+    }).catch(function (err) {
+      container.innerHTML = '<div class="ax-empty"><p style="color:var(--danger);margin:0;">تعذر تحميل الأنشطة: ' + escapeHtml((err && err.message) || '') + '</p></div>';
+    });
+  }
+
+  // onclick (مش addEventListener) عشان إعادة التركيب ما تكرّرش المستمع
+  container.onclick = function (e) {
+    const chip = e.target.closest('[data-filter]');
+    if (chip) { state.filter = chip.dataset.filter; state.shown = pageSize; draw(); return; }
+    if (e.target.closest('[data-more]')) { state.shown += pageSize; draw(); }
+  };
+
+  load();
+  return { reload: load };
+}
+
+/* ---------- الدرج الجانبي ---------- */
+let _activityCtrl = null;
+
+/**
+ * ينشئ (لو مش موجود) ويربط زرار "آخر الأنشطة" في الشريط الجانبي بدرج منزلق.
+ * البيانات بتتحمّل أول ما الدرج يتفتح بس (مش تحميل زيادة لو مافتحوش).
  */
 function setupActivityDrawer() {
   const btn = document.getElementById('adminActivityBtn');
@@ -448,17 +683,21 @@ function setupActivityDrawer() {
     drawer = document.createElement('div');
     drawer.className = 'activity-drawer';
     drawer.id = 'activityDrawer';
+    drawer.setAttribute('role', 'dialog');
+    drawer.setAttribute('aria-label', 'آخر الأنشطة');
     drawer.innerHTML =
       '<div class="activity-drawer-head">' +
-        '<h3>' + icon('clock', 'icon-sm') + ' آخر الأنشطة</h3>' +
-        '<button type="button" class="activity-drawer-close" id="activityDrawerClose" aria-label="إغلاق">' + icon('xmark', 'icon-sm') + '</button>' +
+        '<h3>' + icon('lActivity', 'icon-sm') + ' آخر الأنشطة</h3>' +
+        '<div class="activity-drawer-tools">' +
+          '<button type="button" class="activity-drawer-close" id="activityDrawerRefresh" aria-label="تحديث">' + icon('lRefresh', 'icon-sm') + '</button>' +
+          '<button type="button" class="activity-drawer-close" id="activityDrawerClose" aria-label="إغلاق">' + icon('xmark', 'icon-sm') + '</button>' +
+        '</div>' +
       '</div>' +
-      '<div class="activity-drawer-body" id="activityDrawerBody">' +
-        '<div class="center-loading" style="min-height:160px;"><div class="loader"></div></div>' +
-      '</div>';
+      '<div class="activity-drawer-body" id="activityDrawerBody"></div>';
     document.body.appendChild(drawer);
 
     document.getElementById('activityDrawerClose').addEventListener('click', closeActivityDrawer);
+    document.getElementById('activityDrawerRefresh').addEventListener('click', function () { if (_activityCtrl) _activityCtrl.reload(); });
     overlay.addEventListener('click', closeActivityDrawer);
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') closeActivityDrawer();
@@ -478,7 +717,7 @@ function openActivityDrawer() {
   drawer.classList.add('open');
   overlay.classList.add('open');
   lockBodyScroll();
-  loadActivityDrawerData();
+  _activityCtrl = mountActivityFeed(document.getElementById('activityDrawerBody'), { pageSize: 25 });
 }
 
 function closeActivityDrawer() {
@@ -489,75 +728,6 @@ function closeActivityDrawer() {
   drawer.classList.remove('open');
   overlay.classList.remove('open');
   unlockBodyScroll();
-}
-
-/** يجيب أحدث الأنشطة من قاعدة البيانات ويعرضها جوه الدرج */
-function loadActivityDrawerData() {
-  const body = document.getElementById('activityDrawerBody');
-  if (!body) return;
-  body.innerHTML = '<div class="center-loading" style="min-height:160px;"><div class="loader"></div></div>';
-
-  Promise.all([
-    db.ref('users').once('value'),
-    db.ref('violations').once('value'),
-    db.ref('examAttempts').once('value'),
-    db.ref('competitions').once('value')
-  ]).then(function (results) {
-    const usersObj = results[0].val() || {};
-    const violations = results[1].val() || {};
-    const examAttempts = results[2].val() || {};
-    const comps = results[3].val() || {};
-
-    const realUsers = Object.keys(usersObj)
-      .map(function (uid) { return Object.assign({ uid: uid }, usersObj[uid]); })
-      .filter(function (u) { return u.isAdmin !== true; });
-
-    const events = [];
-
-    realUsers.forEach(function (u) {
-      if (!u.createdAt) return;
-      events.push({ ts: u.createdAt, type: 'user', text: '<b>' + escapeHtml(u.name || u.email || 'مستخدم') + '</b> سجّل حسابًا جديدًا' });
-    });
-
-    Object.keys(violations).forEach(function (uid) {
-      Object.keys(violations[uid] || {}).forEach(function (vid) {
-        const v = violations[uid][vid];
-        if (!v || !v.timestamp) return;
-        events.push({ ts: v.timestamp, type: 'violation', text: 'تسجيل <b>مخالفة</b> (' + escapeHtml(v.type || 'غير معروف') + ')' });
-      });
-    });
-
-    Object.keys(examAttempts).forEach(function (cid) {
-      Object.keys(examAttempts[cid]).forEach(function (lid) {
-        Object.keys(examAttempts[cid][lid]).forEach(function (eid) {
-          Object.keys(examAttempts[cid][lid][eid]).forEach(function (uid) {
-            const a = examAttempts[cid][lid][eid][uid];
-            if (a && a.submittedAt) {
-              events.push({ ts: a.submittedAt, type: 'comp', text: 'تسليم اختبار في <b>' + escapeHtml((comps[cid] && comps[cid].title) || 'محتوى') + '</b>' });
-            }
-          });
-        });
-      });
-    });
-
-    events.sort(function (a, b) { return b.ts - a.ts; });
-    const top = events.slice(0, 30);
-
-    if (top.length === 0) {
-      body.innerHTML = '<p style="color:var(--text-muted); font-size:0.8125rem; text-align:center; padding:20px 0;">لا يوجد نشاط مسجّل بعد.</p>';
-      return;
-    }
-
-    const iconFor = { user: 'user', violation: 'bell', comp: 'trophy' };
-    body.innerHTML = '<div class="activity-feed">' + top.map(function (e) {
-      return '<div class="activity-item act-' + e.type + '">' +
-        '<div class="act-icon">' + icon(iconFor[e.type], 'icon-sm') + '</div>' +
-        '<div class="act-body"><div class="act-text">' + e.text + '</div><div class="act-time">' + formatArabicDate(e.ts) + '</div></div>' +
-      '</div>';
-    }).join('') + '</div>';
-  }).catch(function (err) {
-    body.innerHTML = '<p style="color:var(--danger); font-size:0.8125rem; text-align:center; padding:20px 0;">تعذر تحميل الأنشطة: ' + escapeHtml(err.message || '') + '</p>';
-  });
 }
 
 /** يهرّب أي نص قبل إدراجه في HTML */
@@ -600,7 +770,7 @@ function deleteUserAccountData(uid) {
   updates['conversations/' + uid] = null;
   updates['messages/' + uid] = null;
 
-  return db.ref('enrollments').once('value').then(function (snap) {
+  return db.ref('enrollments').once('value').catch(function () { return { val: function () { return {}; } }; }).then(function (snap) {
     const all = snap.val() || {};
     Object.keys(all).forEach(function (compId) {
       if (all[compId] && Object.prototype.hasOwnProperty.call(all[compId], uid)) {
@@ -737,3 +907,70 @@ function getMaxViolations() {
   });
 }
 window.getMaxViolations = getMaxViolations;
+
+/* ============================================================
+   🔧 دوال قراءة بيانات موحّدة (المشتركين / النقاط / المخالفات)
+   ============================================================ */
+
+/** رسالة خطأ مفهومة لأخطاء Firebase (خصوصًا PERMISSION_DENIED بسبب القواعد) */
+function explainDbError(err) {
+  const msg = (err && (err.code || err.message)) || '';
+  if (/permission[_ -]?denied/i.test(msg)) {
+    return 'صلاحية القراءة مرفوضة من قواعد Firebase — الصق محتوى firebase-rules.json المحدَّث في Firebase Console ← Realtime Database ← Rules ثم Publish.';
+  }
+  return msg || 'خطأ غير معروف';
+}
+window.explainDbError = explainDbError;
+
+/** قراءة آمنة: بترجّع {} لو فشلت القراءة بدل ما تكسر الصفحة كلها */
+function safeRead(path) {
+  return db.ref(path).once('value')
+    .then(function (s) { return s.val() || {}; })
+    .catch(function (err) { console.warn('safeRead failed:', path, err); return {}; });
+}
+window.safeRead = safeRead;
+
+/**
+ * نقاط المستخدم: الأكبر بين الحقل المخزّن users/{uid}/points
+ * ومجموع earnedPoints من userProgress (عشان لو أحدهم ما اتحدّثش يظهر الرقم الصح).
+ * progressForUser = userProgress/{uid} كاملة (compId → lessonId → {earnedPoints})
+ */
+function sumProgressPoints(progressForUser) {
+  let sum = 0;
+  Object.keys(progressForUser || {}).forEach(function (cid) {
+    const lessons = progressForUser[cid] || {};
+    Object.keys(lessons).forEach(function (lid) {
+      const lp = lessons[lid];
+      if (lp && typeof lp === 'object') sum += Number(lp.earnedPoints) || 0;
+    });
+  });
+  return sum;
+}
+function getUserPoints(user, progressForUser) {
+  const stored = Number(user && user.points) || 0;
+  return Math.max(stored, sumProgressPoints(progressForUser));
+}
+window.sumProgressPoints = sumProgressPoints;
+window.getUserPoints = getUserPoints;
+
+/**
+ * يرجّع قائمة uid لمشتركي محتوى معيّن، من مصدرين معًا:
+ *  - enrollments/{compId}/{uid}        (النمط القديم)
+ *  - userEnrollments/{uid}/{compId}    (اللي بيكتبه موقع الطالب)
+ * أي مصدر يفشل بيتجاهل، والتاني يكمّل.
+ */
+function getEnrolledUids(compId) {
+  return Promise.all([
+    safeRead('enrollments/' + compId),
+    safeRead('userEnrollments')
+  ]).then(function (r) {
+    const set = {};
+    Object.keys(r[0] || {}).forEach(function (uid) { if (r[0][uid]) set[uid] = true; });
+    const ue = r[1] || {};
+    Object.keys(ue).forEach(function (uid) {
+      if (ue[uid] && ue[uid][compId]) set[uid] = true;
+    });
+    return Object.keys(set);
+  });
+}
+window.getEnrolledUids = getEnrolledUids;

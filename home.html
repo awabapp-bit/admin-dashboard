@@ -6,52 +6,65 @@
 <title>لوحة تحكم أواب — المحتوى التعليمي</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
+<link rel="stylesheet" href="home.css">
 <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 </head>
 <body>
 
-<nav class="admin-nav" id="adminNav"></nav>
+<nav class="sb" id="adminNav"></nav>
 
-<main class="admin-page">
-  <div class="admin-page-head">
+<main class="admin-page dh"><div class="dh-wrap">
+  <section class="dh-hero">
     <div>
-      <h1 class="page-title">المحتوى التعليمي</h1>
-      <p class="page-sub">إدارة الكورسات والمسابقات ومحاضراتها (فيديوهات و/أو اختبارات و/أو مرفقات)</p>
+      <span class="dh-date" id="dhDate"></span>
+      <h1 id="dhGreet">أهلاً بك في لوحة التحكم</h1>
+      <p>نظرة سريعة على المنصة: ما يحتاج ردًا أو مراجعة، وأداء المحتوى، وكل كورساتك ومسابقاتك في مكان واحد.</p>
     </div>
-    <a href="add-competition.html" class="btn btn-gold" style="width:auto;" id="addBtn">إضافة محتوى جديد</a>
+    <div class="dh-hero-actions">
+      <a href="add-competition.html" class="btn btn-gold" id="dhAdd"></a>
+      <a href="forum.html" class="btn dh-btn-ghost" id="dhForum"></a>
+    </div>
+  </section>
+
+  <div class="dh-section-title"><h2>يحتاج انتباهك</h2><span>محدّث لحظيًا عند فتح الصفحة</span></div>
+  <div class="dh-attn" id="dhAttn">
+    <div class="skel dh-skel"></div><div class="skel dh-skel"></div><div class="skel dh-skel"></div><div class="skel dh-skel"></div>
   </div>
 
-  <div class="stat-grid" id="statGrid">
-    <div class="skel-stat-grid">
-      <div class="skel skel-stat-card"></div><div class="skel skel-stat-card"></div>
-      <div class="skel skel-stat-card"></div><div class="skel skel-stat-card"></div>
-    </div>
+  <div class="dh-section-title"><h2>المنصة بالأرقام</h2></div>
+  <div class="dh-kpis" id="dhKpis">
+    <div class="skel dh-skel"></div><div class="skel dh-skel"></div><div class="skel dh-skel"></div>
+    <div class="skel dh-skel"></div><div class="skel dh-skel"></div><div class="skel dh-skel"></div>
   </div>
 
-  <div class="dash-grid" id="dashGrid" style="display:none;">
-    <div class="dash-card">
-      <h3 id="newUsersChartTitle">المستخدمون الجدد — آخر 30 يوم</h3>
-      <p class="dash-sub">عدد الحسابات الجديدة يوميًا</p>
-      <div class="bar-chart" id="newUsersChart"></div>
-      <div class="bar-chart-labels"><span>قبل 30 يوم</span><span>اليوم</span></div>
+  <div class="dh-panels" id="dhPanels" style="display:none;">
+    <div class="dh-panel">
+      <h3>المستخدمون الجدد</h3>
+      <p class="dh-sub">عدد الحسابات الجديدة يوميًا خلال آخر 30 يومًا</p>
+      <svg class="dh-chart" id="dhChart" viewBox="0 0 600 170" preserveAspectRatio="none" role="img" aria-label="رسم المستخدمين الجدد"></svg>
+      <div class="dh-chart-x"><span>اليوم</span><span>قبل 30 يومًا</span></div>
     </div>
-    <div class="dash-card">
+    <div class="dh-panel">
       <h3>أكثر المحاضرات تفاعلاً</h3>
-      <p class="dash-sub">حسب عدد المستخدمين الذين بدأوها</p>
-      <div class="rank-list" id="topLessonsList"></div>
+      <p class="dh-sub">حسب عدد الطلاب الذين بدأوها</p>
+      <div class="dh-rank" id="dhRank"></div>
     </div>
   </div>
 
-  <div class="admin-page-head" style="border-bottom:none; margin-bottom:14px; padding-bottom:0;">
-    <h2 class="page-title" style="font-size:1.125rem;">كل الكورسات والمسابقات</h2>
+  <div class="dh-section-title"><h2>الكورسات والمسابقات</h2><span id="dhCount"></span></div>
+  <div class="dh-tools">
+    <label class="dh-search"><input type="search" id="dhSearch" placeholder="ابحث بالاسم أو المعلم..."></label>
+    <div class="dh-seg" id="dhSeg">
+      <button type="button" data-f="all" class="on">الكل</button>
+      <button type="button" data-f="course">كورسات</button>
+      <button type="button" data-f="competition">مسابقات</button>
+    </div>
   </div>
-
-  <div id="compsList">
-    <div class="skel skel-row"></div>
-    <div class="skel skel-row"></div>
-    <div class="skel skel-row"></div>
+  <div class="dh-grid" id="dhGrid">
+    <div class="skel dh-skel" style="height:300px"></div><div class="skel dh-skel" style="height:300px"></div><div class="skel dh-skel" style="height:300px"></div>
   </div>
-</main>
+</div></main>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -60,207 +73,188 @@
 <script src="icons.js"></script>
 <script src="admin-shell.js"></script>
 <script>
-  document.getElementById('addBtn').innerHTML = icon('plus') + ' إضافة محتوى جديد';
+  document.getElementById('dhAdd').innerHTML = icon('plus') + ' إضافة محتوى جديد';
+  document.getElementById('dhForum').innerHTML = icon('commentDots') + ' منتدى الأسئلة';
+  document.querySelector('.dh-search').insertAdjacentHTML('beforeend', icon('search', 'icon'));
+  document.getElementById('dhDate').innerHTML = icon('calendar', 'icon-sm') + ' ' + new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  requireAdminAuth(function () {
+  let allComps = {};
+  let filterType = 'all';
+
+  requireAdminAuth(function (user, data) {
     renderAdminNav('home');
-    // تحميل الإحصائيات والمحتوى بعد إنشاء القائمة الجانبية
-    loadStats();
+    const first = ((data && data.name) || '').trim().split(/\s+/)[0];
+    document.getElementById('dhGreet').textContent = first ? 'أهلاً بك يا ' + first : 'أهلاً بك في لوحة التحكم';
+    loadDashboard();
     loadCompetitions();
   });
 
-  function loadStats() {
-    Promise.all([
-      db.ref('competitions').once('value'),
-      db.ref('users').once('value'),
-      db.ref('violations').once('value'),
-      db.ref('examAttempts').once('value'),
-      db.ref('userProgress').once('value')
-    ]).then(function (results) {
-      const comps = results[0].val() || {};
-      const usersObj = results[1].val() || {};
-      const violations = results[2].val() || {};
-      const examAttempts = results[3].val() || {};
-      const userProgress = results[4].val() || {};
+  function loadDashboard() {
+    const safe = function (p) { return db.ref(p).once('value').then(function (s) { return s.val() || {}; }).catch(function () { return null; }); };
+    Promise.all([safe('competitions'), safe('users'), safe('violations'), safe('examAttempts'), safe('userProgress'), safe('forumQuestions')])
+      .then(function (r) {
+        const violationsFailed = r[2] === null; const comps = r[0] || {}, usersObj = r[1] || {}, violations = r[2] || {}, attempts = r[3] || {}, progress = r[4] || {}, forum = r[5];
+        const realUsers = Object.keys(usersObj).map(function (uid) { return Object.assign({ uid: uid }, usersObj[uid]); })
+          .filter(function (u) { return u.isAdmin !== true; });
 
-      const users = Object.keys(usersObj).map(function (uid) { return Object.assign({ uid: uid }, usersObj[uid]); });
-      const realUsers = users.filter(function (u) { return u.isAdmin !== true; });
-
-      let lessonCount = 0, examCount = 0, competitionOnlyCount = 0;
-      const compIds = Object.keys(comps);
-      compIds.forEach(function (cid) {
-        const lessons = comps[cid].lessons || {};
-        const lessonIds = Object.keys(lessons);
-        lessonCount += lessonIds.length;
-        lessonIds.forEach(function (lid) {
-          examCount += lessons[lid].exams ? Object.keys(lessons[lid].exams).length : 0;
-        });
-        if (comps[cid].type === 'competition') competitionOnlyCount++;
-      });
-
-      const activeUsers = realUsers.filter(function (u) { return u.blocked !== true; }).length;
-
-      let violationsTotal = 0;
-      Object.keys(violations).forEach(function (uid) { violationsTotal += Object.keys(violations[uid] || {}).length; });
-
-      const now = Date.now();
-      let submissionsToday = 0;
-      Object.keys(examAttempts).forEach(function (cid) {
-        Object.keys(examAttempts[cid]).forEach(function (lid) {
-          Object.keys(examAttempts[cid][lid]).forEach(function (eid) {
-            Object.keys(examAttempts[cid][lid][eid]).forEach(function (uid) {
-              const a = examAttempts[cid][lid][eid][uid];
-              if (a && a.submittedAt && (now - a.submittedAt) < 86400000) submissionsToday++;
-            });
+        let lessons = 0, exams = 0, videos = 0, contests = 0;
+        Object.keys(comps).forEach(function (cid) {
+          if (comps[cid].type === 'competition') contests++;
+          const ls = comps[cid].lessons || {};
+          Object.keys(ls).forEach(function (lid) {
+            lessons++;
+            exams += Object.keys(ls[lid].exams || {}).length;
+            videos += Object.keys(ls[lid].videos || {}).length;
           });
         });
+
+        let vTotal = 0;
+        Object.keys(violations).forEach(function (uid) { vTotal += Object.keys(violations[uid] || {}).length; });
+
+        const now = Date.now();
+        let today = 0;
+        Object.keys(attempts).forEach(function (c) { Object.keys(attempts[c]).forEach(function (l) { Object.keys(attempts[c][l]).forEach(function (e) {
+          Object.keys(attempts[c][l][e]).forEach(function (u) { const a = attempts[c][l][e][u]; if (a && a.submittedAt && now - a.submittedAt < 86400000) today++; });
+        }); }); });
+
+        let unanswered = null, unpublished = null;
+        if (forum) {
+          unanswered = 0; unpublished = 0;
+          Object.keys(forum).forEach(function (cid) { Object.keys(forum[cid] || {}).forEach(function (qid) {
+            const q = forum[cid][qid];
+            if (!q.adminReply) unanswered++;
+            if (q.published !== true) unpublished++;
+          }); });
+        }
+        const blocked = realUsers.filter(function (u) { return u.blocked === true; }).length;
+
+        document.getElementById('dhAttn').innerHTML =
+          attn('commentDots', unanswered, 'سؤال بانتظار الرد', 'forum.html', unanswered > 0) +
+          attn('eye', unpublished, 'سؤال غير منشور', 'forum.html', unpublished > 0) +
+          attn('bell', violationsFailed ? null : vTotal, 'مخالفة مسجّلة', 'violations.html', !violationsFailed && vTotal > 0) +
+          attn('lock', blocked, 'حساب محظور', 'users.html', false);
+
+        document.getElementById('dhKpis').innerHTML =
+          kpi('users', realUsers.length, 'مستخدم') +
+          kpi(contests === 0 ? 'bookOpen' : 'trophy', Object.keys(comps).length, 'كورس ومسابقة') +
+          kpi('listCheck', lessons, 'محاضرة') +
+          kpi('video', videos, 'فيديو') +
+          kpi('pen', exams, 'اختبار') +
+          kpi('fire', today, 'تسليم اليوم');
+
+        drawChart(realUsers);
+        drawRank(comps, progress);
+        document.getElementById('dhPanels').style.display = '';
       });
-
-      let lastReg = 0;
-      realUsers.forEach(function (u) { if ((u.createdAt || 0) > lastReg) lastReg = u.createdAt || 0; });
-
-      document.getElementById('statGrid').innerHTML =
-        statCard('users', realUsers.length, 'إجمالي المستخدمين') +
-        statCard('circleCheck', activeUsers, 'مستخدم نشط') +
-        statCard('listCheck', lessonCount, 'محاضرة') +
-        statCard('trophy', competitionOnlyCount, 'مسابقة') +
-        statCard('pen', examCount, 'اختبار') +
-        statCard('fire', submissionsToday, 'مشاركة اليوم') +
-        statCard('bell', violationsTotal, 'مخالفة مسجّلة') +
-        statCard('clock', lastReg ? formatArabicDate(lastReg) : '—', 'آخر تسجيل', true);
-
-      renderNewUsersChart(realUsers);
-      renderTopLessons(comps, userProgress);
-
-      document.getElementById('dashGrid').style.display = '';
-    });
   }
 
-  function statCard(iconName, value, label, small) {
-    return '<div class="stat-card"><div class="stat-icon">' + icon(iconName, 'icon-md') + '</div>' +
-      '<div><div class="stat-value"' + (small ? ' style="font-size:0.9375rem;"' : '') + '>' + value + '</div><div class="stat-label">' + label + '</div></div></div>';
+  function attn(ic, n, label, href, hot) {
+    const val = n === null ? '—' : n;
+    const cls = n === null ? '' : (hot ? ' is-hot' : ' is-ok');
+    return '<a class="dh-attn-item' + cls + '" href="' + href + '"><span class="dh-attn-ico">' + icon(ic, 'icon-md') + '</span><div><div class="dh-attn-num">' + val + '</div><div class="dh-attn-lbl">' + label + '</div></div></a>';
+  }
+  function kpi(ic, v, label) {
+    return '<div class="dh-kpi"><div class="dh-kpi-ico">' + icon(ic, 'icon-md') + '</div><b>' + v + '</b><span>' + label + '</span></div>';
   }
 
-  function renderNewUsersChart(realUsers) {
-    const days = 30;
-    const counts = new Array(days).fill(0);
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    realUsers.forEach(function (u) {
+  function drawChart(users) {
+    const days = 30, counts = new Array(days).fill(0);
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    users.forEach(function (u) {
       if (!u.createdAt) return;
       const d = new Date(u.createdAt); d.setHours(0, 0, 0, 0);
-      const diffDays = Math.round((today - d) / 86400000);
-      if (diffDays >= 0 && diffDays < days) counts[days - 1 - diffDays]++;
+      const diff = Math.round((t0 - d) / 86400000);
+      if (diff >= 0 && diff < days) counts[diff]++; // 0 = اليوم (يمين الرسم لأن الصفحة RTL)
     });
-    const max = Math.max.apply(null, counts.concat([1]));
-    document.getElementById('newUsersChart').innerHTML = counts.map(function (c) {
-      const h = Math.max(Math.round((c / max) * 100), c > 0 ? 6 : 2);
-      return '<div class="bar-col" title="' + c + ' حساب جديد"><span class="bar-tip">' + (c > 0 ? c : '') + '</span><div class="bar" style="height:' + h + '%;"></div></div>';
-    }).join('');
+    const max = Math.max.apply(null, counts.concat([3]));
+    const W = 600, H = 170, pad = 14, step = (W - pad * 2) / (days - 1);
+    const pts = counts.map(function (c, i) { return [W - pad - i * step, H - 18 - (c / max) * (H - 44)]; });
+    const line = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
+    const area = line + ' L' + pts[days - 1][0].toFixed(1) + ' ' + (H - 18) + ' L' + pts[0][0].toFixed(1) + ' ' + (H - 18) + ' Z';
+    let grid = '';
+    for (let g = 0; g < 4; g++) { const y = 14 + g * ((H - 32) / 3); grid += '<line x1="0" x2="' + W + '" y1="' + y + '" y2="' + y + '" stroke="currentColor" stroke-opacity=".08" stroke-dasharray="3 5"/>'; }
+    const dots = pts.map(function (p, i) { return counts[i] > 0 ? '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3.2" fill="#14B8A6"><title>' + counts[i] + ' حساب جديد</title></circle>' : ''; }).join('');
+    document.getElementById('dhChart').innerHTML =
+      '<defs><linearGradient id="dhg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14B8A6" stop-opacity=".35"/><stop offset="1" stop-color="#14B8A6" stop-opacity="0"/></linearGradient></defs>' +
+      '<g style="color:var(--text)">' + grid + '</g><path d="' + area + '" fill="url(#dhg)"/><path d="' + line + '" fill="none" stroke="#123A63" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" style="stroke:var(--primary-light)"/>' + dots;
   }
 
-  function renderTopLessons(comps, userProgress) {
-    const counts = {};
-    const titles = {};
+  function drawRank(comps, progress) {
+    const counts = {}, titles = {};
     Object.keys(comps).forEach(function (cid) {
-      const lessons = comps[cid].lessons || {};
-      Object.keys(lessons).forEach(function (lid) {
-        titles[cid + '_' + lid] = (lessons[lid].title || 'محاضرة') + ' — ' + (comps[cid].title || '');
+      Object.keys(comps[cid].lessons || {}).forEach(function (lid) {
+        titles[cid + '_' + lid] = (comps[cid].lessons[lid].title || 'محاضرة') + ' — ' + (comps[cid].title || '');
         counts[cid + '_' + lid] = 0;
       });
     });
-    Object.keys(userProgress).forEach(function (uid) {
-      const compsProg = userProgress[uid] || {};
-      Object.keys(compsProg).forEach(function (cid) {
-        const lessonsProg = compsProg[cid] || {};
-        Object.keys(lessonsProg).forEach(function (lid) {
-          const key = cid + '_' + lid;
-          if (key in counts) counts[key]++;
-        });
-      });
-    });
-
-    const top = Object.keys(counts)
-      .map(function (k) { return { key: k, title: titles[k], count: counts[k] }; })
-      .sort(function (a, b) { return b.count - a.count; })
-      .filter(function (r) { return r.count > 0; })
-      .slice(0, 6);
-
-    const list = document.getElementById('topLessonsList');
-    if (top.length === 0) {
-      list.innerHTML = '<p style="color:var(--text-muted); font-size:0.7812rem;">لا يوجد تفاعل مسجّل بعد.</p>';
-      return;
-    }
-    const max = top[0].count || 1;
-    list.innerHTML = top.map(function (r, i) {
-      return '<div class="rank-item">' +
-        '<div class="rank-no">' + (i + 1) + '</div>' +
-        '<div class="rank-body"><div class="rank-name">' + escapeHtml(r.title) + '</div>' +
-        '<div class="rank-track"><div class="rank-fill" style="width:' + Math.round((r.count / max) * 100) + '%;"></div></div></div>' +
-        '<div class="rank-count">' + r.count + ' مستخدم</div>' +
-      '</div>';
+    Object.keys(progress).forEach(function (uid) { const cp = progress[uid] || {}; Object.keys(cp).forEach(function (cid) { Object.keys(cp[cid] || {}).forEach(function (lid) {
+      const k = cid + '_' + lid; if (k in counts) counts[k]++;
+    }); }); });
+    const top = Object.keys(counts).map(function (k) { return { t: titles[k], c: counts[k] }; })
+      .filter(function (r) { return r.c > 0; }).sort(function (a, b) { return b.c - a.c; }).slice(0, 5);
+    const el = document.getElementById('dhRank');
+    if (!top.length) { el.innerHTML = '<p class="dh-empty-note">لا يوجد تفاعل مسجّل بعد.</p>'; return; }
+    el.innerHTML = top.map(function (r, i) {
+      return '<div class="dh-rank-row"><span class="dh-rank-no">' + (i + 1) + '</span><div style="min-width:0"><div class="dh-rank-name">' + escapeHtml(r.t) + '</div><div class="dh-rank-track"><i style="width:' + Math.round(r.c / top[0].c * 100) + '%"></i></div></div><span class="dh-rank-cnt">' + r.c + ' طالب</span></div>';
     }).join('');
   }
 
+  /* ---------------- شبكة المحتوى ---------------- */
   function loadCompetitions() {
-    const wrap = document.getElementById('compsList');
-    db.ref('competitions').on('value', function (snap) {
-      const data = snap.val() || {};
-      const ids = Object.keys(data);
-
-      if (ids.length === 0) {
-        wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon('trophy', 'icon-xl') + '</div><p>لا يوجد محتوى بعد. ابدأ بإضافة أول كورس أو مسابقة.</p></div>';
-        return;
-      }
-
-      let html = '';
-      ids.forEach(function (id) {
-        const c = data[id];
-        const lessons = c.lessons || {};
-        const lessonIds = Object.keys(lessons);
-        let videoCount = 0, examCount = 0;
-        lessonIds.forEach(function (lid) {
-          videoCount += lessons[lid].videos ? Object.keys(lessons[lid].videos).length : 0;
-          examCount += lessons[lid].exams ? Object.keys(lessons[lid].exams).length : 0;
-        });
-
-        const isCourse = c.type !== 'competition';
-        html +=
-          '<div class="admin-comp-card">' +
-            (c.coverUrl ? '<img src="' + escapeHtml(c.coverUrl) + '" alt="" class="comp-card-thumb" onerror="this.style.display=\'none\'">' : '') +
-            '<div class="info">' +
-              '<h3>' + escapeHtml(c.title || 'بدون عنوان') + '</h3>' +
-              (c.description ? '<p>' + escapeHtml(c.description) + '</p>' : '') +
-              (c.instructorName ?
-                '<div class="comp-instructor-row">' +
-                  (c.instructorPhotoUrl
-                    ? '<img src="' + escapeHtml(c.instructorPhotoUrl) + '" alt="" class="comp-instructor-avatar" onerror="this.style.display=\'none\'">'
-                    : icon('graduationCap', 'icon-sm')) +
-                  '<span>' + escapeHtml(c.instructorName) + '</span>' +
-                '</div>' : '') +
-              '<div class="tags">' +
-                '<span class="tag ' + (isCourse ? '' : 'mix-tag') + '">' + icon(isCourse ? 'bookOpen' : 'trophy', 'icon-sm') + ' ' + (isCourse ? 'كورس' : 'مسابقة') + '</span>' +
-                '<span class="tag">' + icon('listCheck', 'icon-sm') + ' ' + lessonIds.length + ' محاضرة</span>' +
-                '<span class="tag mix-tag video-tag">' + icon('video', 'icon-sm') + ' ' + videoCount + ' فيديو</span>' +
-                '<span class="tag mix-tag">' + icon('pen', 'icon-sm') + ' ' + examCount + ' اختبار</span>' +
-              '</div>' +
-            '</div>' +
-            '<div class="actions">' +
-              '<a class="btn btn-outline btn-sm" href="competition.html?id=' + encodeURIComponent(id) + '">' + icon('pen', 'icon-sm') + ' إدارة المحاضرات</a>' +
-              '<a class="btn btn-outline btn-sm" href="participants.html?id=' + encodeURIComponent(id) + '">' + icon('medal', 'icon-sm') + ' المشتركون</a>' +
-              '<a class="btn btn-outline btn-sm" href="forum.html?id=' + encodeURIComponent(id) + '">' + icon('commentDots', 'icon-sm') + ' المنتدى</a>' +
-              '<button class="btn btn-ghost btn-sm delete-comp-btn" data-id="' + id + '">' + icon('trash', 'icon-sm') + ' حذف</button>' +
-            '</div>' +
-          '</div>';
+    db.ref('competitions').on('value', function (snap) { allComps = snap.val() || {}; renderGrid(); });
+    document.getElementById('dhSearch').addEventListener('input', renderGrid);
+    document.querySelectorAll('#dhSeg button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        filterType = b.dataset.f;
+        document.querySelectorAll('#dhSeg button').forEach(function (x) { x.classList.toggle('on', x === b); });
+        renderGrid();
       });
-      wrap.innerHTML = html;
+    });
+  }
 
-      wrap.querySelectorAll('.delete-comp-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          if (!confirm('هل أنت متأكد من حذف هذا المحتوى نهائيًا؟ سيتم حذف كل محاضراتها وأسئلتها.')) return;
-          db.ref('competitions/' + btn.dataset.id).remove()
-            .then(function () { showToast('تم حذف المحتوى بنجاح', 'success'); })
-            .catch(function (err) { showToast('تعذر الحذف: ' + err.message, 'error'); });
-        });
+  function renderGrid() {
+    const grid = document.getElementById('dhGrid');
+    const q = document.getElementById('dhSearch').value.trim().toLowerCase();
+    const ids = Object.keys(allComps).filter(function (id) {
+      const c = allComps[id], isComp = c.type === 'competition';
+      if (filterType === 'course' && isComp) return false;
+      if (filterType === 'competition' && !isComp) return false;
+      return !q || ((c.title || '') + ' ' + (c.instructorName || '')).toLowerCase().indexOf(q) !== -1;
+    });
+    document.getElementById('dhCount').textContent = Object.keys(allComps).length + ' عنصر';
+
+    if (!ids.length) {
+      grid.innerHTML = '<div class="dh-empty">' + (Object.keys(allComps).length ? 'لا توجد نتائج مطابقة.' : 'لا يوجد محتوى بعد. ابدأ بإضافة أول كورس أو مسابقة.') + '</div>';
+      return;
+    }
+    grid.innerHTML = ids.map(function (id) {
+      const c = allComps[id], ls = c.lessons || {}, lids = Object.keys(ls);
+      let v = 0, e = 0;
+      lids.forEach(function (l) { v += Object.keys(ls[l].videos || {}).length; e += Object.keys(ls[l].exams || {}).length; });
+      const isCourse = c.type !== 'competition', eid = encodeURIComponent(id);
+      return '<article class="dh-card">' +
+        '<div class="dh-cover">' + icon(isCourse ? 'bookOpen' : 'trophy', 'icon-xl') +
+          (c.coverUrl ? '<img src="' + escapeHtml(c.coverUrl) + '" alt="" loading="lazy" onerror="this.remove()">' : '') +
+          '<span class="dh-type' + (isCourse ? '' : ' comp') + '">' + icon(isCourse ? 'bookOpen' : 'trophy', 'icon-sm') + ' ' + (isCourse ? 'كورس' : 'مسابقة') + '</span></div>' +
+        '<div class="dh-body"><h3>' + escapeHtml(c.title || 'بدون عنوان') + '</h3>' +
+          (c.description ? '<p>' + escapeHtml(c.description) + '</p>' : '') +
+          (c.instructorName ? '<div class="dh-teacher">' + (c.instructorPhotoUrl ? '<img src="' + escapeHtml(c.instructorPhotoUrl) + '" alt="" onerror="this.remove()">' : icon('graduationCap', 'icon-sm')) + '<span>' + escapeHtml(c.instructorName) + '</span></div>' : '') +
+        '</div>' +
+        '<div class="dh-nums"><div><b>' + lids.length + '</b><span>محاضرة</span></div><div><b>' + v + '</b><span>فيديو</span></div><div><b>' + e + '</b><span>اختبار</span></div></div>' +
+        '<div class="dh-acts">' +
+          '<a class="btn btn-primary btn-sm" href="competition.html?id=' + eid + '">' + icon('pen', 'icon-sm') + ' إدارة</a>' +
+          '<a class="btn btn-outline btn-sm" href="participants.html?id=' + eid + '">' + icon('medal', 'icon-sm') + ' المشتركون</a>' +
+          '<a class="btn btn-outline btn-sm" href="forum.html?id=' + eid + '">' + icon('commentDots', 'icon-sm') + ' المنتدى</a>' +
+          '<button class="btn btn-ghost btn-sm dh-del" data-id="' + id + '" title="حذف">' + icon('trash', 'icon-sm') + '</button>' +
+        '</div></article>';
+    }).join('');
+
+    grid.querySelectorAll('.dh-del').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (!confirm('هل أنت متأكد من حذف هذا المحتوى نهائيًا؟ سيتم حذف كل محاضراتها وأسئلتها.')) return;
+        db.ref('competitions/' + btn.dataset.id).remove()
+          .then(function () { showToast('تم حذف المحتوى بنجاح', 'success'); })
+          .catch(function (err) { showToast('تعذر الحذف: ' + err.message, 'error'); });
       });
     });
   }

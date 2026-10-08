@@ -1,0 +1,260 @@
+/* ==========================================================
+   form-pages.css — صفحات النماذج: lesson.html (إضافة/تعديل محاضرة) + add-competition.html (إضافة كورس/مسابقة)
+   كل الأسماء بادئتها lf- (أو تحت .cc-add للأنماط المعدّلة) فلا تتأثر أي صفحة أخرى.
+   تُحمَّل بعد style.css و content-pages.css. نفس هوية أواب: كحلي + تركواز، Amiri للعناوين، Cairo للنص،
+   والثماني (octagon) كعلامة ترقيم، والمحراب (قوس) كإطار للغلاف.
+   ========================================================== */
+.lf *, .lf *::before, .lf *::after { box-sizing: border-box; }
+.lf svg.icon { vertical-align: -3px; }
+.lf :focus-visible { outline: 2px solid var(--primary-light); outline-offset: 2px; }
+.lf input[type="url"] { direction: ltr; text-align: left; }
+.lf input[type="url"]::placeholder { text-align: left; }
+.lf textarea { resize: vertical; min-height: 104px; line-height: 1.9; }
+
+/* ---------- الرأس ---------- */
+.lf-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; padding: 6px 0 20px; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+.lf-head h1 { font-family: 'Amiri', serif; font-size: clamp(1.8rem, 3.4vw, 2.4rem); font-weight: 700; line-height: 1.3; margin: 8px 0 4px; color: var(--primary-dark); overflow-wrap: anywhere; }
+:root[data-theme="dark"] .lf-head h1 { color: var(--text); }
+.lf-head p { margin: 0; max-width: 62ch; font-size: .8438rem; line-height: 1.9; color: var(--text-muted); }
+.lf-eyebrow { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: .75rem; font-weight: 700; background: var(--teal-pale); color: var(--teal-dark); }
+:root[data-theme="dark"] .lf-eyebrow { color: var(--accent); }
+.lf-draft { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; font-size: .75rem; font-weight: 600; color: var(--text-muted); background: var(--card-bg); }
+.lf-draft::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--text-faint); }
+.lf-draft.is-saved::before { background: var(--success); }
+.lf-draft[hidden] { display: none; }
+
+/* ---------- رسائل ---------- */
+.lf-msg { display: none; margin-bottom: 18px; padding: 12px 14px; border-radius: 10px; font-size: .8125rem; line-height: 1.8; background: rgba(var(--danger-rgb), .1); color: var(--danger); border: 1px solid rgba(var(--danger-rgb), .2); }
+.lf-msg.show { display: block; }
+.lf-notice { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 18px; padding: 12px 14px; border-radius: 10px; font-size: .8125rem; line-height: 1.8; background: var(--primary-pale); color: var(--primary); border: 1px solid var(--border); }
+:root[data-theme="dark"] .lf-notice { color: var(--text); }
+.lf-notice[hidden] { display: none; }
+.lf-notice .icon { flex-shrink: 0; margin-top: 4px; }
+
+/* ---------- التخطيط ---------- */
+.lf-layout { display: grid; grid-template-columns: minmax(0, 1fr) 292px; gap: 28px; align-items: start; }
+.lf-rail { position: sticky; top: 18px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ---------- الأقسام ---------- */
+.lf-sec { margin-bottom: 20px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px 22px 6px 22px; }
+.lf-sec-head { display: flex; align-items: center; gap: 14px; padding: 16px 22px; border-bottom: 1px solid var(--border); }
+.lf-oct {
+  flex-shrink: 0; width: 38px; height: 38px; display: grid; place-items: center;
+  font-family: 'Amiri', serif; font-size: 1.1rem; font-weight: 700; color: #fff; background: var(--primary);
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+.lf-oct.is-done { background: var(--teal-dark); }
+.lf-sec-title { min-width: 0; }
+.lf-sec-title h2 { display: flex; align-items: center; gap: 10px; margin: 0; font-family: 'Amiri', serif; font-size: 1.3rem; font-weight: 700; color: var(--primary-dark); }
+:root[data-theme="dark"] .lf-sec-title h2 { color: var(--text); }
+.lf-sec-title p { margin: 2px 0 0; font-size: .75rem; color: var(--text-muted); }
+.lf-sec-actions { margin-inline-start: auto; flex-shrink: 0; }
+.lf-sec-body { padding: 22px; }
+.lf-sec-body > .field:last-child { margin-bottom: 0; }
+.lf-count { font-family: 'Cairo', sans-serif; font-size: .72rem; font-weight: 700; padding: 1px 9px; border-radius: 999px; background: var(--primary-pale); color: var(--primary); }
+.lf-count[hidden] { display: none; }
+.lf-opt { font-weight: 500; font-size: .72rem; color: var(--text-faint); margin-inline-start: 6px; }
+.lf-add-btn { width: auto; }
+
+/* ---------- موعد النشر ---------- */
+.lf-quick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.lf-chipbtn { border: 1px solid var(--border); background: var(--card-bg); color: var(--text-muted); font-family: inherit; font-size: .75rem; font-weight: 700; padding: 6px 12px; border-radius: 999px; cursor: pointer; transition: all .15s var(--ease); }
+.lf-chipbtn:hover { border-color: var(--teal); color: var(--teal-dark); background: var(--teal-pale); }
+:root[data-theme="dark"] .lf-chipbtn:hover { color: var(--accent); }
+.lf-when { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: .78rem; line-height: 1.8; color: var(--text-muted); background: var(--bg-start); border: 1px dashed var(--border); }
+.lf-when[hidden] { display: none; }
+.lf-when strong { color: var(--text); font-weight: 700; }
+.lf-when .icon { flex-shrink: 0; margin-top: 4px; }
+.lf-counter { margin-top: 5px; font-size: .72rem; color: var(--text-faint); text-align: end; }
+
+/* ---------- العناصر المتكررة (فيديو / اختبار / مرفق) ---------- */
+.lf-list { display: flex; flex-direction: column; gap: 14px; }
+.lf-list:empty { display: none; }
+.lf-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px 16px 4px 16px; transition: border-color .18s var(--ease), box-shadow .18s var(--ease); }
+.lf-item:focus-within, .lf-item:hover { border-color: var(--primary-light); box-shadow: var(--shadow-xs); }
+.lf-item-head { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border-soft); }
+.lf-idx { flex-shrink: 0; min-width: 28px; height: 28px; padding: 0 6px; display: grid; place-items: center; border-radius: 8px; font-size: .78rem; font-weight: 800; background: var(--primary-pale); color: var(--primary); }
+:root[data-theme="dark"] .lf-idx { color: var(--text); }
+.lf-item-title { flex: 1; min-width: 0; font-size: .875rem; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-x { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; min-height: 34px; padding: 0 10px; border: 1px solid transparent; border-radius: 9px; background: transparent; font-family: inherit; font-size: .75rem; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: all .15s; }
+.lf-x:hover { color: var(--danger); background: rgba(var(--danger-rgb), .08); border-color: rgba(var(--danger-rgb), .25); }
+
+/* فيديو */
+.lf-video-body { display: grid; grid-template-columns: 176px minmax(0, 1fr); gap: 18px; padding: 16px 14px 6px; }
+.lf-thumb { position: relative; aspect-ratio: 16 / 9; display: grid; place-items: center; overflow: hidden; color: var(--primary-light); background: linear-gradient(165deg, var(--primary-pale), var(--teal-pale)); border: 1px solid var(--border); border-radius: 4px 12px 4px 12px; }
+.lf-thumb .icon { opacity: .55; }
+.lf-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.lf-thumb-stat { margin-top: 8px; font-size: .72rem; line-height: 1.7; color: var(--text-muted); }
+.lf-thumb-stat.ok { color: var(--success); }
+.lf-thumb-stat.bad { color: var(--danger); }
+.lf-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.lf-video-body .field { margin-bottom: 14px; }
+.lf-video-body .field label { font-size: .78rem; }
+
+/* اختبار */
+.lf-exam-body { padding: 14px; }
+.lf-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 14px; padding: 0; }
+.lf-stats > div { padding: 10px 12px; border-radius: 10px; background: var(--bg-start); border: 1px solid var(--border-soft); min-width: 0; }
+.lf-stats dt { display: flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 600; color: var(--text-muted); }
+.lf-stats dd { margin: 4px 0 0; font-size: .95rem; font-weight: 800; color: var(--text); overflow-wrap: anywhere; }
+.lf-stats dd.is-sm { font-size: .78rem; font-weight: 700; line-height: 1.6; }
+.lf-warn { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 999px; font-size: .7rem; font-weight: 700; background: rgba(var(--danger-rgb), .1); color: var(--danger); white-space: nowrap; }
+.lf-exam-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.lf-exam-actions .btn { width: auto; }
+
+/* مرفقات */
+.lf-mat-add { padding: 16px; border: 1.5px dashed var(--border); border-radius: 4px 16px 4px 16px; background: var(--bg-start); }
+.lf-mat-add .field { margin-bottom: 14px; }
+.lf-seg { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); }
+.lf-seg label { position: relative; margin: 0 !important; cursor: pointer; }
+.lf-seg input { position: absolute; inset: 0; width: 100% !important; height: 100%; margin: 0; padding: 0 !important; opacity: 0; cursor: pointer; }
+.lf-seg span { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 7px; font-size: .78rem; font-weight: 700; color: var(--text-muted); transition: all .15s; }
+.lf-seg input:checked + span { background: var(--primary); color: #fff; }
+:root[data-theme="dark"] .lf-seg input:checked + span { background: var(--primary-dark); color: var(--text); }
+.lf-seg input:focus-visible + span { outline: 2px solid var(--primary-light); outline-offset: 2px; }
+.lf-mat-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 14px; }
+.lf-mat { display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
+.lf-mat-ico { width: 38px; height: 38px; flex-shrink: 0; display: grid; place-items: center; border-radius: 10px; background: var(--primary-pale); color: var(--primary); }
+.lf-mat-ico.is-image { background: var(--teal-pale); color: var(--teal-dark); }
+.lf-mat-main { flex: 1; min-width: 0; }
+.lf-mat-main b { display: block; font-size: .8438rem; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-mat-main a { display: block; direction: ltr; text-align: end; font-size: .72rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
+.lf-mat-main a:hover { color: var(--primary); text-decoration: underline; }
+.lf-mat .lf-x span { display: none; }
+.lf-mat .lf-x { padding: 0; width: 34px; justify-content: center; }
+
+/* حالة فارغة */
+.lf-empty { display: flex; align-items: center; gap: 14px; padding: 18px; border: 1.5px dashed var(--border); border-radius: 4px 16px 4px 16px; color: var(--text-muted); font-size: .8125rem; line-height: 1.8; }
+.lf-empty[hidden] { display: none; }
+.lf-empty-ico { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; border-radius: 999px 999px 10px 10px; background: var(--teal-pale); color: var(--teal-dark); }
+:root[data-theme="dark"] .lf-empty-ico { color: var(--accent); }
+.lf-empty b { display: block; color: var(--text); font-size: .875rem; }
+.lf-list:not(:empty) + .lf-empty, .lf-mat-add + .lf-list:not(:empty) { margin-top: 14px; }
+
+/* ---------- الشريط الجانبي (الملخص) ---------- */
+.lf-card { padding: 18px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px 22px 6px 22px; }
+.lf-card h2 { margin: 0 0 12px; font-family: 'Amiri', serif; font-size: 1.25rem; color: var(--primary-dark); }
+:root[data-theme="dark"] .lf-card h2 { color: var(--text); }
+.lf-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0 0 16px; padding: 0; }
+.lf-tiles > div { padding: 10px 6px; text-align: center; border-radius: 10px; background: var(--bg-start); border: 1px solid var(--border-soft); }
+.lf-tiles dd { margin: 0; font-family: 'Amiri', serif; font-size: 1.5rem; font-weight: 700; line-height: 1.1; color: var(--text); }
+.lf-tiles dt { margin-top: 3px; font-size: .7rem; font-weight: 600; color: var(--text-muted); }
+.lf-check { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.lf-check li { display: flex; align-items: center; gap: 10px; font-size: .8125rem; color: var(--text-muted); }
+.lf-check .lf-dot { width: 20px; height: 20px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid var(--border); color: transparent; }
+.lf-check .lf-dot .icon { width: 10px; height: 10px; }
+.lf-check li.is-ok { color: var(--text); font-weight: 600; }
+.lf-check li.is-ok .lf-dot { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; }
+.lf-check li.is-bad { color: var(--danger); font-weight: 600; }
+.lf-check li.is-bad .lf-dot { border-color: var(--danger); }
+.lf-rail .btn { width: 100%; }
+.lf-rail-actions { display: flex; flex-direction: column; gap: 8px; }
+.lf-rail-note { margin: 12px 0 0; font-size: .72rem; line-height: 1.8; color: var(--text-faint); }
+
+/* ==========================================================
+   صفحة إضافة كورس/مسابقة (add-competition.html) — تحسينات تحت .cc-add
+   ========================================================== */
+.cc-add .cc-panel { padding: 0; overflow: hidden; }
+.cc-add .cc-panel > .cc-formmsg { margin: 22px 26px 0; }
+.cc-add .cc-form { counter-reset: lfstep; }
+.cc-add .cc-fieldset { margin: 0; padding: 24px 26px 26px; border-bottom: 1px solid var(--border); }
+.cc-add .cc-fieldset legend { float: inline-start; width: 100%; display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.cc-add .cc-fieldset legend + * { clear: both; }
+.cc-add .cc-fieldset legend::before {
+  counter-increment: lfstep; content: counter(lfstep); flex-shrink: 0; width: 34px; height: 34px; display: grid; place-items: center;
+  font-family: 'Amiri', serif; font-size: 1.05rem; font-weight: 700; color: #fff; background: var(--primary);
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+.cc-add .cc-fieldset:last-child { border-bottom: 0; }
+.cc-add .cc-types { gap: 14px; }
+.cc-add .cc-type-body { align-items: center; text-align: center; gap: 8px; padding: 22px 16px 18px; border-radius: 6px 22px 6px 22px; }
+.cc-add .cc-type-title { flex-direction: column; gap: 10px; font-size: 1rem; }
+.cc-add .cc-type-title .icon { width: 26px; height: 26px; padding: 14px; box-sizing: content-box; border-radius: 999px 999px 10px 10px; background: var(--primary-pale); color: var(--primary); }
+.cc-add .cc-type input:checked + .cc-type-body .cc-type-title .icon { background: var(--teal-dark); color: #fff; }
+.cc-add .cc-panel-foot { display: flex; flex-wrap: wrap; gap: 10px; padding: 18px 26px; background: var(--bg-start); border-top: 1px solid var(--border); }
+.cc-add .cc-panel-foot .btn { width: auto; min-width: 150px; }
+
+.cc-add .cc-pv-side { display: flex; flex-direction: column; gap: 16px; }
+.cc-ready { padding: 16px 18px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px 22px 6px 22px; }
+.cc-ready h3 { margin: 0 0 10px; font-family: 'Amiri', serif; font-size: 1.15rem; color: var(--primary-dark); }
+:root[data-theme="dark"] .cc-ready h3 { color: var(--text); }
+.cc-ready ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.cc-ready li { display: flex; align-items: center; gap: 10px; font-size: .78rem; color: var(--text-muted); }
+.cc-ready .lf-dot { width: 18px; height: 18px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid var(--border); color: transparent; }
+.cc-ready .lf-dot .icon { width: 9px; height: 9px; }
+.cc-ready li.is-ok { color: var(--text); font-weight: 600; }
+.cc-ready li.is-ok .lf-dot { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; }
+.cc-ready small { margin-inline-start: auto; font-size: .68rem; color: var(--text-faint); }
+.cc-next { margin: 12px 0 0; padding: 12px 0 0; border-top: 1px dashed var(--border); font-size: .75rem; line-height: 1.9; color: var(--text-muted); }
+
+/* ---------- الموبايل ---------- */
+@media (max-width: 960px) {
+  .lf-layout { grid-template-columns: 1fr; gap: 6px; }
+  .lf-rail { position: static; }
+  .cc-add .cc-pv-side { order: -1; }
+  .cc-add .cc-ready { display: none; }
+}
+@media (max-width: 720px) {
+  .lf-head { padding-bottom: 16px; margin-bottom: 18px; }
+  .lf-sec-head { flex-wrap: wrap; padding: 14px 14px; gap: 10px; }
+  .lf-sec-body { padding: 16px 14px; }
+  .lf-sec-actions { width: 100%; margin-inline-start: 0; }
+  .lf-sec-actions .btn { width: 100%; }
+  .lf-video-body { grid-template-columns: 1fr; gap: 12px; padding-top: 14px; }
+  .lf-thumbcol { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; align-items: center; }
+  .lf-thumb-stat { margin-top: 0; }
+  .lf-pair, .lf-mat-grid { grid-template-columns: 1fr; gap: 0; }
+  .lf-stats { grid-template-columns: 1fr 1fr; }
+  .lf-stats > div:last-child { grid-column: 1 / -1; }
+  .lf-exam-actions .btn { flex: 1; }
+  .lf-mat-add { padding: 12px; }
+  .cc-add .cc-fieldset { padding: 20px 14px 22px; }
+  .cc-add .cc-panel > .cc-formmsg { margin: 16px 14px 0; }
+  .cc-add .cc-panel-foot { padding: 14px; }
+  .cc-add .cc-panel-foot .btn { flex: 1; min-width: 0; }
+  .cc-add .cc-types { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cc-add .cc-type-body { padding: 16px 10px 14px; }
+  .cc-add .cc-type-note { font-size: .7rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lf-item, .lf-chipbtn, .lf-x, .lf-seg span { transition: none; }
+}
+
+/* ==========================================================
+   صفحة أسئلة الاختبار (exam.html)
+   ========================================================== */
+.lf-trio { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 14px; }
+.lf-sec-body .lf-trio .field { margin-bottom: 0; }
+.lf-sec-body > .field + .lf-trio, .lf-sec-body > .field { margin-bottom: 18px; }
+.lf-q-body { padding: 14px; }
+.lf-q-body .field { margin-bottom: 14px; }
+.lf-q-body .field label { font-size: .78rem; }
+.lf-q-text { min-height: 78px !important; }
+.lf-opts-label { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 2px 0 8px; font-size: .78rem; font-weight: 600; color: var(--text); }
+.lf-opts-label small { font-weight: 500; font-size: .72rem; color: var(--text-muted); }
+.lf-optrow { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.lf-optrow .qq-option { flex: 1; min-width: 0; padding: 10px 14px; font-size: .875rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; background: var(--card-bg); color: var(--text); transition: border-color .15s, background .15s; }
+.lf-optrow .qq-option:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .12); outline: none; }
+.lf-optrow.is-correct .qq-option { border-color: var(--teal-dark); background: var(--teal-pale); }
+.lf-mark { position: relative; flex-shrink: 0; width: 36px; height: 36px; margin: 0 !important; cursor: pointer; }
+.lf-mark input { position: absolute; inset: 0; width: 100% !important; height: 100%; margin: 0; padding: 0 !important; opacity: 0; cursor: pointer; }
+.lf-mark span { width: 100%; height: 100%; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid var(--border); color: var(--text-faint); font-size: .8rem; font-weight: 800; background: var(--card-bg); transition: all .15s; }
+.lf-mark span .icon { display: none; width: 14px; height: 14px; }
+.lf-mark:hover span { border-color: var(--teal); }
+.lf-mark input:checked + span { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; }
+.lf-mark input:checked + span b { display: none; }
+.lf-mark input:checked + span .icon { display: block; }
+.lf-mark input:focus-visible + span { outline: 2px solid var(--primary-light); outline-offset: 2px; }
+.lf-q-foot { display: flex; align-items: center; gap: 12px; padding-top: 6px; }
+.lf-q-foot .field { margin: 0; display: flex; align-items: center; gap: 10px; }
+.lf-q-foot .field label { margin: 0; white-space: nowrap; }
+.lf-q-foot .field input { width: 90px; padding: 8px 12px; }
+.lf-hint-live { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: .78rem; line-height: 1.8; background: var(--bg-start); border: 1px dashed var(--border); color: var(--text-muted); }
+.lf-hint-live.is-warn { color: var(--danger); border-color: rgba(var(--danger-rgb), .35); background: rgba(var(--danger-rgb), .06); }
+.lf-hint-live[hidden] { display: none; }
+.lf-addq { width: 100%; justify-content: center; border-style: dashed; }
+@media (max-width: 720px) {
+  .lf-trio { grid-template-columns: 1fr 1fr; }
+  .lf-trio > .field:first-child { grid-column: 1 / -1; }
+  .lf-q-foot { flex-wrap: wrap; }
+}

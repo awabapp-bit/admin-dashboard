@@ -6,6 +6,7 @@
 <title>منتدى الأسئلة — لوحة تحكم أواب</title>
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="sidebar.css">
 <script>(function(){try{var t=localStorage.getItem('adminTheme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <style>
   .fr-list-card {
@@ -76,7 +77,7 @@
 </head>
 <body>
 
-<nav class="admin-nav" id="adminNav"></nav>
+<nav class="sb" id="adminNav"></nav>
 
 <main class="admin-page">
   <a class="back-link" id="backLink" href="home.html">كل المحتوى</a>
@@ -233,6 +234,13 @@
             '</div>';
         }
 
+        const published = q.published === true;
+        const pubHtml =
+          '<div class="fr-pub-row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 2px;">' +
+            '<span class="status-pill" style="' + (published ? 'background:var(--teal-pale);color:var(--teal-dark);' : 'background:rgba(var(--danger-rgb),0.1);color:var(--danger);') + '">' + (published ? 'منشور للجميع' : 'غير منشور — ظاهر لصاحبه فقط') + '</span>' +
+            '<button type="button" class="btn btn-outline btn-xs fr-pub-btn" data-question="' + qid + '" data-publish="' + (published ? 'false' : 'true') + '" style="width:auto;">' + (published ? 'إلغاء النشر' : 'نشر للجميع') + '</button>' +
+          '</div>';
+
         return (
           '<div class="fr-post ' + (reply ? '' : 'is-pending') + '">' +
             '<div class="fr-post-head"><span class="fr-avatar">' + escapeHtml(initial) + '</span>' +
@@ -240,6 +248,7 @@
             '<span class="fr-time">' + formatArabicDate(q.createdAt) + '</span></div>' +
             '<p class="fr-text">' + escapeHtml(q.text) + '</p>' +
             (q.imageData ? '<a href="' + q.imageData + '" target="_blank" rel="noopener"><img class="fr-image" src="' + q.imageData + '" alt="" loading="lazy"></a>' : '') +
+            pubHtml +
             statusHtml +
           '</div>'
         );
@@ -248,6 +257,27 @@
       feed.querySelectorAll('.fr-reply-send-btn').forEach(function (btn) {
         btn.addEventListener('click', function () { sendAdminReply(id, btn.dataset.question); });
       });
+      feed.querySelectorAll('.fr-pub-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () { setPublished(id, btn.dataset.question, btn.dataset.publish === 'true', btn, data[btn.dataset.question]); });
+      });
+    });
+  }
+
+  /* نشر السؤال للجميع / إلغاء النشر (حقل published يقرأه موقع الطالب) */
+  function setPublished(compIdForPub, questionId, value, btn, q) {
+    btn.disabled = true;
+    forumRef(compIdForPub).child(questionId).child('published').set(value).then(function () {
+      showToast(value ? 'تم نشر السؤال للجميع' : 'تم إلغاء النشر، والسؤال الآن ظاهر لصاحبه فقط', 'success');
+      if (value && q && q.uid && q.uid !== currentAdmin.uid) {
+        return db.ref('notifications/' + q.uid).push({
+          type: 'reply', title: 'تم نشر سؤالك في المنتدى',
+          body: q.text && q.text.length > 60 ? q.text.slice(0, 60) + '…' : (q.text || ''),
+          link: 'forum.html?id=' + compIdForPub, read: false, createdAt: firebase.database.ServerValue.TIMESTAMP
+        }).catch(function () {});
+      }
+    }).catch(function (err) {
+      showToast('تعذر تنفيذ الإجراء' + (err && err.message ? ': ' + err.message : ''), 'error');
+      btn.disabled = false;
     });
   }
 
